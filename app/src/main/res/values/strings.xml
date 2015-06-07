@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Exceptional</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="facebook_app_id">1573592742907543</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="throw_exc_button">Throw Exception!</string>
+    <string name="give_exc_button">Give me an Exception!</string>
+    <string name="set_exc_button">Set Exception location!</string>
+    <string name="my_exceptions_text">My Exceptions</string>
+    <string name="my_friends_text">My Friends</string>
+
+    <string name="main_login_fragment_text">You have to login with Facebook to use this app.</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="main_fragment_text">Hello user!</string>
+    <string name="main_text">EXPECT THE EXCEPTIONS</string>
+</resources>
