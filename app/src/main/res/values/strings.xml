@@ -5,9 +5,9 @@
     <string name="facebook_app_id">1573592742907543</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="title_activity_settings">SettingsActivity</string>
-    <string name="throw_exc_button">Throw Exception!</string>
+    <string name="throw_exc_button">Throw an Exception!</string>
     <string name="give_exc_button">Give me an Exception!</string>
-    <string name="set_exc_button">Set Exception location!</string>
+    <string name="set_exc_button">Geofence an Exception!</string>
     <string name="my_exceptions_text">My Exceptions</string>
     <string name="my_friends_text">My Friends</string>
 
