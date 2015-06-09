@@ -32,7 +32,8 @@
         android:id="@+id/button3"
         android:layout_gravity="center_horizontal|bottom"
         android:layout_above="@+id/button4"
-        android:layout_alignStart="@+id/throwExcBtn" />
+        android:layout_alignStart="@+id/throwExcBtn"
+        android:onClick="throwMeExcClicked" />
 
     <Button
         android:layout_width="200dp"

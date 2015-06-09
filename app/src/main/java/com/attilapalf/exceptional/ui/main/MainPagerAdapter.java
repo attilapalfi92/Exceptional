@@ -9,10 +9,6 @@ import android.support.v4.app.FragmentPagerAdapter;
  */
 public class MainPagerAdapter extends FragmentPagerAdapter {
 
-    private MainFragment mainFragment;
-    private ExceptionsFragment exceptionsFragment;
-    private FriendsFragment friendsFragment;
-
     public MainPagerAdapter(FragmentManager fm) {
         super(fm);
     }
@@ -21,25 +17,13 @@ public class MainPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                if (mainFragment == null) {
-                    mainFragment = new MainFragment();
-                }
-                return mainFragment;
+                return new MainFragment();
             case 1:
-                if (exceptionsFragment == null) {
-                    exceptionsFragment = new ExceptionsFragment();
-                }
-                return exceptionsFragment;
+                return new ExceptionsFragment();
             case 2:
-                if (friendsFragment == null) {
-                    friendsFragment = new FriendsFragment();
-                }
-                return friendsFragment;
+                return new FriendsFragment();
             default:
-                if (mainFragment == null) {
-                    mainFragment = new MainFragment();
-                }
-                return mainFragment;
+                return new MainFragment();
         }
     }
 

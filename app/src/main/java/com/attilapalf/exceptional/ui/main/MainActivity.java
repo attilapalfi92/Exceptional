@@ -1,25 +1,54 @@
 package com.attilapalf.exceptional.ui.main;
 
+
 import android.content.Intent;
+import android.location.Location;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.attilapalf.exceptional.R;
+import com.attilapalf.exceptional.exception.*;
+import com.attilapalf.exceptional.exception.Exception;
 import com.attilapalf.exceptional.ui.LoginActivity;
 import com.attilapalf.exceptional.utils.LoginManager;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
+
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
+    private GoogleApiClient mGoogleApiClient;
+    private Location mLocation;
+    private CopyOnWriteArrayList<com.attilapalf.exceptional.exception.Exception> setLocationExceptions
+            = new CopyOnWriteArrayList<>();
+    private ExceptionPreferences exceptionPreferences;
+
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        buildGoogleApiClient();
+        mGoogleApiClient.connect();
+        exceptionPreferences = ExceptionPreferences.getInstance(getApplicationContext());
 
         MainPagerAdapter adapter = new MainPagerAdapter(getSupportFragmentManager());
 
@@ -36,6 +65,13 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }
+    }
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mGoogleApiClient.disconnect();
     }
 
     @Override
@@ -82,5 +118,62 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Press the back button once again to close the application.", Toast.LENGTH_SHORT).show();
             backButtonCount++;
         }
+    }
+
+    private static String makeFragmentName(int viewPagerId, int index) {
+        return "android:switcher:" + viewPagerId + ":" + index;
+    }
+
+
+    public void throwMeExcClicked(View view) {
+        Exception e = Exception.getRandomException();
+
+        synchronized (this) {
+            if (mLocation == null) {
+                setLocationExceptions.add(e);
+
+            } else {
+                e.setLocation(mLocation);
+                exceptionPreferences.addException(e);
+            }
+        }
+
+
+        CharSequence[] data = new CharSequence[4];
+        data[0] = "name: " + e.getName();
+        data[1] = "description: " + e.getDescription();
+        data[2] = "from: " + e.getFromWho();
+        data[3] = "where: " + e.getLocation().toString();
+
+        new MaterialDialog.Builder(this)
+                .title(R.string.new_exception_text)
+                .items(data)
+                .positiveText("LOL")
+                .negativeText("OK")
+                .show();
+    }
+
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        synchronized (this) {
+            mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            for(Exception e : setLocationExceptions) {
+                e.setLocation(mLocation);
+                exceptionPreferences.addException(e);
+            }
+
+            setLocationExceptions.clear();
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Toast.makeText(this, "Couldn't get device's location.", Toast.LENGTH_SHORT).show();
     }
 }

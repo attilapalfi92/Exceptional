@@ -15,4 +15,7 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="main_fragment_text">Hello user!</string>
     <string name="main_text">EXPECT THE EXCEPTIONS</string>
+
+    <string name="exception_preferences">com.attilapalf.exceptional.exception.ExceptionPreferences</string>
+    <string name="new_exception_text">You got a new Exception!</string>
 </resources>
