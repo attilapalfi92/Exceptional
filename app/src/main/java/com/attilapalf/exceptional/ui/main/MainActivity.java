@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
     public void throwMeExcClicked(View view) {
-        Exception e = Exception.getRandomException();
+        Exception e = ExceptionFactory.createRandomException(exceptionPreferences);
 
         synchronized (this) {
             if (mLocation == null) {
@@ -139,15 +139,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
 
 
-        CharSequence[] data = new CharSequence[4];
-        data[0] = "name: " + e.getName();
-        data[1] = "description: " + e.getDescription();
-        data[2] = "from: " + e.getFromWho();
-        data[3] = "where: " + e.getLocation().toString();
+        String data =
+                    "Description: " + e.getDescription() + "\n\n" +
+                    "From: " + e.getFromWho() + "\n\n" +
+                    "Where: " + e.getLocation();
 
         new MaterialDialog.Builder(this)
-                .title(R.string.new_exception_text)
-                .items(data)
+                .title(e.getPrefix() + "\n" + e.getShortName())
+                .content(data)
                 .positiveText("LOL")
                 .negativeText("OK")
                 .show();

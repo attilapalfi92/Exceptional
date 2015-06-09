@@ -12,8 +12,10 @@ import java.util.Comparator;
  * Created by Attila on 2015-06-08.
  */
 public class Exception {
-    private int id;
-    private String name;
+    private String instanceId;
+    private int exceptionId;
+    private String shortName;
+    private String prefix;
     private String description;
     private Location location;
     private Calendar date;
@@ -22,18 +24,15 @@ public class Exception {
 
     private static Gson gson = new Gson();
 
-
-    public static class NameComparator implements Comparator<Exception> {
-
+    public static class ShortNameComparator implements Comparator<Exception> {
         @Override
         public int compare(Exception lhs, Exception rhs) {
-            return lhs.getName().compareTo(rhs.getName());
+            return lhs.getShortName().compareTo(rhs.getShortName());
         }
     }
 
 
     public static class DateComparator implements Comparator<Exception> {
-
         @Override
         public int compare(Exception lhs, Exception rhs) {
             return rhs.getDate().compareTo(lhs.getDate());
@@ -46,24 +45,21 @@ public class Exception {
         return gson.toJson(this);
     }
 
+    public Exception clone() {
+        Exception e = new Exception();
+        e.setExceptionId(exceptionId);
+        e.setPrefix(prefix);
+        e.setShortName(shortName);
+        e.setDescription(description);
+
+        return e;
+    }
+
     public static Exception fromString(String json) {
         return gson.fromJson(json, Exception.class);
     }
 
-    public Exception() {
-        id = (int)(Math.random() * Integer.MAX_VALUE);
-        name = "java." + id + ".pulyka." + "\nRandomException";
-        description = name + " is thrown, when it's thrown. You just get it randomly, OK? " +
-                "You better accept it, there is nothing to do.";
-        fromWho = "Device";
-        toWho = "You";
-
-        date = Calendar.getInstance();
-    }
-
-    public static Exception getRandomException() {
-        return new Exception();
-    }
+    public Exception() {}
 
     public synchronized Location getLocation() {
         return location;
@@ -73,20 +69,16 @@ public class Exception {
         this.location = location;
     }
 
-    public int getId() {
-        return id;
+    public String getFullName() {
+        return prefix + shortName;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public String getInstanceId() {
+        return instanceId;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setInstanceId(String instanceId) {
+        this.instanceId = instanceId;
     }
 
     public String getDescription() {
@@ -119,5 +111,29 @@ public class Exception {
 
     public void setToWho(String toWho) {
         this.toWho = toWho;
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
+    }
+
+    public String getShortName() {
+        return shortName;
+    }
+
+    public void setShortName(String shortName) {
+        this.shortName = shortName;
+    }
+
+    public int getExceptionId() {
+        return exceptionId;
+    }
+
+    public void setExceptionId(int exceptionId) {
+        this.exceptionId = exceptionId;
     }
 }

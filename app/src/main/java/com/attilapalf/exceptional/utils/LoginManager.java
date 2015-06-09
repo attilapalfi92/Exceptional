@@ -3,6 +3,7 @@ package com.attilapalf.exceptional.utils;
 import android.app.Application;
 import android.content.Intent;
 
+import com.attilapalf.exceptional.exception.ExceptionFactory;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
@@ -46,6 +47,7 @@ public class LoginManager {
             public void onSuccess(LoginResult loginResult) {
                 accessToken = loginResult.getAccessToken();
                 loginSuccessHandler.onLoginSuccess(loginResult);
+                profile = Profile.getCurrentProfile();
             }
 
             @Override
@@ -76,10 +78,20 @@ public class LoginManager {
 
         tokenTracker.startTracking();
         profileTracker.startTracking();
+        ExceptionFactory.initialize(application.getApplicationContext());
     }
 
 
-    public static boolean isUserLoggedIn(){
+    public static String getProfilId() {
+        if (profile == null) {
+            profile = Profile.getCurrentProfile();
+        }
+
+        return profile.getId();
+    }
+
+
+    public static boolean isUserLoggedIn() {
         if (accessToken == null) {
             accessToken = AccessToken.getCurrentAccessToken();
         }

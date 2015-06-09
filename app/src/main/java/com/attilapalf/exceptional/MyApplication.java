@@ -2,6 +2,7 @@ package com.attilapalf.exceptional;
 
 import android.app.Application;
 
+import com.attilapalf.exceptional.exception.ExceptionFactory;
 import com.attilapalf.exceptional.utils.LoginManager;
 
 /**

@@ -110,26 +110,35 @@ public class ExceptionsFragment extends ListFragment implements OnSharedPreferen
             private TextView nameView;
             private TextView descView;
             private TextView dateView;
+            private TextView fromWhoView;
 
             public RowViewHolder(View rowView) {
                 nameView = (TextView) rowView.findViewById(R.id.excName);
                 descView = (TextView) rowView.findViewById(R.id.excDesc);
+                fromWhoView = (TextView) rowView.findViewById(R.id.excFromWho);
                 dateView = (TextView) rowView.findViewById(R.id.excDate);
+
 
                 nameView.setTextSize(20);
                 descView.setTextSize(15);
+                fromWhoView.setTextSize(15);
                 dateView.setTextSize(15);
+
                 nameView.setTextColor(Color.BLACK);
                 descView.setTextColor(Color.BLACK);
-                dateView.setTextColor(Color.BLUE);
+                fromWhoView.setTextColor(Color.BLACK);
+                dateView.setTextColor(Color.BLACK);
             }
 
             public void bindRow(Exception model) {
-                nameView.setText(model.getName());
+                nameView.setText(model.getPrefix() + "\n" + model.getShortName());
                 descView.setText(model.getDescription());
-                String date = model.getDate().get(Calendar.HOUR_OF_DAY) + ":" +
-                        model.getDate().get(Calendar.MINUTE) + ":" +
-                        model.getDate().get(Calendar.SECOND);
+                fromWhoView.setText(model.getFromWho());
+                String date =
+                        model.getDate().getTime().toString();
+//                        model.getDate().get(Calendar.HOUR_OF_DAY) + ":" +
+//                        model.getDate().get(Calendar.MINUTE) + ":" +
+//                        model.getDate().get(Calendar.SECOND);
                 dateView.setText(date);
             }
         }

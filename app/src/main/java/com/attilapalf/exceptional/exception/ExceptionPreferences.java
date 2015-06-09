@@ -28,8 +28,7 @@ public class ExceptionPreferences {
      * This LinkedList stores the last 30 exceptions the user got.
      * */
     private LinkedList<Exception> storedExceptions = new LinkedList<>();
-    public final int STORE_SIZE = 30;
-
+    public final int STORE_SIZE = Integer.MAX_VALUE;
 
     private static ExceptionPreferences instance;
 
@@ -42,35 +41,34 @@ public class ExceptionPreferences {
     }
 
     private ExceptionPreferences(Context context) {
-        if (sharedPreferences == null) {
-            String PREFS_NAME = context.getString(R.string.exception_preferences);
-            sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        }
-        /*
-        * Get a SharedPreferences editor instance.
-        * SharedPreferences ensures that updates are atomic
-        * and non-concurrent
-        */
+        String PREFS_NAME = context.getString(R.string.exception_preferences);
+        sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+
         editor = sharedPreferences.edit();
         editor.apply();
 
-        // loading the @storedExceptions with data
         Map<String, ?> store = sharedPreferences.getAll();
         Set<String> keys = store.keySet();
-        // if sharedPreferences stores at least 1 element, and storedExceptions is still empty
-        // then we have to fill it
-        if (keys.size() > 0 && storedExceptions.size() == 0) {
-            String[] keyArray = new String[keys.size()];
-            keys.toArray(keyArray);
-            for (String s : keyArray) {
-                String excJson = (String) store.get(s);
-                Exception e = Exception.fromString(excJson);
-                storedExceptions.addLast(e);
-            }
+
+        String[] keyArray = new String[keys.size()];
+        keys.toArray(keyArray);
+        for (String s : keyArray) {
+            String excJson = (String) store.get(s);
+            Exception e = Exception.fromString(excJson);
+            storedExceptions.addLast(e);
         }
 
         Collections.sort(storedExceptions, new Exception.DateComparator());
     }
+
+
+
+    public int exceptionCount() {
+        return storedExceptions.size();
+    }
+
+
+
 
     public void addException(Exception e) {
 //        Collections.sort(storedExceptions, new Exception.DateComparator());
@@ -78,14 +76,14 @@ public class ExceptionPreferences {
             removeLast();
         }
         storedExceptions.addFirst(e);
-        editor.putString(Integer.toString(e.getId()), e.toString());
+        editor.putString(e.getInstanceId(), e.toString());
         editor.apply();
     }
 
 
     private void removeLast() {
         Exception removed = storedExceptions.removeLast();
-        editor.remove(Integer.toString(removed.getId()));
+        editor.remove(removed.getInstanceId());
     }
 
 
@@ -96,10 +94,10 @@ public class ExceptionPreferences {
 
 
     public void removeException(Exception e) {
-        editor.remove(Integer.toString(e.getId()));
+        editor.remove(e.getInstanceId());
         editor.apply();
         for (int i = 0; i < storedExceptions.size(); i++) {
-            if (storedExceptions.get(i).getId() == e.getId()) {
+            if (storedExceptions.get(i).getInstanceId().equals(e.getInstanceId())) {
                 storedExceptions.remove(i);
                 return;
             }
