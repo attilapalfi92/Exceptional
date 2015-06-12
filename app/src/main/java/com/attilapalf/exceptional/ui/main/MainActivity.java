@@ -6,6 +6,7 @@ import android.location.Location;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,25 +14,30 @@ import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.attilapalf.exceptional.R;
-import com.attilapalf.exceptional.exception.*;
-import com.attilapalf.exceptional.exception.Exception;
+import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.ui.LoginActivity;
-import com.attilapalf.exceptional.utils.LoginManager;
+import com.attilapalf.exceptional.utils.ExceptionFactory;
+import com.attilapalf.exceptional.utils.ExceptionPreferences;
+import com.attilapalf.exceptional.utils.FacebookManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
-import java.util.concurrent.CopyOnWriteArrayList;
-
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener, ExceptionSource {
 
     private GoogleApiClient mGoogleApiClient;
     private Location mLocation;
-    private CopyOnWriteArrayList<com.attilapalf.exceptional.exception.Exception> setLocationExceptions
-            = new CopyOnWriteArrayList<>();
-    private ExceptionPreferences exceptionPreferences;
+    private List<com.attilapalf.exceptional.model.Exception> setLocationExceptions
+            = Collections.synchronizedList(new ArrayList<Exception>());
+    private final Set<ExceptionChangeListener> exceptionChangeListeners = new HashSet<>();
+
 
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -48,7 +54,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         buildGoogleApiClient();
         mGoogleApiClient.connect();
-        exceptionPreferences = ExceptionPreferences.getInstance(getApplicationContext());
 
         MainPagerAdapter adapter = new MainPagerAdapter(getSupportFragmentManager());
 
@@ -61,9 +66,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onResume() {
         super.onResume();
 
-        if(!LoginManager.isUserLoggedIn()) {
+        if(!FacebookManager.isUserLoggedIn()) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
+        } else {
+            String id = FacebookManager.getProfilId();
+            Log.d("profile id:", id);
         }
     }
 
@@ -126,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
     public void throwMeExcClicked(View view) {
-        Exception e = ExceptionFactory.createRandomException(exceptionPreferences);
+        Exception e = ExceptionFactory.createRandomException();
 
         synchronized (this) {
             if (mLocation == null) {
@@ -134,10 +142,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
             } else {
                 e.setLocation(mLocation);
-                exceptionPreferences.addException(e);
+                ExceptionPreferences.addException(e);
             }
         }
 
+
+        for(ExceptionChangeListener listener : exceptionChangeListeners) {
+            listener.onExceptionsChanged();
+        }
 
         String data =
                     "Description: " + e.getDescription() + "\n\n" +
@@ -159,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             for(Exception e : setLocationExceptions) {
                 e.setLocation(mLocation);
-                exceptionPreferences.addException(e);
+                ExceptionPreferences.addException(e);
             }
 
             setLocationExceptions.clear();
@@ -174,5 +186,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Toast.makeText(this, "Couldn't get device's location.", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public boolean addExceptionChangeListener(ExceptionChangeListener listener) {
+        return exceptionChangeListeners.add(listener);
+    }
+
+    @Override
+    public boolean removeExceptionChangeListener(ExceptionChangeListener listener) {
+        return exceptionChangeListeners.remove(listener);
     }
 }

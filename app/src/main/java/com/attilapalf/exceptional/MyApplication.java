@@ -2,8 +2,10 @@ package com.attilapalf.exceptional;
 
 import android.app.Application;
 
-import com.attilapalf.exceptional.exception.ExceptionFactory;
-import com.attilapalf.exceptional.utils.LoginManager;
+import com.attilapalf.exceptional.utils.ExceptionFactory;
+import com.attilapalf.exceptional.utils.ExceptionPreferences;
+import com.attilapalf.exceptional.utils.FacebookManager;
+import com.attilapalf.exceptional.utils.FriendsPreferences;
 
 /**
  * Created by Attila on 2015-06-05.
@@ -13,12 +15,16 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        LoginManager.onAppStart(this);
+        FriendsPreferences friendsPreference = FriendsPreferences.getInstance(getApplicationContext());
+        FacebookManager.registerFriendListListener(friendsPreference);
+        FacebookManager.onAppStart(this);
+        ExceptionFactory.initialize(getApplicationContext());
+        ExceptionPreferences.initalize(getApplicationContext());
     }
 
     @Override
     public void onTerminate() {
         super.onTerminate();
-        LoginManager.onAppKilled();
+        FacebookManager.onAppKilled();
     }
 }

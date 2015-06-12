@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="exceptions">
+        <item>0:Ł:java.nio.channels.:Đ:InterruptedByTimeoutException:Ł:Checked exception received by a thread when a timeout elapses before an asynchronous operation completes.</item>
+        <item>1:Ł:java.lang.:Đ:InterruptedException:Ł:Thrown when a thread is waiting, sleeping, or otherwise occupied, and the thread is interrupted, either before or during the activity. Occasionally a method may wish to test whether the current thread has been interrupted, and if so, to immediately throw this exception.</item>
+        <item>2:Ł:javax.management.:Đ:InvalidApplicationException:Ł:Thrown when an attempt is made to apply either of the following: A subquery expression to an MBean or a qualified attribute expression to an MBean of the wrong class. This exception is used internally by JMX during the evaluation of a query. User code does not usually see it.</item>
+        <item>3:Ł:java.awt.geom.:Đ:NoninvertibleTransformException:Ł:The NoninvertibleTransformException class represents an exception that is thrown if an operation is performed requiring the inverse of an AffineTransform object but the AffineTransform is in a non-invertible state.</item>
+        <item>4:Ł:javax.swing.:Đ:UnsupportedLookAndFeelException:Ł:An exception that indicates the requested look &amp; feel management classes are not present on the user\'s system.</item>
+        <item>5:Ł:java.lang.:Đ:NegativeArraySizeException:Ł:Thrown if an application tries to create an array with negative size.</item>
+        <item>6:Ł:java.util.:Đ:NoSuchElementException:Ł:Thrown by the nextElement method of an Enumeration to indicate that there are no more elements in the enumeration.</item>
+        <item>7:Ł:java.lang.:Đ:NullPointerException:Ł:Thrown when an application attempts to use null in a case where an object is required.</item>
+        <item>8:Ł:javax.print.attribute.:Đ:UnmodifiableSetException:Ł:Thrown to indicate that the requested operation cannot be performed because the set is unmodifiable.</item>
+        <item>9:Ł:java.lang.:Đ:ArithmeticException:Ł:Thrown when an exceptional arithmetic condition has occurred. For example, an integer "divide by zero" throws an instance of this class. ArithmeticException objects may be constructed by the virtual machine as if suppression were disabled and/or the stack trace was not writable.</item>
+        <item>10:Ł:java.nio.file.:Đ:FileSystemAlreadyExistsException:Ł:Runtime exception thrown when an attempt is made to create a file system that already exists.</item>
+        <item>11:Ł:java.lang.:Đ:IndexOutOfBoundsException:Ł:Thrown to indicate that an index of some sort (such as to an array, to a string, or to a vector) is out of range.</item>
+        <item>12:Ł:java.lang.:Đ:VirtualMachineError:Ł:Thrown to indicate that the Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.</item>
+    </string-array>
+</resources>
+

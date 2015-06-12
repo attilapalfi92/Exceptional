@@ -1,8 +1,6 @@
 package com.attilapalf.exceptional.ui;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 
 import android.support.v4.app.Fragment;
@@ -13,7 +11,7 @@ import android.widget.TextView;
 
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.ui.main.MainActivity;
-import com.attilapalf.exceptional.utils.LoginManager;
+import com.attilapalf.exceptional.utils.FacebookManager;
 import com.facebook.Profile;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
@@ -21,7 +19,7 @@ import com.facebook.login.widget.LoginButton;
 
 /**
  */
-public class FbLoginFragment extends Fragment implements LoginManager.LoginSuccessHandler {
+public class FbLoginFragment extends Fragment implements FacebookManager.LoginSuccessHandler {
 
     private TextView welcomeText;
 
@@ -31,7 +29,7 @@ public class FbLoginFragment extends Fragment implements LoginManager.LoginSucce
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_fb_login, container, false);
 
-        LoginManager.registerLoginSuccessHandler(this);
+        FacebookManager.registerLoginSuccessHandler(this);
 
         LoginButton loginButton = (LoginButton) view.findViewById(R.id.login_button);
         loginButton.setReadPermissions("user_friends");
@@ -39,8 +37,8 @@ public class FbLoginFragment extends Fragment implements LoginManager.LoginSucce
         loginButton.setFragment(this);
 
         loginButton.setReadPermissions("user_friends");
-        loginButton.registerCallback(LoginManager.getCallbackManager(),
-                LoginManager.getFacebookCallback());
+        loginButton.registerCallback(FacebookManager.getCallbackManager(),
+                FacebookManager.getFacebookCallback());
 
         welcomeText = (TextView) view.findViewById(R.id.welcomeText);
 
@@ -66,7 +64,7 @@ public class FbLoginFragment extends Fragment implements LoginManager.LoginSucce
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        LoginManager.onActivityResult(requestCode, resultCode, data);
+        FacebookManager.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

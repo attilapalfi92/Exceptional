@@ -1,9 +1,9 @@
-package com.attilapalf.exceptional.exception;
+package com.attilapalf.exceptional.utils;
 
 import android.content.Context;
 
 import com.attilapalf.exceptional.R;
-import com.attilapalf.exceptional.utils.LoginManager;
+import com.attilapalf.exceptional.model.Exception;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -13,7 +13,7 @@ import java.util.Collections;
  * Created by Attila on 2015-06-09.
  */
 public class ExceptionFactory {
-    private static ArrayList<Exception> exceptions = new ArrayList<>();
+    private static ArrayList<com.attilapalf.exceptional.model.Exception> exceptions = new ArrayList<>();
 
     public static void initialize(Context context) {
         String[] strings = context.getResources().getStringArray(R.array.exceptions);
@@ -38,17 +38,17 @@ public class ExceptionFactory {
     }
 
 
-    public static Exception createRandomException(ExceptionPreferences preferences) {
+    public static Exception createRandomException() {
         int random = (int)(Math.random() * exceptions.size());
         Exception base = exceptions.get(random);
 
         Exception newInstance = base.clone();
-        newInstance.setFromWho("Your device");
-        newInstance.setToWho("You");
+        newInstance.setFromWho(0);
+        newInstance.setToWho(Long.parseLong(FacebookManager.getProfilId()));
         newInstance.setDate(Calendar.getInstance());
 
-        String profileId = LoginManager.getProfilId();
-        String excCount = String.valueOf(preferences.exceptionCount());
+        String profileId = FacebookManager.getProfilId();
+        String excCount = String.valueOf(ExceptionPreferences.exceptionCount());
         String instanceId = profileId + excCount;
         try {
             newInstance.setInstanceId(instanceId);

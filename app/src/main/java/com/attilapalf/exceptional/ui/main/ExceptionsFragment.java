@@ -16,15 +16,15 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.attilapalf.exceptional.R;
-import com.attilapalf.exceptional.exception.*;
-import com.attilapalf.exceptional.exception.Exception;
+import com.attilapalf.exceptional.model.Exception;
+import com.attilapalf.exceptional.utils.ExceptionPreferences;
 
-import java.util.Calendar;
 import java.util.List;
 
 /**
  */
-public class ExceptionsFragment extends ListFragment implements OnSharedPreferenceChangeListener {
+public class ExceptionsFragment extends ListFragment implements //OnSharedPreferenceChangeListener,
+        ExceptionChangeListener {
 
     private MyAdapter adapter;
 
@@ -34,10 +34,7 @@ public class ExceptionsFragment extends ListFragment implements OnSharedPreferen
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        ExceptionPreferences exceptionPreferences = ExceptionPreferences.
-                getInstance(getActivity().getApplicationContext());
-
-        List<Exception> values = exceptionPreferences.getExceptionList();
+        List<Exception> values = ExceptionPreferences.getExceptionList();
         adapter = new MyAdapter(getActivity().getApplicationContext(), values);
         //adapter.sort(new Exception.DateComparator());
         adapter.notifyDataSetChanged();
@@ -57,23 +54,36 @@ public class ExceptionsFragment extends ListFragment implements OnSharedPreferen
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        SharedPreferences sharedPreferences = activity.getSharedPreferences(getString(R.string.exception_preferences),
-                Context.MODE_PRIVATE);
-        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+        if (getActivity() instanceof MainActivity) {
+            ((ExceptionSource)getActivity()).addExceptionChangeListener(this);
+        }
+
+//        SharedPreferences sharedPreferences = activity.getSharedPreferences(getString(R.string.exception_preferences),
+//                Context.MODE_PRIVATE);
+//        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     public void onDetach() {
+        if (getActivity() instanceof MainActivity) {
+            ((ExceptionSource)getActivity()).removeExceptionChangeListener(this);
+        }
         super.onDetach();
     }
 
+//    @Override
+//    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+//        //adapter.sort(new Exception.DateComparator());
+//        adapter.notifyDataSetChanged();
+//    }
+
+
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        //adapter.sort(new Exception.DateComparator());
+    public void onExceptionsChanged() {
         adapter.notifyDataSetChanged();
     }
 
-    private static class MyAdapter extends ArrayAdapter<com.attilapalf.exceptional.exception.Exception> {
+    private static class MyAdapter extends ArrayAdapter<com.attilapalf.exceptional.model.Exception> {
         private Context context;
         private List<Exception> values;
 
@@ -133,7 +143,7 @@ public class ExceptionsFragment extends ListFragment implements OnSharedPreferen
             public void bindRow(Exception model) {
                 nameView.setText(model.getPrefix() + "\n" + model.getShortName());
                 descView.setText(model.getDescription());
-                fromWhoView.setText(model.getFromWho());
+                fromWhoView.setText(Long.toString(model.getFromWho()));
                 String date =
                         model.getDate().getTime().toString();
 //                        model.getDate().get(Calendar.HOUR_OF_DAY) + ":" +

@@ -1,4 +1,4 @@
-package com.attilapalf.exceptional.exception;
+package com.attilapalf.exceptional.model;
 
 import android.location.Location;
 
@@ -12,15 +12,20 @@ import java.util.Comparator;
  * Created by Attila on 2015-06-08.
  */
 public class Exception {
-    private String instanceId;
+    // meta exception fields
     private int exceptionId;
     private String shortName;
     private String prefix;
     private String description;
+
+    // TODO: optimize exceptions: to be like on the server side
+
+    // exception instance fields
+    private String instanceId;
     private Location location;
     private Calendar date;
-    private String fromWho;
-    private String toWho;
+    private long fromWho;
+    private long toWho;
 
     private static Gson gson = new Gson();
 
@@ -97,19 +102,19 @@ public class Exception {
         this.date = date;
     }
 
-    public String getFromWho() {
+    public long getFromWho() {
         return fromWho;
     }
 
-    public void setFromWho(String fromWho) {
+    public void setFromWho(long fromWho) {
         this.fromWho = fromWho;
     }
 
-    public String getToWho() {
+    public long getToWho() {
         return toWho;
     }
 
-    public void setToWho(String toWho) {
+    public void setToWho(long toWho) {
         this.toWho = toWho;
     }
 

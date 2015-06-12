@@ -17,5 +17,6 @@
     <string name="main_text">EXPECT THE EXCEPTIONS</string>
 
     <string name="exception_preferences">com.attilapalf.exceptional.exception.ExceptionPreferences</string>
+    <string name="friends_preferences">com.attilapalf.exceptional.exception.FriendsPreferences</string>
     <string name="new_exception_text">You got a new Exception!</string>
 </resources>
