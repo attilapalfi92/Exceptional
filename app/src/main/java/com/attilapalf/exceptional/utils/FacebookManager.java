@@ -41,7 +41,7 @@ public class FacebookManager {
     private static CallbackManager callbackManager;
     private static FacebookCallback<LoginResult> facebookCallback;
 
-    private static boolean friendRefreshFailed = true;
+    private static boolean firstStart = true;
 
     // -------------------------------------------------------------------------------------
     // ------------------------------------- interfaces ------------------------------------
@@ -94,7 +94,8 @@ public class FacebookManager {
                     accessToken = loginResult.getAccessToken();
                     loginSuccessHandler.onLoginSuccess(loginResult);
                     profile = Profile.getCurrentProfile();
-                    refreshFriends(true);
+                    firstStart = true;
+                    refreshFriends();
                 }
             }
 
@@ -135,7 +136,8 @@ public class FacebookManager {
 
         synchronized (syncObject) {
             if (accessToken != null) {
-                refreshFriends(false);
+                firstStart = false;
+                refreshFriends();
             }
         }
     }
@@ -143,7 +145,7 @@ public class FacebookManager {
 
 
 
-    private static void refreshFriends(boolean firstStart) {
+    private static void refreshFriends() {
         GraphRequest request = GraphRequest.newMyFriendsRequest(accessToken, new GraphRequest.GraphJSONArrayCallback() {
             @Override
             public void onCompleted(JSONArray jsonArray, GraphResponse graphResponse) {
