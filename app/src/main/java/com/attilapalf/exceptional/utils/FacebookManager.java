@@ -56,6 +56,9 @@ public class FacebookManager {
 
     // -------------------------------------------------------------------------------------
 
+    /**
+     * If the user successfully logs in, the FbLoginFragment start hte main activity
+     */
     public interface LoginSuccessHandler {
         void onLoginSuccess(LoginResult loginResult);
     }
