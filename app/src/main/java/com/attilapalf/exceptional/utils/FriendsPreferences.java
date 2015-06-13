@@ -5,8 +5,11 @@ import android.content.SharedPreferences;
 
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.*;
+import com.attilapalf.exceptional.rest.AppStartDataSource;
+import com.attilapalf.exceptional.rest.AppStartHandler;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -14,7 +17,9 @@ import java.util.TreeSet;
 /**
  * Created by Attila on 2015-06-12.
  */
-public class FriendsPreferences implements FacebookManager.FriendListListener {
+public class FriendsPreferences implements FacebookManager.FriendListListener, AppStartDataSource {
+
+    private Set<AppStartHandler> appStartHandlers = new HashSet<>();
 
     /** This is the application's preferences */
     private SharedPreferences sharedPreferences;
@@ -124,5 +129,15 @@ public class FriendsPreferences implements FacebookManager.FriendListListener {
         synchronized (memoryCacheSyncObj) {
             findNewFriends(friendSet);
         }
+    }
+
+    @Override
+    public boolean addAppStartHandler(AppStartHandler handler) {
+        return appStartHandlers.add(handler);
+    }
+
+    @Override
+    public boolean removeAppStartHandler(AppStartHandler handler) {
+        return appStartHandlers.remove(handler);
     }
 }
