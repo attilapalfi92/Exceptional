@@ -2,6 +2,7 @@ package com.attilapalf.exceptional;
 
 import android.app.Application;
 
+import com.attilapalf.exceptional.rest.BackendConnector;
 import com.attilapalf.exceptional.utils.ExceptionFactory;
 import com.attilapalf.exceptional.utils.ExceptionPreferences;
 import com.attilapalf.exceptional.utils.FacebookManager;
@@ -16,7 +17,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         FriendsPreferences friendsPreference = FriendsPreferences.getInstance(getApplicationContext());
-        //friendsPreference.addAppStartHandler()
+        friendsPreference.addBackendService(new BackendConnector());
         FacebookManager.registerFriendListListener(friendsPreference);
         FacebookManager.onAppStart(this);
         ExceptionFactory.initialize(getApplicationContext());

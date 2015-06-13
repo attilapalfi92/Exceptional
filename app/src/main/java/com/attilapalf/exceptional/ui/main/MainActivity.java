@@ -133,6 +133,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
 
+
+
+
+
     public void throwMeExcClicked(View view) {
         Exception e = ExceptionFactory.createRandomException();
 
@@ -163,6 +167,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 .negativeText("OK")
                 .show();
     }
+
+
+
 
 
     @Override

@@ -5,11 +5,10 @@ import android.content.SharedPreferences;
 
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.*;
-import com.attilapalf.exceptional.rest.AppStartDataSource;
-import com.attilapalf.exceptional.rest.AppStartHandler;
+import com.attilapalf.exceptional.rest.BackendServiceUser;
+import com.attilapalf.exceptional.rest.BackendService;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -17,9 +16,9 @@ import java.util.TreeSet;
 /**
  * Created by Attila on 2015-06-12.
  */
-public class FriendsPreferences implements FacebookManager.FriendListListener, AppStartDataSource {
+public class FriendsPreferences implements FacebookManager.FriendListListener, BackendServiceUser {
 
-    private Set<AppStartHandler> appStartHandlers = new HashSet<>();
+    private BackendService backendService;
 
     /** This is the application's preferences */
     private SharedPreferences sharedPreferences;
@@ -33,6 +32,12 @@ public class FriendsPreferences implements FacebookManager.FriendListListener, A
     private final Set<Friend> storedFriends = Collections.synchronizedSet(
             new TreeSet<Friend>(new Friend.NameComparator()));
 
+    /**
+     * On app start the first thing is to load the storedFriends with data from
+     * the preferences file. After that a callback can come from facebook to access
+     * storedFriends. If the callback comes too soon, it would be bad, so we synchronize
+     * with this object.
+     */
     private final Object memoryCacheSyncObj = new Object();
 
     private static FriendsPreferences instance;
@@ -67,8 +72,27 @@ public class FriendsPreferences implements FacebookManager.FriendListListener, A
     }
 
 
+    @Override
+    public void onFirstAppStart(Set<Friend> friendSet) {
+        synchronized (memoryCacheSyncObj) {
+            addFacebookFriends(friendSet);
+        }
+    }
 
 
+    @Override
+    public void onAppStart(Set<Friend> friendSet) {
+        synchronized (memoryCacheSyncObj) {
+            findNewFriends(friendSet);
+        }
+    }
+
+
+
+    /**
+     *
+     * @param facebookFriends
+     */
     public void addFacebookFriends(Set<Friend> facebookFriends) {
         Set<Friend> storedTemporary = new TreeSet<>(new Friend.NameComparator());
         storedTemporary.addAll(storedFriends);
@@ -89,6 +113,8 @@ public class FriendsPreferences implements FacebookManager.FriendListListener, A
         // TODO: send facebookFriends to backend database
     }
 
+
+
     /**
      * Adding new friends
      * @param friendSet
@@ -98,6 +124,11 @@ public class FriendsPreferences implements FacebookManager.FriendListListener, A
 
         // TODO: send new facebookFriends to backend database
     }
+
+
+
+
+
 
 
     private void addFriends(Set<Friend> toBeAdded) {
@@ -116,28 +147,11 @@ public class FriendsPreferences implements FacebookManager.FriendListListener, A
         storedFriends.removeAll(toBeDeleted);
     }
 
-    @Override
-    public void onFirstAppStart(Set<Friend> friendSet) {
-        synchronized (memoryCacheSyncObj) {
-            addFacebookFriends(friendSet);
-        }
-    }
+
 
 
     @Override
-    public void onAppStart(Set<Friend> friendSet) {
-        synchronized (memoryCacheSyncObj) {
-            findNewFriends(friendSet);
-        }
-    }
-
-    @Override
-    public boolean addAppStartHandler(AppStartHandler handler) {
-        return appStartHandlers.add(handler);
-    }
-
-    @Override
-    public boolean removeAppStartHandler(AppStartHandler handler) {
-        return appStartHandlers.remove(handler);
+    public void addBackendService(BackendService service) {
+        backendService = service;
     }
 }
