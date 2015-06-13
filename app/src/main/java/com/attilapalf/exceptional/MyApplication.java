@@ -17,7 +17,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         FriendsPreferences friendsPreference = FriendsPreferences.getInstance(getApplicationContext());
-        friendsPreference.addBackendService(new BackendConnector());
+        friendsPreference.addBackendService(BackendConnector.getInstance());
         FacebookManager.registerFriendListListener(friendsPreference);
         FacebookManager.onAppStart(this);
         ExceptionFactory.initialize(getApplicationContext());
