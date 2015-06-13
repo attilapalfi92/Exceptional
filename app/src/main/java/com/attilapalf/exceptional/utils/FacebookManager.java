@@ -43,6 +43,11 @@ public class FacebookManager {
     // -------------------------------------------------------------------------------------
     // ------------------------------------- interfaces ------------------------------------
     // -------------------------------------------------------------------------------------
+
+    /**
+     * When the user starts the application, first thing is that it sends a request to
+     * Facebook to get his friends. When facebook sends his friends back, these methods are called.
+     */
     public interface FriendListListener {
         void onFirstAppStart(Set<Friend> friendSet);
         void onAppStart(Set<Friend> friendSet);
