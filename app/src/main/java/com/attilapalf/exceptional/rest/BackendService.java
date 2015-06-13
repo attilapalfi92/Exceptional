@@ -1,4 +1,4 @@
-package com.attilapalf.exceptional.utils.rest;
+package com.attilapalf.exceptional.rest;
 
 /**
  * Created by Attila on 2015-06-13.

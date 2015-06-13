@@ -1,9 +1,7 @@
-package com.attilapalf.exceptional.utils.rest;
+package com.attilapalf.exceptional.rest;
 
 
-import java.math.BigInteger;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 /**
  * Created by Attila on 2015-06-11.

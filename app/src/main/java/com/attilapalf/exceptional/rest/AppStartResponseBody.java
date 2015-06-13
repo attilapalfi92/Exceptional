@@ -1,4 +1,4 @@
-package com.attilapalf.exceptional.utils.rest;
+package com.attilapalf.exceptional.rest;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,6 +1,5 @@
-package com.attilapalf.exceptional.utils.rest;
+package com.attilapalf.exceptional.rest;
 
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 
