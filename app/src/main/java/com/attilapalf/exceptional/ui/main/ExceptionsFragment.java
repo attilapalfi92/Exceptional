@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
+import com.attilapalf.exceptional.rest.BackendConnector;
 import com.attilapalf.exceptional.utils.ExceptionPreferences;
 
 import java.util.List;
@@ -27,6 +28,21 @@ public class ExceptionsFragment extends ListFragment implements //OnSharedPrefer
         ExceptionChangeListener {
 
     private MyAdapter adapter;
+
+
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        if (getActivity() instanceof MainActivity) {
+            ((ExceptionSource)getActivity()).addExceptionChangeListener(this);
+        }
+        BackendConnector.getInstance().addExceptionChangeListener(this);
+
+//        SharedPreferences sharedPreferences = activity.getSharedPreferences(getString(R.string.exception_preferences),
+//                Context.MODE_PRIVATE);
+//        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+    }
 
 
 
@@ -51,23 +67,13 @@ public class ExceptionsFragment extends ListFragment implements //OnSharedPrefer
 
 
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        if (getActivity() instanceof MainActivity) {
-            ((ExceptionSource)getActivity()).addExceptionChangeListener(this);
-        }
-
-//        SharedPreferences sharedPreferences = activity.getSharedPreferences(getString(R.string.exception_preferences),
-//                Context.MODE_PRIVATE);
-//        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-    }
 
     @Override
     public void onDetach() {
         if (getActivity() instanceof MainActivity) {
             ((ExceptionSource)getActivity()).removeExceptionChangeListener(this);
         }
+        BackendConnector.getInstance().removeExceptionChangeListener(this);
         super.onDetach();
     }
 

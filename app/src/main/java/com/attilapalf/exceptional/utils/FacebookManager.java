@@ -30,6 +30,9 @@ import java.util.TreeSet;
  */
 public class FacebookManager {
     private static AccessToken accessToken;
+    /**
+     * Protects the accessToken and the profile objects
+     */
     private static final Object syncObject = new Object();
     private static AccessTokenTracker tokenTracker;
     private static Profile profile;
@@ -146,7 +149,6 @@ public class FacebookManager {
             public void onCompleted(JSONArray jsonArray, GraphResponse graphResponse) {
                 // request successfully returned
                 if (graphResponse.getError() == null) {
-                    friendRefreshFailed = false;
                     Log.d("response length: ", Integer.toString(jsonArray.length()));
                     Set<Friend> friends = new TreeSet<>(new Friend.NameComparator());
                     for(int i = 0; i < jsonArray.length(); i++) {
@@ -166,9 +168,6 @@ public class FacebookManager {
                     } else {
                         friendListListener.onAppStart(friends);
                     }
-
-                } else {
-                    friendRefreshFailed = true;
                 }
             }
         });

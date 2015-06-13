@@ -89,30 +89,38 @@ public class FriendsPreferences implements FacebookManager.FriendListListener, B
 
 
 
-    /**
-     *
-     * @param facebookFriends
-     */
+//    public void addFacebookFriends(Set<Friend> facebookFriends) {
+//        Set<Friend> storedTemporary = new TreeSet<>(new Friend.NameComparator());
+//        storedTemporary.addAll(storedFriends);
+//        // these have to be deleted
+//        storedTemporary.removeAll(facebookFriends);
+//
+//        Set<Friend> fbTemporaryFriends = new TreeSet<>(new Friend.NameComparator());
+//        fbTemporaryFriends.addAll(facebookFriends);
+//        // these have to be added to the stored friends
+//        fbTemporaryFriends.removeAll(storedFriends);
+//
+//        // removing deleted friends
+//        deleteFriends(storedTemporary);
+//
+//        // adding new friends
+//        saveFriends(fbTemporaryFriends);
+//
+//        // TODO: send facebookFriends to backend database
+//
+//        // TODO: notify FriendsFragment's adapter about the data set change
+//    }
+
+
     public void addFacebookFriends(Set<Friend> facebookFriends) {
-        Set<Friend> storedTemporary = new TreeSet<>(new Friend.NameComparator());
-        storedTemporary.addAll(storedFriends);
-        // these have to be deleted
-        storedTemporary.removeAll(facebookFriends);
 
-        Set<Friend> fbTemporaryFriends = new TreeSet<>(new Friend.NameComparator());
-        fbTemporaryFriends.addAll(facebookFriends);
-        // these have to be added to the stored friends
-        fbTemporaryFriends.removeAll(storedFriends);
-
-        // removing deleted friends
-        deleteFriends(storedTemporary);
-
-        // adding new friends
-        addFriends(fbTemporaryFriends);
+        // adding facebook friends
+        saveFriends(facebookFriends);
 
         // TODO: send facebookFriends to backend database
-    }
 
+        // TODO: notify FriendsFragment's adapter about the data set change
+    }
 
 
     /**
@@ -123,6 +131,8 @@ public class FriendsPreferences implements FacebookManager.FriendListListener, B
         friendSet.removeAll(storedFriends);
 
         // TODO: send new facebookFriends to backend database
+
+        // TODO: notify FriendsFragment's adapter about the data set change
     }
 
 
@@ -131,13 +141,14 @@ public class FriendsPreferences implements FacebookManager.FriendListListener, B
 
 
 
-    private void addFriends(Set<Friend> toBeAdded) {
-        for (Friend f : toBeAdded) {
+    private void saveFriends(Set<Friend> toBeSaved) {
+        for (Friend f : toBeSaved) {
             editor.putString(Long.toString(f.getId()), f.toString());
             storedFriends.add(f);
         }
         editor.apply();
     }
+
 
     private void deleteFriends(Set<Friend> toBeDeleted) {
         for (Friend f : toBeDeleted) {
