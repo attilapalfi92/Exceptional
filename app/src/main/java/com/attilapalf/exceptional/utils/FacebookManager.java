@@ -83,7 +83,7 @@ public class FacebookManager {
                     accessToken = loginResult.getAccessToken();
                     loginSuccessHandler.onLoginSuccess(loginResult);
                     profile = Profile.getCurrentProfile();
-                    refreshFriends();
+                    refreshFriends(true);
                 }
             }
 
@@ -124,7 +124,7 @@ public class FacebookManager {
 
         synchronized (syncObject) {
             if (accessToken != null) {
-                refreshFriends();
+                refreshFriends(false);
             }
         }
     }
@@ -132,7 +132,7 @@ public class FacebookManager {
 
 
 
-    private static void refreshFriends() {
+    private static void refreshFriends(boolean firstStart) {
         GraphRequest request = GraphRequest.newMyFriendsRequest(accessToken, new GraphRequest.GraphJSONArrayCallback() {
             @Override
             public void onCompleted(JSONArray jsonArray, GraphResponse graphResponse) {
@@ -153,7 +153,11 @@ public class FacebookManager {
                             e.printStackTrace();
                         }
                     }
-                    friendListListener.onFirstAppStart(friends);
+                    if (firstStart) {
+                        friendListListener.onFirstAppStart(friends);
+                    } else {
+                        friendListListener.onAppStart(friends);
+                    }
 
                 } else {
                     friendRefreshFailed = true;
