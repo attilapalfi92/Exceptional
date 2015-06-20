@@ -12,17 +12,14 @@ import java.util.Comparator;
  * Created by Attila on 2015-06-08.
  */
 public class Exception {
-    // meta exception fields
-    private int exceptionId;
-    private String shortName;
-    private String prefix;
-    private String description;
+    ExceptionType exceptionType;
 
     // TODO: optimize exceptions: to be like on the server side
 
     // exception instance fields
-    private String instanceId;
-    private Location location;
+    private long instanceId;
+    private double longitude;
+    private double latitude;
     private Calendar date;
     private long fromWho;
     private long toWho;
@@ -52,10 +49,7 @@ public class Exception {
 
     public Exception clone() {
         Exception e = new Exception();
-        e.setExceptionId(exceptionId);
-        e.setPrefix(prefix);
-        e.setShortName(shortName);
-        e.setDescription(description);
+        e.setExceptionType(exceptionType);
 
         return e;
     }
@@ -66,32 +60,44 @@ public class Exception {
 
     public Exception() {}
 
-    public synchronized Location getLocation() {
-        return location;
+    public double getLongitude() {
+        return longitude;
     }
 
-    public synchronized void setLocation(Location location) {
-        this.location = location;
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public ExceptionType getExceptionType() {
+        return exceptionType;
+    }
+
+    public void setExceptionType(ExceptionType exceptionType) {
+        this.exceptionType = exceptionType;
     }
 
     public String getFullName() {
-        return prefix + shortName;
+        return exceptionType.getPrefix() + exceptionType.getShortName();
     }
 
-    public String getInstanceId() {
+    public long getInstanceId() {
         return instanceId;
     }
 
-    public void setInstanceId(String instanceId) {
+    public void setInstanceId(long instanceId) {
         this.instanceId = instanceId;
     }
 
     public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
+        return exceptionType.getDescription();
     }
 
     public Calendar getDate() {
@@ -119,26 +125,14 @@ public class Exception {
     }
 
     public String getPrefix() {
-        return prefix;
-    }
-
-    public void setPrefix(String prefix) {
-        this.prefix = prefix;
+        return exceptionType.getPrefix();
     }
 
     public String getShortName() {
-        return shortName;
-    }
-
-    public void setShortName(String shortName) {
-        this.shortName = shortName;
+        return exceptionType.getShortName();
     }
 
     public int getExceptionId() {
-        return exceptionId;
-    }
-
-    public void setExceptionId(int exceptionId) {
-        this.exceptionId = exceptionId;
+        return exceptionType.getTypeId();
     }
 }

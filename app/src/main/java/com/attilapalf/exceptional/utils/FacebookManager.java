@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.attilapalf.exceptional.model.Friend;
+import com.attilapalf.exceptional.ui.main.ExceptionChangeListener;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
@@ -37,6 +38,7 @@ public class FacebookManager {
     private static AccessTokenTracker tokenTracker;
     private static Profile profile;
     private static ProfileTracker profileTracker;
+    private static long profileId = 0;
 
     private static CallbackManager callbackManager;
     private static FacebookCallback<LoginResult> facebookCallback;
@@ -147,6 +149,9 @@ public class FacebookManager {
 
     private static void refreshFriends() {
         GraphRequest request = GraphRequest.newMyFriendsRequest(accessToken, new GraphRequest.GraphJSONArrayCallback() {
+
+            // this method is called from the main thread, so... if it takes too long to process,
+            // I'll have to put the processing in a background thread
             @Override
             public void onCompleted(JSONArray jsonArray, GraphResponse graphResponse) {
                 // request successfully returned
@@ -182,12 +187,42 @@ public class FacebookManager {
 
 
 
-    public static String getProfilId() {
+
+    public static void testAsyncCall(final Set<ExceptionChangeListener> exceptionChangeListeners) {
+        GraphRequest request = GraphRequest.newMyFriendsRequest(accessToken, new GraphRequest.GraphJSONArrayCallback() {
+            @Override
+            public void onCompleted(JSONArray jsonArray, GraphResponse graphResponse) {
+                // request successfully returned
+                if (graphResponse.getError() == null) {
+                    Log.d("response length: ", Integer.toString(jsonArray.length()));
+                    Set<Friend> friends = new TreeSet<>(new Friend.NameComparator());
+                    for (ExceptionChangeListener listener : exceptionChangeListeners) {
+                        listener.onExceptionsChanged();
+                    }
+
+                    friendListListener.onFirstAppStart(friends);
+                }
+            }
+        });
+
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", "id,name,picture");
+        request.setParameters(parameters);
+        request.executeAsync();
+    }
+
+
+
+    public static long getProfileId() {
         if (profile == null) {
             profile = Profile.getCurrentProfile();
         }
 
-        return profile.getId();
+        if (profileId == 0) {
+            profileId = Long.parseLong(profile.getId());
+        }
+
+        return profileId;
     }
 
 

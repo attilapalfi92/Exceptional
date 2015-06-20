@@ -11,28 +11,28 @@ public class ExceptionWrapper {
     private Calendar creationDate;
     double longitude, latitude;
     int exceptionTypeId;
+    long instanceId;
 
     public ExceptionWrapper() {
     }
 
-//    public ExceptionWrapper(Users2ExceptionsEntity exception) {
-//        fromWho = exception.getFromUser().getUserId();
-//        toWho = exception.getToUser().getUserId();
-//        creationDate = Calendar.getInstance();
-//        creationDate.setTimeInMillis(exception.getCreationDate().getTime());
-//        longitude = exception.getLongitude();
-//        latitude = exception.getLatitude();
-//        exceptionTypeId = exception.getException().getTypeId();
-//    }
-
     public ExceptionWrapper(Long fromWho, Long toWho, Calendar creationDate,
-                            double longitude, double latitude, int exceptionTypeId) {
+                            double longitude, double latitude, int exceptionTypeId, long instanceId) {
         this.fromWho = fromWho;
         this.toWho = toWho;
         this.creationDate = creationDate;
         this.longitude = longitude;
         this.latitude = latitude;
         this.exceptionTypeId = exceptionTypeId;
+        this.instanceId = instanceId;
+    }
+
+    public long getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(long instanceId) {
+        this.instanceId = instanceId;
     }
 
     public long getFromWho() {

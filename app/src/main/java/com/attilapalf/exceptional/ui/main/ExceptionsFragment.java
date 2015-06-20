@@ -2,13 +2,12 @@ package com.attilapalf.exceptional.ui.main;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +17,7 @@ import android.widget.TextView;
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.rest.BackendConnector;
-import com.attilapalf.exceptional.utils.ExceptionPreferences;
+import com.attilapalf.exceptional.utils.ExceptionManager;
 
 import java.util.List;
 
@@ -44,16 +43,19 @@ public class ExceptionsFragment extends ListFragment implements //OnSharedPrefer
 //        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
     }
 
-
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        List<Exception> values = ExceptionPreferences.getExceptionList();
+        List<Exception> values = ExceptionManager.getExceptionList();
         adapter = new MyAdapter(getActivity().getApplicationContext(), values);
         //adapter.sort(new Exception.DateComparator());
-        adapter.notifyDataSetChanged();
+        onExceptionsChanged();
         setListAdapter(adapter);
     }
 
@@ -77,15 +79,12 @@ public class ExceptionsFragment extends ListFragment implements //OnSharedPrefer
         super.onDetach();
     }
 
-//    @Override
-//    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-//        //adapter.sort(new Exception.DateComparator());
-//        adapter.notifyDataSetChanged();
-//    }
 
 
     @Override
     public void onExceptionsChanged() {
+        String currentThread = Long.toString(Thread.currentThread().getId());
+        Log.d("Current thread id: ", currentThread);
         adapter.notifyDataSetChanged();
     }
 

@@ -8,15 +8,15 @@ import com.attilapalf.exceptional.model.*;
 import com.attilapalf.exceptional.rest.BackendServiceUser;
 import com.attilapalf.exceptional.rest.BackendService;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 /**
+ * Responsible for storing friends in the device's preferences
  * Created by Attila on 2015-06-12.
  */
-public class FriendsPreferences implements FacebookManager.FriendListListener, BackendServiceUser {
+public class FriendsManager implements FacebookManager.FriendListListener, BackendServiceUser {
 
     private BackendService backendService;
 
@@ -26,11 +26,10 @@ public class FriendsPreferences implements FacebookManager.FriendListListener, B
     /** This is the application's sharedPreferences editor*/
     private SharedPreferences.Editor editor;
 
-    /**
-     * This LinkedList stores the last 30 exceptions the user got.
-     * */
-    private final Set<Friend> storedFriends = Collections.synchronizedSet(
-            new TreeSet<Friend>(new Friend.NameComparator()));
+//    private final Set<Friend> storedFriends = Collections.synchronizedSet(
+//            new TreeSet<Friend>(new Friend.NameComparator()));
+    private final Set<Friend> storedFriends = new TreeSet<>(new Friend.NameComparator());
+
 
     /**
      * On app start the first thing is to load the storedFriends with data from
@@ -38,19 +37,20 @@ public class FriendsPreferences implements FacebookManager.FriendListListener, B
      * storedFriends. If the callback comes too soon, it would be bad, so we synchronize
      * with this object.
      */
-    private final Object memoryCacheSyncObj = new Object();
+    // TODO: not needed
+    //private final Object memoryCacheSyncObj = new Object();
 
-    private static FriendsPreferences instance;
+    private static FriendsManager instance;
 
-    public static FriendsPreferences getInstance(Context context) {
+    public static FriendsManager getInstance(Context context) {
         if (instance == null) {
-            instance = new FriendsPreferences(context);
+            instance = new FriendsManager(context);
         }
 
         return instance;
     }
 
-    private FriendsPreferences(Context context) {
+    private FriendsManager(Context context) {
         String PREFS_NAME = context.getString(R.string.friends_preferences);
         sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
@@ -62,29 +62,36 @@ public class FriendsPreferences implements FacebookManager.FriendListListener, B
 
         String[] keyArray = new String[keys.size()];
         keys.toArray(keyArray);
-        synchronized (memoryCacheSyncObj) {
+        //synchronized (memoryCacheSyncObj) {
             for (String s : keyArray) {
                 String friendJson = (String) store.get(s);
                 Friend f = Friend.fromString(friendJson);
                 storedFriends.add(f);
             }
-        }
+        //}
     }
 
 
     @Override
     public void onFirstAppStart(Set<Friend> friendSet) {
-        synchronized (memoryCacheSyncObj) {
-            addFacebookFriends(friendSet);
-        }
+        //synchronized (memoryCacheSyncObj) {
+            // adding facebook friends
+            saveFriends(friendSet);
+
+            // TODO: send facebookFriends to backend database
+            backendService.onFirstAppStart(friendSet);
+        //}
     }
 
 
     @Override
     public void onAppStart(Set<Friend> friendSet) {
-        synchronized (memoryCacheSyncObj) {
-            findNewFriends(friendSet);
-        }
+        //synchronized (memoryCacheSyncObj) {
+            friendSet.removeAll(storedFriends);
+
+            // TODO: send new facebookFriends to backend database
+            backendService.onAppStart(friendSet);
+        //}
     }
 
 
@@ -107,33 +114,12 @@ public class FriendsPreferences implements FacebookManager.FriendListListener, B
 //        saveFriends(fbTemporaryFriends);
 //
 //        // TODO: send facebookFriends to backend database
+
 //
 //        // TODO: notify FriendsFragment's adapter about the data set change
 //    }
 
 
-    public void addFacebookFriends(Set<Friend> facebookFriends) {
-
-        // adding facebook friends
-        saveFriends(facebookFriends);
-
-        // TODO: send facebookFriends to backend database
-
-        // TODO: notify FriendsFragment's adapter about the data set change
-    }
-
-
-    /**
-     * Adding new friends
-     * @param friendSet
-     */
-    private void findNewFriends(Set<Friend> friendSet) {
-        friendSet.removeAll(storedFriends);
-
-        // TODO: send new facebookFriends to backend database
-
-        // TODO: notify FriendsFragment's adapter about the data set change
-    }
 
 
 

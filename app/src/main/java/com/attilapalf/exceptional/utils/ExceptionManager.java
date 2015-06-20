@@ -16,7 +16,7 @@ import java.util.Set;
 /**
  * Created by Attila on 2015-06-08.
  */
-public class ExceptionPreferences {
+public class ExceptionManager {
 
     /** This is the application's preferences */
     private static SharedPreferences sharedPreferences;
@@ -24,21 +24,26 @@ public class ExceptionPreferences {
     /** This is the application's sharedPreferences editor*/
     private static SharedPreferences.Editor editor;
 
+    private static String PREFS_NAME;
+
+    private static long starterId = 0;
+
     /**
      * This LinkedList stores the last 30 exceptions the user got.
      * */
-    // TODO: synchronize this motherfucker
-    private static List<Exception> storedExceptions = Collections.synchronizedList(new LinkedList<Exception>());
+    //private static List<Exception> storedExceptions = Collections.synchronizedList(new LinkedList<Exception>());
+    private static List<Exception> storedExceptions = new LinkedList<Exception>();
     public static final int STORE_SIZE = Integer.MAX_VALUE;
 
     public static void initalize(Context context) {
-        String PREFS_NAME = context.getString(R.string.exception_preferences);
+        PREFS_NAME = context.getString(R.string.exception_preferences);
         sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 
         editor = sharedPreferences.edit();
         editor.apply();
 
         Map<String, ?> store = sharedPreferences.getAll();
+        store.remove("starterId");
         Set<String> keys = store.keySet();
 
         String[] keyArray = new String[keys.size()];
@@ -47,10 +52,9 @@ public class ExceptionPreferences {
             String excJson = (String) store.get(s);
             Exception e = Exception.fromString(excJson);
             storedExceptions.add(storedExceptions.size(), e);
-            //storedExceptions.addLast(e);
         }
 
-        Collections.sort(storedExceptions, new Exception.DateComparator());
+        starterId = sharedPreferences.getLong("starterId", 0);
     }
 
 
@@ -59,8 +63,23 @@ public class ExceptionPreferences {
         return storedExceptions.size();
     }
 
+    public static void saveStarterId(long myId) {
+        starterId = myId;
+        editor.putLong("starterId", myId);
+        editor.apply();
+    }
 
+    public static long getStarterId() {
+        return starterId;
+    }
 
+    public static long getNextId() {
+        if (storedExceptions.isEmpty()) {
+            return starterId;
+        }
+
+        return storedExceptions.get(0).getInstanceId() + 1;
+    }
 
     public static void addException(Exception e) {
         if (storedExceptions.size() >= STORE_SIZE) {
@@ -68,7 +87,7 @@ public class ExceptionPreferences {
         }
         //storedExceptions.addFirst(e);
         storedExceptions.add(0, e);
-        editor.putString(e.getInstanceId(), e.toString());
+        editor.putString(Long.toString(e.getInstanceId()), e.toString());
         editor.apply();
     }
 
@@ -76,21 +95,17 @@ public class ExceptionPreferences {
     private static void removeLast() {
         //Exception removed = storedExceptions.removeLast();
         Exception removed = storedExceptions.remove(storedExceptions.size() - 1);
-        editor.remove(removed.getInstanceId());
+        editor.remove(Long.toString(removed.getInstanceId()));
     }
 
 
-    public static Exception getException(int id) {
-        String exception_json = sharedPreferences.getString(Integer.toString(id), "");
-        return Exception.fromString(exception_json);
-    }
 
 
     public static void removeException(Exception e) {
-        editor.remove(e.getInstanceId());
+        editor.remove(Long.toString(e.getInstanceId()));
         editor.apply();
         for (int i = 0; i < storedExceptions.size(); i++) {
-            if (storedExceptions.get(i).getInstanceId().equals(e.getInstanceId())) {
+            if (storedExceptions.get(i).getInstanceId() == e.getInstanceId()) {
                 storedExceptions.remove(i);
                 return;
             }

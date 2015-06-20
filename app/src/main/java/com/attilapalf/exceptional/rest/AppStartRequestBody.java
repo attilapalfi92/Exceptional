@@ -1,5 +1,6 @@
 package com.attilapalf.exceptional.rest;
 
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 
@@ -7,24 +8,25 @@ import java.util.List;
  * Created by Attila on 2015-06-11.
  */
 public class AppStartRequestBody {
-    private long deviceId, userId;
+    private long userId;
+    private String deviceId;
     private Collection<Long> friendsIds;
     private List<Long> exceptionIds;
 
     public AppStartRequestBody() {
     }
 
-    public AppStartRequestBody(long deviceId, long userId, List<Long> friendsIds) {
+    public AppStartRequestBody(String deviceId, long userId, List<Long> friendsIds) {
         this.deviceId = deviceId;
         this.userId = userId;
         this.friendsIds = friendsIds;
     }
 
-    public long getDeviceId() {
+    public String getDeviceId() {
         return deviceId;
     }
 
-    public void setDeviceId(long deviceId) {
+    public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
     }
 

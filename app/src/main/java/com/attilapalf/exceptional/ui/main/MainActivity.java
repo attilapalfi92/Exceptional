@@ -3,10 +3,10 @@ package com.attilapalf.exceptional.ui.main;
 
 import android.content.Intent;
 import android.location.Location;
+import android.provider.Settings;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,10 +15,13 @@ import android.widget.Toast;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
+import com.attilapalf.exceptional.rest.BackendConnector;
+import com.attilapalf.exceptional.rest.ConnectionFailedListener;
 import com.attilapalf.exceptional.ui.LoginActivity;
 import com.attilapalf.exceptional.utils.ExceptionFactory;
-import com.attilapalf.exceptional.utils.ExceptionPreferences;
+import com.attilapalf.exceptional.utils.ExceptionManager;
 import com.attilapalf.exceptional.utils.FacebookManager;
+import com.attilapalf.exceptional.utils.GpsTracker;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -29,34 +32,27 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, ExceptionSource {
+public class MainActivity extends AppCompatActivity implements ExceptionSource, ConnectionFailedListener {
 
-    private GoogleApiClient mGoogleApiClient;
     private Location mLocation;
-    private List<com.attilapalf.exceptional.model.Exception> setLocationExceptions
-            = Collections.synchronizedList(new ArrayList<Exception>());
     private final Set<ExceptionChangeListener> exceptionChangeListeners = new HashSet<>();
+    private String androidId;
 
-
-    protected synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-    }
+    GpsTracker gpsTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        buildGoogleApiClient();
-        mGoogleApiClient.connect();
+        gpsTracker = new GpsTracker(getApplicationContext());
+
+        BackendConnector.getInstance().addConnectionListener(this);
+
+        androidId = Settings.Secure.getString(getApplicationContext()
+                .getContentResolver(), Settings.Secure.ANDROID_ID);
 
         MainPagerAdapter adapter = new MainPagerAdapter(getSupportFragmentManager());
-
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
         pager.setAdapter(adapter);
     }
@@ -69,9 +65,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         if(!FacebookManager.isUserLoggedIn()) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
-        } else {
-            String id = FacebookManager.getProfilId();
-            Log.d("profile id:", id);
         }
     }
 
@@ -79,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mGoogleApiClient.disconnect();
+        BackendConnector.getInstance().removeConnectionListener(this);
     }
 
     @Override
@@ -128,72 +121,50 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
-    private static String makeFragmentName(int viewPagerId, int index) {
-        return "android:switcher:" + viewPagerId + ":" + index;
-    }
-
-
-
-
 
 
     public void throwMeExcClicked(View view) {
-        Exception e = ExceptionFactory.createRandomException();
+        Exception e = ExceptionFactory.createRandomException(FacebookManager.getProfileId(),
+                FacebookManager.getProfileId(), ExceptionManager.getNextId());
 
-        synchronized (this) {
-            if (mLocation == null) {
-                setLocationExceptions.add(e);
+        if (gpsTracker.canGetLocation()) {
+            mLocation = gpsTracker.getLocation();
 
-            } else {
-                e.setLocation(mLocation);
-                ExceptionPreferences.addException(e);
+        }
+
+        if (!gpsTracker.canGetLocation() && mLocation == null) {
+            gpsTracker.showSettingsAlert();
+
+        } else {
+            e.setLongitude(mLocation.getLongitude());
+            e.setLatitude(mLocation.getLatitude());
+            ExceptionManager.addException(e);
+
+            for (ExceptionChangeListener listener : exceptionChangeListeners) {
+                listener.onExceptionsChanged();
             }
-        }
 
-
-        for(ExceptionChangeListener listener : exceptionChangeListeners) {
-            listener.onExceptionsChanged();
-        }
-
-        String data =
+            String data =
                     "Description: " + e.getDescription() + "\n\n" +
-                    "From: " + e.getFromWho() + "\n\n" +
-                    "Where: " + e.getLocation();
+                            "From: " + e.getFromWho() + "\n\n" +
+                            "Where: " + e.getLongitude() + ", " +
+                            e.getLatitude();
 
-        new MaterialDialog.Builder(this)
-                .title(e.getPrefix() + "\n" + e.getShortName())
-                .content(data)
-                .positiveText("LOL")
-                .negativeText("OK")
-                .show();
-    }
-
-
-
-
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        synchronized (this) {
-            mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            for(Exception e : setLocationExceptions) {
-                e.setLocation(mLocation);
-                ExceptionPreferences.addException(e);
-            }
-
-            setLocationExceptions.clear();
+            new MaterialDialog.Builder(this)
+                    .title(e.getPrefix() + "\n" + e.getShortName())
+                    .content(data)
+                    .positiveText("LOL")
+                    .negativeText("OK")
+                    .show();
         }
     }
 
-    @Override
-    public void onConnectionSuspended(int i) {
 
+
+    public void asyncTestBtnClicked(View view) {
+        FacebookManager.testAsyncCall(exceptionChangeListeners);
     }
 
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Toast.makeText(this, "Couldn't get device's location.", Toast.LENGTH_SHORT).show();
-    }
 
     @Override
     public boolean addExceptionChangeListener(ExceptionChangeListener listener) {
@@ -203,5 +174,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public boolean removeExceptionChangeListener(ExceptionChangeListener listener) {
         return exceptionChangeListeners.remove(listener);
+    }
+
+    @Override
+    public void onConnectionFailed(String what, String why) {
+        Toast.makeText(this, what + " " + why, Toast.LENGTH_LONG).show();
     }
 }
