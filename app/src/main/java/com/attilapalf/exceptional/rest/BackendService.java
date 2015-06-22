@@ -1,6 +1,7 @@
 package com.attilapalf.exceptional.rest;
 
-import com.attilapalf.exceptional.model.Friend;
+import com.attilapalf.exceptional.model.*;
+import com.attilapalf.exceptional.model.Exception;
 
 import java.util.Set;
 
@@ -9,5 +10,6 @@ import java.util.Set;
  */
 public interface BackendService {
     void onFirstAppStart(Set<Friend> friendSet);
-    void onAppStart(Set<Friend> friendSet);
+    void onAppStart();
+    void sendException(Exception e);
 }

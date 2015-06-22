@@ -150,7 +150,7 @@ public class ExceptionsFragment extends ListFragment implements //OnSharedPrefer
                 descView.setText(model.getDescription());
                 fromWhoView.setText(Long.toString(model.getFromWho()));
                 String date =
-                        model.getDate().getTime().toString();
+                        model.getDate().toString();
 //                        model.getDate().get(Calendar.HOUR_OF_DAY) + ":" +
 //                        model.getDate().get(Calendar.MINUTE) + ":" +
 //                        model.getDate().get(Calendar.SECOND);

@@ -1,26 +1,37 @@
-package com.attilapalf.exceptional.rest;
+package com.attilapalf.exceptional.rest.messages;
 
 
-import java.util.Calendar;
+import com.attilapalf.exceptional.model.Exception;
+
 
 /**
  * Created by Attila on 2015-06-11.
  */
 public class ExceptionWrapper {
     private long fromWho, toWho;
-    private Calendar creationDate;
-    double longitude, latitude;
-    int exceptionTypeId;
-    long instanceId;
+    private long timeInMillis;
+    private double longitude, latitude;
+    private int exceptionTypeId;
+    private long instanceId;
 
     public ExceptionWrapper() {
     }
 
-    public ExceptionWrapper(Long fromWho, Long toWho, Calendar creationDate,
+    public ExceptionWrapper(Exception e) {
+        fromWho = e.getFromWho();
+        toWho = e.getToWho();
+        timeInMillis = e.getDate().getTime();
+        longitude = e.getLongitude();
+        latitude = e.getLatitude();
+        exceptionTypeId = e.getExceptionTypeId();
+        instanceId = e.getInstanceId();
+    }
+
+    public ExceptionWrapper(Long fromWho, Long toWho, long timeInMillis,
                             double longitude, double latitude, int exceptionTypeId, long instanceId) {
         this.fromWho = fromWho;
         this.toWho = toWho;
-        this.creationDate = creationDate;
+        this.timeInMillis = timeInMillis;
         this.longitude = longitude;
         this.latitude = latitude;
         this.exceptionTypeId = exceptionTypeId;
@@ -51,12 +62,12 @@ public class ExceptionWrapper {
         this.toWho = toWho;
     }
 
-    public Calendar getCreationDate() {
-        return creationDate;
+    public long getTimeInMillis() {
+        return timeInMillis;
     }
 
-    public void setCreationDate(Calendar creationDate) {
-        this.creationDate = creationDate;
+    public void setTimeInMillis(long timeInMillis) {
+        this.timeInMillis = timeInMillis;
     }
 
     public double getLongitude() {

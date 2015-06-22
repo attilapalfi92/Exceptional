@@ -4,6 +4,7 @@ import android.location.Location;
 
 import com.google.gson.Gson;
 
+import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Comparator;
 
@@ -20,7 +21,7 @@ public class Exception {
     private long instanceId;
     private double longitude;
     private double latitude;
-    private Calendar date;
+    private Timestamp date;
     private long fromWho;
     private long toWho;
 
@@ -100,11 +101,11 @@ public class Exception {
         return exceptionType.getDescription();
     }
 
-    public Calendar getDate() {
+    public Timestamp getDate() {
         return date;
     }
 
-    public void setDate(Calendar date) {
+    public void setDate(Timestamp date) {
         this.date = date;
     }
 
@@ -132,7 +133,7 @@ public class Exception {
         return exceptionType.getShortName();
     }
 
-    public int getExceptionId() {
+    public int getExceptionTypeId() {
         return exceptionType.getTypeId();
     }
 }

@@ -1,8 +1,13 @@
 package com.attilapalf.exceptional.utils;
 
 import android.app.Application;
+import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.hardware.camera2.params.Face;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 
 import com.attilapalf.exceptional.model.Friend;
@@ -30,20 +35,39 @@ import java.util.TreeSet;
  * Created by Attila on 2015-06-06.
  */
 public class FacebookManager {
-    private static AccessToken accessToken;
+    private AccessToken accessToken;
     /**
      * Protects the accessToken and the profile objects
      */
-    private static final Object syncObject = new Object();
-    private static AccessTokenTracker tokenTracker;
-    private static Profile profile;
-    private static ProfileTracker profileTracker;
-    private static long profileId = 0;
+    private final Object syncObject = new Object();
+    private AccessTokenTracker tokenTracker;
+    private Profile profile;
+    private ProfileTracker profileTracker;
+    private long profileId = 0;
 
-    private static CallbackManager callbackManager;
-    private static FacebookCallback<LoginResult> facebookCallback;
+    private CallbackManager callbackManager;
+    private FacebookCallback<LoginResult> facebookCallback;
 
-    private static boolean firstStart = true;
+    private boolean firstStart = false;
+
+    private static FacebookManager instance;
+
+    public static FacebookManager getInstance() {
+        if (instance == null) {
+            instance = new FacebookManager();
+        }
+
+        return instance;
+    }
+
+    private FacebookManager() {
+    }
+
+
+//    @Override
+//    public IBinder onBind(Intent intent) {
+//        return null;
+//    }
 
     // -------------------------------------------------------------------------------------
     // ------------------------------------- interfaces ------------------------------------
@@ -58,9 +82,9 @@ public class FacebookManager {
         void onAppStart(Set<Friend> friendSet);
     }
 
-    public static FriendListListener friendListListener;
+    public FriendListListener friendListListener;
 
-    public static void registerFriendListListener(FriendListListener listener) {
+    public void registerFriendListListener(FriendListListener listener) {
         friendListListener = listener;
     }
 
@@ -73,9 +97,9 @@ public class FacebookManager {
         void onLoginSuccess(LoginResult loginResult);
     }
 
-    private static LoginSuccessHandler loginSuccessHandler;
+    private LoginSuccessHandler loginSuccessHandler;
 
-    public static void registerLoginSuccessHandler(LoginSuccessHandler handler) {
+    public void registerLoginSuccessHandler(LoginSuccessHandler handler) {
         loginSuccessHandler = handler;
     }
     // -------------------------------------------------------------------------------------
@@ -84,7 +108,7 @@ public class FacebookManager {
 
 
 
-    public static void onAppStart(Application application) {
+    public void onAppStart(Application application) {
         FacebookSdk.sdkInitialize(application.getApplicationContext());
 
         callbackManager = CallbackManager.Factory.create();
@@ -94,6 +118,18 @@ public class FacebookManager {
             public void onSuccess(LoginResult loginResult) {
                 synchronized (syncObject) {
                     accessToken = loginResult.getAccessToken();
+
+//                    String PREFS_NAME = "FirstStart";
+//                    SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+//                    // it means the user logged in and this is the first start
+//                    if (accessToken != null) {
+//                        settings.edit().putBoolean("firstStart", true).apply();
+//                    }
+//                    // it means the user logged out
+//                    else {
+//                        settings.edit().remove("firstStart").apply();
+//                    }
+
                     loginSuccessHandler.onLoginSuccess(loginResult);
                     profile = Profile.getCurrentProfile();
                     firstStart = true;
@@ -118,6 +154,9 @@ public class FacebookManager {
             protected void onCurrentAccessTokenChanged(AccessToken oldToken, AccessToken newToken) {
                 synchronized (syncObject) {
                     accessToken = newToken;
+                    if (!firstStart) {
+                        refreshFriends();
+                    }
                 }
             }
         };
@@ -135,19 +174,12 @@ public class FacebookManager {
         tokenTracker.startTracking();
         profileTracker.startTracking();
         accessToken = AccessToken.getCurrentAccessToken();
-
-        synchronized (syncObject) {
-            if (accessToken != null) {
-                firstStart = false;
-                refreshFriends();
-            }
-        }
     }
 
 
 
 
-    private static void refreshFriends() {
+    private void refreshFriends() {
         GraphRequest request = GraphRequest.newMyFriendsRequest(accessToken, new GraphRequest.GraphJSONArrayCallback() {
 
             // this method is called from the main thread, so... if it takes too long to process,
@@ -188,18 +220,25 @@ public class FacebookManager {
 
 
 
-    public static void testAsyncCall(final Set<ExceptionChangeListener> exceptionChangeListeners) {
+    public void testAsyncCall() {
         GraphRequest request = GraphRequest.newMyFriendsRequest(accessToken, new GraphRequest.GraphJSONArrayCallback() {
             @Override
             public void onCompleted(JSONArray jsonArray, GraphResponse graphResponse) {
                 // request successfully returned
                 if (graphResponse.getError() == null) {
-                    Log.d("response length: ", Integer.toString(jsonArray.length()));
                     Set<Friend> friends = new TreeSet<>(new Friend.NameComparator());
-                    for (ExceptionChangeListener listener : exceptionChangeListeners) {
-                        listener.onExceptionsChanged();
+                    for(int i = 0; i < jsonArray.length(); i++) {
+                        try {
+                            JSONObject user = jsonArray.getJSONObject(i);
+                            String name = user.getString("name");
+                            String id = user.getString("id");
+                            String imageUrl = user.getString("picture");
+                            Friend friend = new Friend(Long.parseLong(id), name, imageUrl);
+                            friends.add(friend);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
-
                     friendListListener.onFirstAppStart(friends);
                 }
             }
@@ -213,7 +252,7 @@ public class FacebookManager {
 
 
 
-    public static long getProfileId() {
+    public long getProfileId() {
         if (profile == null) {
             profile = Profile.getCurrentProfile();
         }
@@ -226,7 +265,7 @@ public class FacebookManager {
     }
 
 
-    public static boolean isUserLoggedIn() {
+    public boolean isUserLoggedIn() {
         synchronized (syncObject) {
             if (accessToken == null) {
                 accessToken = AccessToken.getCurrentAccessToken();
@@ -236,22 +275,22 @@ public class FacebookManager {
     }
 
 
-    public static void onAppKilled() {
+    public void onAppKilled() {
         tokenTracker.stopTracking();
         profileTracker.stopTracking();
     }
 
 
-    public static CallbackManager getCallbackManager() {
+    public CallbackManager getCallbackManager() {
         return callbackManager;
     }
 
 
-    public static FacebookCallback<LoginResult> getFacebookCallback() {
+    public FacebookCallback<LoginResult> getFacebookCallback() {
         return facebookCallback;
     }
 
-    public static boolean onActivityResult(int requestCode, int resultCode, Intent data) {
+    public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
         return callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 }

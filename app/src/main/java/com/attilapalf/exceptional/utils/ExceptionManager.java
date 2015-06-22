@@ -73,6 +73,16 @@ public class ExceptionManager {
         return starterId;
     }
 
+
+    public static long getLastKnownId() {
+        if (storedExceptions.isEmpty()) {
+            return starterId;
+        }
+
+        return storedExceptions.get(0).getInstanceId();
+    }
+
+
     public static long getNextId() {
         if (storedExceptions.isEmpty()) {
             return starterId;

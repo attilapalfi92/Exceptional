@@ -7,6 +7,7 @@ import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.model.ExceptionType;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -53,7 +54,7 @@ public class ExceptionFactory {
         Exception e = new Exception();
         e.setFromWho(fromWho);
         e.setToWho(toWho);
-        e.setDate(Calendar.getInstance());
+        e.setDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
         e.setInstanceId(instanceId);
         e.setExceptionType(type);
 

@@ -29,7 +29,7 @@ public class FbLoginFragment extends Fragment implements FacebookManager.LoginSu
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_fb_login, container, false);
 
-        FacebookManager.registerLoginSuccessHandler(this);
+        FacebookManager.getInstance().registerLoginSuccessHandler(this);
 
         LoginButton loginButton = (LoginButton) view.findViewById(R.id.login_button);
         loginButton.setReadPermissions("user_friends");
@@ -37,8 +37,8 @@ public class FbLoginFragment extends Fragment implements FacebookManager.LoginSu
         loginButton.setFragment(this);
 
         loginButton.setReadPermissions("user_friends");
-        loginButton.registerCallback(FacebookManager.getCallbackManager(),
-                FacebookManager.getFacebookCallback());
+        loginButton.registerCallback(FacebookManager.getInstance().getCallbackManager(),
+                FacebookManager.getInstance().getFacebookCallback());
 
         welcomeText = (TextView) view.findViewById(R.id.welcomeText);
 
@@ -64,7 +64,7 @@ public class FbLoginFragment extends Fragment implements FacebookManager.LoginSu
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        FacebookManager.onActivityResult(requestCode, resultCode, data);
+        FacebookManager.getInstance().onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

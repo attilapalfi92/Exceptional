@@ -2,6 +2,10 @@ package com.attilapalf.exceptional.rest;
 
 import com.attilapalf.exceptional.model.*;
 import com.attilapalf.exceptional.model.Exception;
+import com.attilapalf.exceptional.rest.messages.AppStartRequestBody;
+import com.attilapalf.exceptional.rest.messages.AppStartResponseBody;
+import com.attilapalf.exceptional.rest.messages.ExceptionSentResponse;
+import com.attilapalf.exceptional.rest.messages.ExceptionWrapper;
 import com.attilapalf.exceptional.ui.main.ExceptionChangeListener;
 import com.attilapalf.exceptional.ui.main.ExceptionSource;
 import com.attilapalf.exceptional.ui.main.FriendChangeListener;
@@ -13,6 +17,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.bind.DateTypeAdapter;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
@@ -25,21 +30,20 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 import retrofit.converter.GsonConverter;
 import retrofit.http.Body;
-import retrofit.http.Header;
-import retrofit.http.Headers;
 import retrofit.http.POST;
+import retrofit.http.PUT;
 
 /**
  * Created by Attila on 2015-06-13.
  */
 public class BackendConnector implements BackendService, ExceptionSource, FriendSource,
-        ConnectionFailedSource {
+        ServerResponseSource {
 
     private String androidId;
     private Gson gson;
     private RestAdapter restAdapter;
     private RestInterface restInterface;
-    private Set<ConnectionFailedListener> connectionListeners;
+    private Set<ServerResponseListener> connectionListeners;
     private Set<ExceptionChangeListener> exceptionChangeListeners;
     private Set<FriendChangeListener> friendChangeListeners;
 
@@ -63,7 +67,6 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
         exceptionChangeListeners = new HashSet<>();
 
         gson = new GsonBuilder()
-                .registerTypeAdapter(Calendar.class, new DateTypeAdapter())
                 .create();
 
         restAdapter = new RestAdapter.Builder()
@@ -76,12 +79,12 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
     }
 
     @Override
-    public boolean addConnectionListener(ConnectionFailedListener listener) {
+    public boolean addConnectionListener(ServerResponseListener listener) {
         return connectionListeners.add(listener);
     }
 
     @Override
-    public boolean removeConnectionListener(ConnectionFailedListener listener) {
+    public boolean removeConnectionListener(ServerResponseListener listener) {
         return connectionListeners.remove(listener);
     }
 
@@ -97,61 +100,28 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
 
 
     public interface RestInterface {
-        @Headers({
-                "Accept: application/json"
-        })
         @POST("/user/firstAppStart")
         void firstAppStart(@Body AppStartRequestBody requestBody, Callback<AppStartResponseBody> cb);
-//        @POST("/user/firstAppStart")
-//        AppStartResponseBody firstAppStart(@Body AppStartRequestBody requestBody);
+
+        @POST("/user/appStart")
+        void appStart(@Body AppStartRequestBody requestBody, Callback<AppStartResponseBody> cb);
+
+        @POST("/exception")
+        void sendException(@Body ExceptionWrapper exceptionWrapper, Callback<ExceptionSentResponse> cb);
     }
 
-
-//    @Override
-//    public void onFirstAppStart(Set<Friend> friendSet) {
-//        long userId = FacebookManager.getProfileId();
-//        List<Long> friendIdList = new ArrayList<>(friendSet.size());
-//        for(Friend f : friendSet) {
-//            friendIdList.add(f.getId());
-//        }
-//        AppStartRequestBody requestBody = new AppStartRequestBody(androidId, userId, friendIdList);
-//
-//        try {
-//            AppStartResponseBody appStartResponseBody = restInterface.firstAppStart(requestBody);
-//
-//            ExceptionManager.saveStarterId(appStartResponseBody.getExceptionIdStarter());
-//            int excSize = appStartResponseBody.getMyExceptions().size();
-//            if (excSize > 0) {
-//                for (int i = 0; i < excSize; i++) {
-//                    ExceptionWrapper eW = appStartResponseBody.getMyExceptions().get(i);
-//                    Exception e = new Exception();
-//                    e.setExceptionType(ExceptionFactory.findById(eW.exceptionTypeId));
-//                    e.setFromWho(eW.getFromWho());
-//                    e.setToWho(eW.getToWho());
-//                    e.setDate(eW.getCreationDate());
-//                    e.setInstanceId(eW.getInstanceId());
-//                    ExceptionManager.addException(e);
-//                }
-//                for (ExceptionChangeListener l : exceptionChangeListeners) {
-//                    l.onExceptionsChanged();
-//                }
-//            }
-//        } catch (java.lang.Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//    }
 
 
 
     @Override
     public void onFirstAppStart(Set<Friend> friendSet) {
-        long userId = FacebookManager.getProfileId();
+        long userId = FacebookManager.getInstance().getProfileId();
         List<Long> friendIdList = new ArrayList<>(friendSet.size());
         for(Friend f : friendSet) {
             friendIdList.add(f.getId());
         }
-        AppStartRequestBody requestBody = new AppStartRequestBody(androidId, userId, friendIdList);
+        AppStartRequestBody requestBody = new AppStartRequestBody(androidId, userId, friendIdList,
+                new ArrayList<Long>());
 
         try {
             restInterface.firstAppStart(requestBody, new Callback<AppStartResponseBody>() {
@@ -163,10 +133,10 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
                         for (int i = 0; i < excSize; i++) {
                             ExceptionWrapper eW = appStartResponseBody.getMyExceptions().get(i);
                             Exception e = new Exception();
-                            e.setExceptionType(ExceptionFactory.findById(eW.exceptionTypeId));
+                            e.setExceptionType(ExceptionFactory.findById(eW.getExceptionTypeId()));
                             e.setFromWho(eW.getFromWho());
                             e.setToWho(eW.getToWho());
-                            e.setDate(eW.getCreationDate());
+                            e.setDate(new Timestamp(eW.getTimeInMillis()));
                             e.setInstanceId(eW.getInstanceId());
                             ExceptionManager.addException(e);
                         }
@@ -178,7 +148,7 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
 
                 @Override
                 public void failure(RetrofitError error) {
-                    for(ConnectionFailedListener l : connectionListeners) {
+                    for(ServerResponseListener l : connectionListeners) {
                         l.onConnectionFailed("Connection to server failed.", error.getMessage());
                     }
                 }
@@ -191,9 +161,76 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
 
 
     @Override
-    public void onAppStart(Set<Friend> friendSet) {
+    public void onAppStart() {
+        Long lastKnownExcId = ExceptionManager.getLastKnownId();
+        List<Long> exceptionIds = new ArrayList<>();
+        exceptionIds.add(lastKnownExcId);
+        long userId = FacebookManager.getInstance().getProfileId();
+        AppStartRequestBody requestBody = new AppStartRequestBody(androidId, userId,
+                new ArrayList<Long>(), exceptionIds);
 
+        try {
+            restInterface.appStart(requestBody, new Callback<AppStartResponseBody>() {
+                @Override
+                public void success(AppStartResponseBody appStartResponseBody, Response response) {
+                    ExceptionManager.saveStarterId(appStartResponseBody.getExceptionIdStarter());
+                    int excSize = appStartResponseBody.getMyExceptions().size();
+                    if (excSize > 0) {
+                        for (int i = 0; i < excSize; i++) {
+                            ExceptionWrapper eW = appStartResponseBody.getMyExceptions().get(i);
+                            Exception e = new Exception();
+                            e.setExceptionType(ExceptionFactory.findById(eW.getExceptionTypeId()));
+                            e.setFromWho(eW.getFromWho());
+                            e.setToWho(eW.getToWho());
+                            e.setDate(new Timestamp(eW.getTimeInMillis()));
+                            e.setInstanceId(eW.getInstanceId());
+                            ExceptionManager.addException(e);
+                        }
+                        for (ExceptionChangeListener l : exceptionChangeListeners) {
+                            l.onExceptionsChanged();
+                        }
+                    }
+               }
+
+                @Override
+                public void failure(RetrofitError error) {
+                    for (ServerResponseListener l : connectionListeners) {
+                        l.onConnectionFailed("Connection to server failed.", error.getMessage());
+                    }
+                }
+            });
+        } catch (java.lang.Exception e) {
+            e.printStackTrace();
+        }
     }
+
+
+    @Override
+    public void sendException(Exception e) {
+        ExceptionWrapper exceptionWrapper = new ExceptionWrapper(e);
+
+        try{
+            restInterface.sendException(exceptionWrapper, new Callback<ExceptionSentResponse>() {
+                @Override
+                public void success(ExceptionSentResponse e, Response response) {
+                    for (ServerResponseListener l : connectionListeners) {
+                        l.onSuccess(e.getShortName() + " successfully sent to " + e.getToWho());
+                    }
+                }
+
+                @Override
+                public void failure(RetrofitError error) {
+                    for (ServerResponseListener l : connectionListeners) {
+                        l.onConnectionFailed("Failed to send the exception to the server.", error.getMessage());
+                    }
+                }
+            });
+
+        } catch (java.lang.Exception exception) {
+
+        }
+    }
+
 
     @Override
     public boolean addExceptionChangeListener(ExceptionChangeListener listener) {

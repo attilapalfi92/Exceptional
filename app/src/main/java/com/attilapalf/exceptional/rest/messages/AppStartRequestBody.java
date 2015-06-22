@@ -1,4 +1,4 @@
-package com.attilapalf.exceptional.rest;
+package com.attilapalf.exceptional.rest.messages;
 
 import java.math.BigInteger;
 import java.util.Collection;
@@ -16,10 +16,11 @@ public class AppStartRequestBody {
     public AppStartRequestBody() {
     }
 
-    public AppStartRequestBody(String deviceId, long userId, List<Long> friendsIds) {
+    public AppStartRequestBody(String deviceId, long userId, List<Long> friendsIds, List<Long> exceptionIds) {
         this.deviceId = deviceId;
         this.userId = userId;
         this.friendsIds = friendsIds;
+        this.exceptionIds = exceptionIds;
     }
 
     public String getDeviceId() {

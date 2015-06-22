@@ -16,36 +16,30 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.rest.BackendConnector;
-import com.attilapalf.exceptional.rest.ConnectionFailedListener;
+import com.attilapalf.exceptional.rest.ServerResponseListener;
 import com.attilapalf.exceptional.ui.LoginActivity;
 import com.attilapalf.exceptional.utils.ExceptionFactory;
 import com.attilapalf.exceptional.utils.ExceptionManager;
 import com.attilapalf.exceptional.utils.FacebookManager;
-import com.attilapalf.exceptional.utils.GpsTracker;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
+import com.attilapalf.exceptional.utils.GpsService;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-public class MainActivity extends AppCompatActivity implements ExceptionSource, ConnectionFailedListener {
+public class MainActivity extends AppCompatActivity implements ExceptionSource, ServerResponseListener {
 
     private Location mLocation;
     private final Set<ExceptionChangeListener> exceptionChangeListeners = new HashSet<>();
     private String androidId;
 
-    GpsTracker gpsTracker;
+    GpsService gpsService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        gpsTracker = new GpsTracker(getApplicationContext());
+        gpsService = new GpsService(getApplicationContext());
 
         BackendConnector.getInstance().addConnectionListener(this);
 
@@ -62,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements ExceptionSource, 
     protected void onResume() {
         super.onResume();
 
-        if(!FacebookManager.isUserLoggedIn()) {
+        if(!FacebookManager.getInstance().isUserLoggedIn()) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }
@@ -124,18 +118,18 @@ public class MainActivity extends AppCompatActivity implements ExceptionSource, 
 
 
     public void throwMeExcClicked(View view) {
-        Exception e = ExceptionFactory.createRandomException(FacebookManager.getProfileId(),
-                FacebookManager.getProfileId(), ExceptionManager.getNextId());
-
-        if (gpsTracker.canGetLocation()) {
-            mLocation = gpsTracker.getLocation();
+        if (gpsService.canGetLocation()) {
+            mLocation = gpsService.getLocation();
 
         }
 
-        if (!gpsTracker.canGetLocation() && mLocation == null) {
-            gpsTracker.showSettingsAlert();
+        if (!gpsService.canGetLocation() && mLocation == null) {
+            gpsService.showSettingsAlert();
 
         } else {
+            Exception e = ExceptionFactory.createRandomException(FacebookManager.getInstance().getProfileId(),
+                    FacebookManager.getInstance().getProfileId(), ExceptionManager.getNextId());
+
             e.setLongitude(mLocation.getLongitude());
             e.setLatitude(mLocation.getLatitude());
             ExceptionManager.addException(e);
@@ -143,6 +137,8 @@ public class MainActivity extends AppCompatActivity implements ExceptionSource, 
             for (ExceptionChangeListener listener : exceptionChangeListeners) {
                 listener.onExceptionsChanged();
             }
+
+            BackendConnector.getInstance().sendException(e);
 
             String data =
                     "Description: " + e.getDescription() + "\n\n" +
@@ -162,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements ExceptionSource, 
 
 
     public void asyncTestBtnClicked(View view) {
-        FacebookManager.testAsyncCall(exceptionChangeListeners);
+        FacebookManager.getInstance().testAsyncCall();
     }
 
 
@@ -178,6 +174,11 @@ public class MainActivity extends AppCompatActivity implements ExceptionSource, 
 
     @Override
     public void onConnectionFailed(String what, String why) {
-        Toast.makeText(this, what + " " + why, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, what + " " + why, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onSuccess(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

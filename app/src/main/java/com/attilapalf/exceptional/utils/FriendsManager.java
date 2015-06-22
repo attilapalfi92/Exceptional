@@ -86,12 +86,12 @@ public class FriendsManager implements FacebookManager.FriendListListener, Backe
 
     @Override
     public void onAppStart(Set<Friend> friendSet) {
-        //synchronized (memoryCacheSyncObj) {
-            friendSet.removeAll(storedFriends);
+        // removing known friends from all friends
+        friendSet.removeAll(storedFriends);
+        // saving the rest of the all friends (these are the new ones)
+        saveFriends(friendSet);
 
-            // TODO: send new facebookFriends to backend database
-            backendService.onAppStart(friendSet);
-        //}
+        backendService.onAppStart();
     }
 
 
