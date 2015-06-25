@@ -8,6 +8,9 @@ import com.attilapalf.exceptional.model.*;
 import com.attilapalf.exceptional.rest.BackendServiceUser;
 import com.attilapalf.exceptional.rest.BackendService;
 
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -28,7 +31,7 @@ public class FriendsManager implements FacebookManager.FriendListListener, Backe
 
 //    private final Set<Friend> storedFriends = Collections.synchronizedSet(
 //            new TreeSet<Friend>(new Friend.NameComparator()));
-    private final Set<Friend> storedFriends = new TreeSet<>(new Friend.NameComparator());
+    private final List<Friend> storedFriends = new LinkedList<>();
 
 
     /**
@@ -69,6 +72,7 @@ public class FriendsManager implements FacebookManager.FriendListListener, Backe
                 storedFriends.add(f);
             }
         //}
+        //Collections.sort(storedFriends, new Friend.NameComparator());
     }
 
 
@@ -89,39 +93,13 @@ public class FriendsManager implements FacebookManager.FriendListListener, Backe
         // removing known friends from all friends
         friendSet.removeAll(storedFriends);
         // saving the rest of the all friends (these are the new ones)
-        saveFriends(friendSet);
+        if (!friendSet.isEmpty()) {
+            saveFriends(friendSet);
+            Collections.sort(storedFriends, new Friend.NameComparator());
+        }
 
         backendService.onAppStart();
     }
-
-
-
-//    public void addFacebookFriends(Set<Friend> facebookFriends) {
-//        Set<Friend> storedTemporary = new TreeSet<>(new Friend.NameComparator());
-//        storedTemporary.addAll(storedFriends);
-//        // these have to be deleted
-//        storedTemporary.removeAll(facebookFriends);
-//
-//        Set<Friend> fbTemporaryFriends = new TreeSet<>(new Friend.NameComparator());
-//        fbTemporaryFriends.addAll(facebookFriends);
-//        // these have to be added to the stored friends
-//        fbTemporaryFriends.removeAll(storedFriends);
-//
-//        // removing deleted friends
-//        deleteFriends(storedTemporary);
-//
-//        // adding new friends
-//        saveFriends(fbTemporaryFriends);
-//
-//        // TODO: send facebookFriends to backend database
-
-//
-//        // TODO: notify FriendsFragment's adapter about the data set change
-//    }
-
-
-
-
 
 
 
@@ -150,5 +128,9 @@ public class FriendsManager implements FacebookManager.FriendListListener, Backe
     @Override
     public void addBackendService(BackendService service) {
         backendService = service;
+    }
+
+    public List<Friend> getStoredFriends() {
+        return storedFriends;
     }
 }

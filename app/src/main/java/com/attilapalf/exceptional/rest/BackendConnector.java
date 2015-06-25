@@ -65,6 +65,7 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
     private BackendConnector(){
         connectionListeners = new HashSet<>();
         exceptionChangeListeners = new HashSet<>();
+        friendChangeListeners = new HashSet<>();
 
         gson = new GsonBuilder()
                 .create();

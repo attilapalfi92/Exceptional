@@ -2,11 +2,16 @@ package com.attilapalf.exceptional.ui.main;
 
 
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.location.Location;
 import android.provider.Settings;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,6 +28,8 @@ import com.attilapalf.exceptional.utils.ExceptionManager;
 import com.attilapalf.exceptional.utils.FacebookManager;
 import com.attilapalf.exceptional.utils.GpsService;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -49,6 +56,23 @@ public class MainActivity extends AppCompatActivity implements ExceptionSource, 
         MainPagerAdapter adapter = new MainPagerAdapter(getSupportFragmentManager());
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
         pager.setAdapter(adapter);
+
+        // write release hash key as debug message
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(
+                    "com.attilapalf.exceptional",
+                    PackageManager.GET_SIGNATURES);
+            for (Signature signature : info.signatures) {
+                MessageDigest md = MessageDigest.getInstance("SHA");
+                md.update(signature.toByteArray());
+                String hash = Base64.encodeToString(md.digest(), Base64.DEFAULT);
+                Log.d("KeyHash:", hash);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -118,15 +142,13 @@ public class MainActivity extends AppCompatActivity implements ExceptionSource, 
 
 
     public void throwMeExcClicked(View view) {
-        if (gpsService.canGetLocation()) {
-            mLocation = gpsService.getLocation();
-
-        }
 
         if (!gpsService.canGetLocation() && mLocation == null) {
-            gpsService.showSettingsAlert();
+            Toast.makeText(this, "Can't get device's location.\nPlease enable location services.", Toast.LENGTH_SHORT).show();
 
         } else {
+
+            mLocation = gpsService.getLocation();
             Exception e = ExceptionFactory.createRandomException(FacebookManager.getInstance().getProfileId(),
                     FacebookManager.getInstance().getProfileId(), ExceptionManager.getNextId());
 

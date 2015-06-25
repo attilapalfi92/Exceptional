@@ -4,31 +4,25 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/excName"
+        android:id="@+id/friendName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@+id/label" >
     </TextView>
 
     <TextView
-        android:id="@+id/excDesc"
+        android:id="@+id/friendId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@+id/label" >
     </TextView>
 
     <TextView
-        android:id="@+id/excFromWho"
+        android:id="@+id/friendImgUrl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@+id/label" >
     </TextView>
 
-    <TextView
-        android:id="@+id/excDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@+id/label" >
-    </TextView>
 
 </LinearLayout>

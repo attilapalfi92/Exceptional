@@ -56,7 +56,7 @@ public class GpsService extends Service implements LocationListener {
             if (!isNetworkEnabled) {
                 // no network provider is enabled
             } else {
-                this.canGetLocation = true;
+                canGetLocation = true;
                 // First get location from Network Provider
                 if (isNetworkEnabled) {
                     locationManager.requestLocationUpdates(
@@ -97,7 +97,13 @@ public class GpsService extends Service implements LocationListener {
      * @return boolean
      * */
     public boolean canGetLocation() {
-        return this.canGetLocation;
+        // getting network status
+        isNetworkEnabled = locationManager
+                .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+        canGetLocation = isNetworkEnabled;
+
+        return canGetLocation;
     }
 
 

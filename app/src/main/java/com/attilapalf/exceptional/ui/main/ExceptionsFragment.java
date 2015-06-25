@@ -26,7 +26,7 @@ import java.util.List;
 public class ExceptionsFragment extends ListFragment implements //OnSharedPreferenceChangeListener,
         ExceptionChangeListener {
 
-    private MyAdapter adapter;
+    private ExceptionAdapter adapter;
 
 
 
@@ -36,25 +36,17 @@ public class ExceptionsFragment extends ListFragment implements //OnSharedPrefer
         if (getActivity() instanceof MainActivity) {
             ((ExceptionSource)getActivity()).addExceptionChangeListener(this);
         }
+
         BackendConnector.getInstance().addExceptionChangeListener(this);
-
-//        SharedPreferences sharedPreferences = activity.getSharedPreferences(getString(R.string.exception_preferences),
-//                Context.MODE_PRIVATE);
-//        sharedPreferences.registerOnSharedPreferenceChangeListener(this);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
         List<Exception> values = ExceptionManager.getExceptionList();
-        adapter = new MyAdapter(getActivity().getApplicationContext(), values);
-        //adapter.sort(new Exception.DateComparator());
+        adapter = new ExceptionAdapter(getActivity().getApplicationContext(), values);
         onExceptionsChanged();
         setListAdapter(adapter);
     }
@@ -83,16 +75,15 @@ public class ExceptionsFragment extends ListFragment implements //OnSharedPrefer
 
     @Override
     public void onExceptionsChanged() {
-        String currentThread = Long.toString(Thread.currentThread().getId());
-        Log.d("Current thread id: ", currentThread);
         adapter.notifyDataSetChanged();
     }
 
-    private static class MyAdapter extends ArrayAdapter<com.attilapalf.exceptional.model.Exception> {
+
+    private static class ExceptionAdapter extends ArrayAdapter<Exception> {
         private Context context;
         private List<Exception> values;
 
-        public MyAdapter(Context context, List<Exception> values) {
+        public ExceptionAdapter(Context context, List<Exception> values) {
             super(context, R.layout.exc_row_layout, values);
             this.context = context;
             this.values = values;
@@ -105,7 +96,6 @@ public class ExceptionsFragment extends ListFragment implements //OnSharedPrefer
             RowViewHolder viewHolder;
 
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            //View rowView = inflater.inflate(R.layout.exc_row_layout, parent, false);
             if (convertView == null) {
                 convertView = inflater.inflate(R.layout.exc_row_layout, parent, false);
                 viewHolder = new RowViewHolder(convertView);
