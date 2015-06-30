@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements ExceptionSource, 
 
     GpsService gpsService;
 
+    // TODO: Check for Google Play Services APK
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements ExceptionSource, 
 
         gpsService = new GpsService(getApplicationContext());
 
-        BackendConnector.getInstance().addConnectionListener(this);
+        BackendConnector.getInstance(getApplicationContext()).addConnectionListener(this);
 
         androidId = Settings.Secure.getString(getApplicationContext()
                 .getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -76,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements ExceptionSource, 
     }
 
 
+    // TODO: Check for Google Play Services APK
     @Override
     protected void onResume() {
         super.onResume();
@@ -90,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements ExceptionSource, 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        BackendConnector.getInstance().removeConnectionListener(this);
+        BackendConnector.getInstance(getApplicationContext()).removeConnectionListener(this);
     }
 
     @Override
@@ -160,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements ExceptionSource, 
                 listener.onExceptionsChanged();
             }
 
-            BackendConnector.getInstance().sendException(e);
+            BackendConnector.getInstance(getApplicationContext()).sendException(e);
 
             String data =
                     "Description: " + e.getDescription() + "\n\n" +

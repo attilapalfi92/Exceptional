@@ -3,7 +3,13 @@
     package="com.attilapalf.exceptional" >
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.SEND" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <permission android:name="com.attilapalf.exceptional.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.attilapalf.exceptional.permission.C2D_MESSAGE" />
 
     <application
         android:name=".MyApplication"
@@ -11,6 +17,26 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+
+        <receiver
+            android:name=".utils.GcmBroadcastReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <category android:name="com.attilapalf.exceptional" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".utils.GcmMessageHandler"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+
+
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
@@ -34,6 +60,7 @@
             android:name=".ui.LoginActivity"
             android:label="@string/title_activity_login" >
         </activity>
+
     </application>
 
 </manifest>

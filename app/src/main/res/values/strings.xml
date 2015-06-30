@@ -19,4 +19,6 @@
     <string name="exception_preferences">com.attilapalf.exceptional.exception.ExceptionPreferences</string>
     <string name="friends_preferences">com.attilapalf.exceptional.exception.FriendsPreferences</string>
     <string name="new_exception_text">You got a new Exception!</string>
+    
+    <string name="project_number">947608408958</string>
 </resources>

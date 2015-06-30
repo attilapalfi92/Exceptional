@@ -25,7 +25,7 @@ public class MyApplication extends Application {
         String aId = Settings.Secure.getString(getApplicationContext()
                 .getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        friendsPreference.addBackendService(BackendConnector.getInstance().setAndroidId(aId));
+        friendsPreference.addBackendService(BackendConnector.getInstance(getApplicationContext()).setAndroidId(aId));
 
         FacebookManager.getInstance().registerFriendListListener(friendsPreference);
         FacebookManager.getInstance().onAppStart(this);

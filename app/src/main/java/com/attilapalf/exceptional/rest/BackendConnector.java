@@ -1,5 +1,9 @@
 package com.attilapalf.exceptional.rest;
 
+import android.content.Context;
+import android.os.AsyncTask;
+
+import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.*;
 import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.rest.messages.AppStartRequestBody;
@@ -13,13 +17,13 @@ import com.attilapalf.exceptional.ui.main.FriendSource;
 import com.attilapalf.exceptional.utils.ExceptionFactory;
 import com.attilapalf.exceptional.utils.ExceptionManager;
 import com.attilapalf.exceptional.utils.FacebookManager;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.internal.bind.DateTypeAdapter;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.List;
@@ -31,13 +35,17 @@ import retrofit.client.Response;
 import retrofit.converter.GsonConverter;
 import retrofit.http.Body;
 import retrofit.http.POST;
-import retrofit.http.PUT;
 
 /**
  * Created by Attila on 2015-06-13.
  */
 public class BackendConnector implements BackendService, ExceptionSource, FriendSource,
         ServerResponseSource {
+
+    private final Context context;
+    private final String projectNumber;
+    private GoogleCloudMessaging googleCloudMessaging;
+    private String registrationId;
 
     private String androidId;
     private Gson gson;
@@ -49,9 +57,9 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
 
     private static BackendConnector instance;
 
-    public static BackendConnector getInstance() {
+    public static BackendConnector getInstance(Context context) {
         if (instance == null) {
-            instance = new BackendConnector();
+            instance = new BackendConnector(context);
         }
 
         return instance;
@@ -62,7 +70,11 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
         return this;
     }
 
-    private BackendConnector(){
+    private BackendConnector(Context context){
+        this.context = context;
+
+        projectNumber = context.getString(R.string.project_number);
+
         connectionListeners = new HashSet<>();
         exceptionChangeListeners = new HashSet<>();
         friendChangeListeners = new HashSet<>();
@@ -114,8 +126,49 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
 
 
 
+
     @Override
     public void onFirstAppStart(Set<Friend> friendSet) {
+        backendFirstAppStart(friendSet);
+        gcmFirstAppStart();
+    }
+
+
+
+    private void gcmFirstAppStart() {
+        new AsyncTask<Void, Void, String>() {
+
+            String message;
+
+            @Override
+            protected String doInBackground(Void... params) {
+                googleCloudMessaging = GoogleCloudMessaging.getInstance(context);
+                try {
+
+                    registrationId = googleCloudMessaging.register(projectNumber);
+                    message = "Device registered, ID: " + registrationId;
+
+                } catch (IOException e) {
+                    message = "Error: " + e.getMessage();
+                }
+
+                return message;
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+
+                for(ServerResponseListener l : connectionListeners) {
+                    l.onSuccess(message);
+                }
+            }
+
+        }.execute(null, null, null);
+    }
+
+
+
+    private void backendFirstAppStart(Set<Friend> friendSet) {
         long userId = FacebookManager.getInstance().getProfileId();
         List<Long> friendIdList = new ArrayList<>(friendSet.size());
         for(Friend f : friendSet) {
@@ -157,8 +210,8 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
         } catch (java.lang.Exception e) {
             e.printStackTrace();
         }
-
     }
+
 
 
     @Override
