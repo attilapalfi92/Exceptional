@@ -1,7 +1,6 @@
 package com.attilapalf.exceptional;
 
 import android.app.Application;
-import android.content.SharedPreferences;
 import android.provider.Settings;
 
 import com.attilapalf.exceptional.rest.BackendConnector;
@@ -19,17 +18,22 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        ExceptionManager.initalize(getApplicationContext());
+        if (!ExceptionFactory.isInitialized()) {
+            ExceptionFactory.initialize(getApplicationContext());
+        }
+        if (!ExceptionManager.getInstance().isInitialized()) {
+            ExceptionManager.getInstance().initialize(getApplicationContext());
+        }
         FriendsManager friendsPreference = FriendsManager.getInstance(getApplicationContext());
 
         String aId = Settings.Secure.getString(getApplicationContext()
                 .getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        friendsPreference.addBackendService(BackendConnector.getInstance(getApplicationContext()).setAndroidId(aId));
+        BackendConnector.init(getApplicationContext());
+        friendsPreference.addBackendService(BackendConnector.getInstance().setAndroidId(aId));
 
         FacebookManager.getInstance().registerFriendListListener(friendsPreference);
         FacebookManager.getInstance().onAppStart(this);
-        ExceptionFactory.initialize(getApplicationContext());
     }
 
     @Override

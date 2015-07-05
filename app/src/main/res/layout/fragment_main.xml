@@ -42,7 +42,7 @@
         android:layout_gravity="center_horizontal|bottom"
         android:layout_above="@+id/button4"
         android:layout_alignStart="@+id/throwExcBtn"
-        android:onClick="throwMeExcClicked" />
+        android:onClick="giveMeExcClicked" />
 
     <Button
         android:layout_width="200dp"

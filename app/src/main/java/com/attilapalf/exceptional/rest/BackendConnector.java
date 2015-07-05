@@ -8,6 +8,8 @@ import com.attilapalf.exceptional.model.*;
 import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.rest.messages.AppStartRequestBody;
 import com.attilapalf.exceptional.rest.messages.AppStartResponseBody;
+import com.attilapalf.exceptional.rest.messages.BaseRequestBody;
+import com.attilapalf.exceptional.rest.messages.ExceptionRefreshResponse;
 import com.attilapalf.exceptional.rest.messages.ExceptionSentResponse;
 import com.attilapalf.exceptional.rest.messages.ExceptionWrapper;
 import com.attilapalf.exceptional.ui.main.ExceptionChangeListener;
@@ -34,6 +36,7 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 import retrofit.converter.GsonConverter;
 import retrofit.http.Body;
+import retrofit.http.GET;
 import retrofit.http.POST;
 
 /**
@@ -55,13 +58,21 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
     private Set<ExceptionChangeListener> exceptionChangeListeners;
     private Set<FriendChangeListener> friendChangeListeners;
 
+    private AppStartRequestBody requestBody;
+
+    // http://188.36.23.85:8090
+    private final String backendAddress = "http://188.36.23.85:8090";
+
     private static BackendConnector instance;
 
-    public static BackendConnector getInstance(Context context) {
-        if (instance == null) {
-            instance = new BackendConnector(context);
-        }
 
+    public static void init(Context context) {
+        instance = new BackendConnector(context);
+    }
+
+
+    // TODO: separate to init and getInstance
+    public static BackendConnector getInstance() {
         return instance;
     }
 
@@ -83,8 +94,7 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
                 .create();
 
         restAdapter = new RestAdapter.Builder()
-                .setEndpoint("http://188.36.23.85:8090")
-                //.setEndpoint("http://localhost:8090")
+                .setEndpoint(backendAddress)
                 .setConverter(new GsonConverter((gson)))
                 .build();
 
@@ -121,21 +131,89 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
 
         @POST("/exception")
         void sendException(@Body ExceptionWrapper exceptionWrapper, Callback<ExceptionSentResponse> cb);
+
+        @GET("/exception")
+        void refreshExceptions(@Body BaseRequestBody requestBody, Callback<ExceptionRefreshResponse> cb);
     }
 
 
+
+    public void refreshExceptions() {
+        try {
+            // TODO: finish
+            //restInterface.refreshExceptions();
+        } catch (java.lang.Exception e) {
+
+        }
+    }
 
 
 
     @Override
+    public void onAppStart() {
+        Long lastKnownExcId = ExceptionManager.getInstance().getLastKnownId();
+        List<Long> exceptionIds = new ArrayList<>();
+        exceptionIds.add(lastKnownExcId);
+        long userId = FacebookManager.getInstance().getProfileId();
+        AppStartRequestBody requestBody = new AppStartRequestBody(androidId, userId,
+                new ArrayList<Long>(), exceptionIds);
+
+        try {
+            restInterface.appStart(requestBody, new Callback<AppStartResponseBody>() {
+                @Override
+                public void success(AppStartResponseBody appStartResponseBody, Response response) {
+                    ExceptionManager.getInstance().saveStarterId(appStartResponseBody.getExceptionIdStarter());
+                    int excSize = appStartResponseBody.getMyExceptions().size();
+                    if (excSize > 0) {
+                        for (int i = 0; i < excSize; i++) {
+                            ExceptionWrapper eW = appStartResponseBody.getMyExceptions().get(i);
+                            Exception e = new Exception();
+                            e.setExceptionType(ExceptionFactory.findById(eW.getExceptionTypeId()));
+                            e.setFromWho(eW.getFromWho());
+                            e.setToWho(eW.getToWho());
+                            e.setDate(new Timestamp(eW.getTimeInMillis()));
+                            e.setInstanceId(eW.getInstanceId());
+                            ExceptionManager.getInstance().addException(e);
+                        }
+                        for (ExceptionChangeListener l : exceptionChangeListeners) {
+                            l.onExceptionsChanged();
+                        }
+                    }
+                }
+
+                @Override
+                public void failure(RetrofitError error) {
+                    for (ServerResponseListener l : connectionListeners) {
+                        l.onConnectionFailed("Connection to server failed.", error.getMessage());
+                    }
+                }
+            });
+        } catch (java.lang.Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @Override
     public void onFirstAppStart(Set<Friend> friendSet) {
-        backendFirstAppStart(friendSet);
+        long userId = FacebookManager.getInstance().getProfileId();
+        List<Long> friendIdList = new ArrayList<>(friendSet.size());
+        for(Friend f : friendSet) {
+            friendIdList.add(f.getId());
+        }
+
+        requestBody = new AppStartRequestBody();
+        requestBody.setDeviceId(androidId);
+        requestBody.setUserId(userId);
+        requestBody.setFriendsIds(friendIdList);
+        requestBody.setExceptionIds(new ArrayList<Long>());
+
         gcmFirstAppStart();
     }
 
 
-
-    private void gcmFirstAppStart() {
+    // TODO: private
+    public void gcmFirstAppStart() {
         new AsyncTask<Void, Void, String>() {
 
             String message;
@@ -158,6 +236,11 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
             @Override
             protected void onPostExecute(String s) {
 
+                if (registrationId != null) {
+                    requestBody.setRegId(registrationId);
+                    backendFirstAppStart();
+                }
+
                 for(ServerResponseListener l : connectionListeners) {
                     l.onSuccess(message);
                 }
@@ -168,20 +251,12 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
 
 
 
-    private void backendFirstAppStart(Set<Friend> friendSet) {
-        long userId = FacebookManager.getInstance().getProfileId();
-        List<Long> friendIdList = new ArrayList<>(friendSet.size());
-        for(Friend f : friendSet) {
-            friendIdList.add(f.getId());
-        }
-        AppStartRequestBody requestBody = new AppStartRequestBody(androidId, userId, friendIdList,
-                new ArrayList<Long>());
-
+    private void backendFirstAppStart() {
         try {
             restInterface.firstAppStart(requestBody, new Callback<AppStartResponseBody>() {
                 @Override
                 public void success(AppStartResponseBody appStartResponseBody, Response response) {
-                    ExceptionManager.saveStarterId(appStartResponseBody.getExceptionIdStarter());
+                    ExceptionManager.getInstance().saveStarterId(appStartResponseBody.getExceptionIdStarter());
                     int excSize = appStartResponseBody.getMyExceptions().size();
                     if (excSize > 0) {
                         for (int i = 0; i < excSize; i++) {
@@ -192,59 +267,13 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
                             e.setToWho(eW.getToWho());
                             e.setDate(new Timestamp(eW.getTimeInMillis()));
                             e.setInstanceId(eW.getInstanceId());
-                            ExceptionManager.addException(e);
-                        }
-                        for(ExceptionChangeListener l : exceptionChangeListeners) {
-                            l.onExceptionsChanged();
-                        }
-                    }
-                }
-
-                @Override
-                public void failure(RetrofitError error) {
-                    for(ServerResponseListener l : connectionListeners) {
-                        l.onConnectionFailed("Connection to server failed.", error.getMessage());
-                    }
-                }
-            });
-        } catch (java.lang.Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-
-
-    @Override
-    public void onAppStart() {
-        Long lastKnownExcId = ExceptionManager.getLastKnownId();
-        List<Long> exceptionIds = new ArrayList<>();
-        exceptionIds.add(lastKnownExcId);
-        long userId = FacebookManager.getInstance().getProfileId();
-        AppStartRequestBody requestBody = new AppStartRequestBody(androidId, userId,
-                new ArrayList<Long>(), exceptionIds);
-
-        try {
-            restInterface.appStart(requestBody, new Callback<AppStartResponseBody>() {
-                @Override
-                public void success(AppStartResponseBody appStartResponseBody, Response response) {
-                    ExceptionManager.saveStarterId(appStartResponseBody.getExceptionIdStarter());
-                    int excSize = appStartResponseBody.getMyExceptions().size();
-                    if (excSize > 0) {
-                        for (int i = 0; i < excSize; i++) {
-                            ExceptionWrapper eW = appStartResponseBody.getMyExceptions().get(i);
-                            Exception e = new Exception();
-                            e.setExceptionType(ExceptionFactory.findById(eW.getExceptionTypeId()));
-                            e.setFromWho(eW.getFromWho());
-                            e.setToWho(eW.getToWho());
-                            e.setDate(new Timestamp(eW.getTimeInMillis()));
-                            e.setInstanceId(eW.getInstanceId());
-                            ExceptionManager.addException(e);
+                            ExceptionManager.getInstance().addException(e);
                         }
                         for (ExceptionChangeListener l : exceptionChangeListeners) {
                             l.onExceptionsChanged();
                         }
                     }
-               }
+                }
 
                 @Override
                 public void failure(RetrofitError error) {
@@ -257,6 +286,10 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
             e.printStackTrace();
         }
     }
+
+
+
+
 
 
     @Override

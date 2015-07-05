@@ -19,10 +19,12 @@ import java.util.TreeSet;
  * Created by Attila on 2015-06-09.
  */
 public class ExceptionFactory {
-    private static List<ExceptionType> exceptionTypesByName = new ArrayList<>();
-    private static List<ExceptionType> exceptionTypesById = new ArrayList<>();
+    private static List<ExceptionType> exceptionTypesByName;
+    private static List<ExceptionType> exceptionTypesById;
 
     public static void initialize(Context context) {
+        exceptionTypesByName = new ArrayList<>();
+        exceptionTypesById = new ArrayList<>();
         String[] strings = context.getResources().getStringArray(R.array.exceptions);
 
         for(String s : strings) {
@@ -47,7 +49,7 @@ public class ExceptionFactory {
     }
 
 
-    public static Exception createRandomException(long fromWho, long toWho, long instanceId) {
+    public static Exception createRandomException(long fromWho, long toWho) {
         int random = (int)(Math.random() * exceptionTypesByName.size());
         ExceptionType type = exceptionTypesByName.get(random);
 
@@ -55,7 +57,6 @@ public class ExceptionFactory {
         e.setFromWho(fromWho);
         e.setToWho(toWho);
         e.setDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-        e.setInstanceId(instanceId);
         e.setExceptionType(type);
 
         return e;
@@ -63,6 +64,10 @@ public class ExceptionFactory {
 
     public static ExceptionType findById(int id) {
         return exceptionTypesById.get(id);
+    }
+
+    public static boolean isInitialized() {
+        return exceptionTypesById != null;
     }
 
 }

@@ -33,7 +33,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.Set;
 
-public class MainActivity extends AppCompatActivity implements ExceptionSource, ServerResponseListener {
+public class MainActivity extends AppCompatActivity implements ServerResponseListener {
 
     private Location mLocation;
     private final Set<ExceptionChangeListener> exceptionChangeListeners = new HashSet<>();
@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements ExceptionSource, 
 
         gpsService = new GpsService(getApplicationContext());
 
-        BackendConnector.getInstance(getApplicationContext()).addConnectionListener(this);
+        BackendConnector.getInstance().addConnectionListener(this);
 
         androidId = Settings.Secure.getString(getApplicationContext()
                 .getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements ExceptionSource, 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        BackendConnector.getInstance(getApplicationContext()).removeConnectionListener(this);
+        BackendConnector.getInstance().removeConnectionListener(this);
     }
 
     @Override
@@ -142,8 +142,7 @@ public class MainActivity extends AppCompatActivity implements ExceptionSource, 
     }
 
 
-
-    public void throwMeExcClicked(View view) {
+    public void giveMeExcClicked(View view) {
 
         if (!gpsService.canGetLocation() && mLocation == null) {
             Toast.makeText(this, "Can't get device's location.\nPlease enable location services.", Toast.LENGTH_SHORT).show();
@@ -151,18 +150,20 @@ public class MainActivity extends AppCompatActivity implements ExceptionSource, 
         } else {
 
             mLocation = gpsService.getLocation();
+            // TODO: giving exception to myself: not setting the instance ID, and not saving the exception here.
+            // TODO: save the exception when in arrives from the backend
             Exception e = ExceptionFactory.createRandomException(FacebookManager.getInstance().getProfileId(),
-                    FacebookManager.getInstance().getProfileId(), ExceptionManager.getNextId());
+                    FacebookManager.getInstance().getProfileId());
 
             e.setLongitude(mLocation.getLongitude());
             e.setLatitude(mLocation.getLatitude());
-            ExceptionManager.addException(e);
+            //ExceptionManager.addException(e);
 
-            for (ExceptionChangeListener listener : exceptionChangeListeners) {
-                listener.onExceptionsChanged();
-            }
+//            for (ExceptionChangeListener listener : exceptionChangeListeners) {
+//                listener.onExceptionsChanged();
+//            }
 
-            BackendConnector.getInstance(getApplicationContext()).sendException(e);
+            BackendConnector.getInstance().sendException(e);
 
             String data =
                     "Description: " + e.getDescription() + "\n\n" +
@@ -182,19 +183,10 @@ public class MainActivity extends AppCompatActivity implements ExceptionSource, 
 
 
     public void asyncTestBtnClicked(View view) {
-        FacebookManager.getInstance().testAsyncCall();
+//        FacebookManager.getInstance().testAsyncCall();
+        BackendConnector.getInstance().gcmFirstAppStart();
     }
 
-
-    @Override
-    public boolean addExceptionChangeListener(ExceptionChangeListener listener) {
-        return exceptionChangeListeners.add(listener);
-    }
-
-    @Override
-    public boolean removeExceptionChangeListener(ExceptionChangeListener listener) {
-        return exceptionChangeListeners.remove(listener);
-    }
 
     @Override
     public void onConnectionFailed(String what, String why) {

@@ -5,8 +5,11 @@ import android.content.SharedPreferences;
 
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
+import com.attilapalf.exceptional.ui.main.ExceptionChangeListener;
+import com.attilapalf.exceptional.ui.main.ExceptionSource;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -16,30 +19,51 @@ import java.util.Set;
 /**
  * Created by Attila on 2015-06-08.
  */
-public class ExceptionManager {
+public class ExceptionManager implements ExceptionSource {
 
     /** This is the application's preferences */
-    private static SharedPreferences sharedPreferences;
+    private SharedPreferences sharedPreferences;
 
     /** This is the application's sharedPreferences editor*/
-    private static SharedPreferences.Editor editor;
+    private SharedPreferences.Editor editor;
 
-    private static String PREFS_NAME;
+    private String PREFS_NAME;
 
-    private static long starterId = 0;
+    private long starterId = 0;
+
+    private Set<ExceptionChangeListener> exceptionChangeListeners = new HashSet<>();
 
     /**
      * This LinkedList stores the last 30 exceptions the user got.
      * */
     //private static List<Exception> storedExceptions = Collections.synchronizedList(new LinkedList<Exception>());
-    private static List<Exception> storedExceptions = new LinkedList<Exception>();
-    public static final int STORE_SIZE = Integer.MAX_VALUE;
+    private List<Exception> storedExceptions = new LinkedList<>();
+    public final int STORE_SIZE = Integer.MAX_VALUE;
 
-    public static void initalize(Context context) {
+
+    private static ExceptionManager instance;
+
+    public static ExceptionManager getInstance () {
+        if (instance == null) {
+            instance = new ExceptionManager();
+        }
+
+        return instance;
+    }
+
+    private ExceptionManager() {}
+
+    public void initialize(Context context) {
+        if (!ExceptionFactory.isInitialized()) {
+            ExceptionFactory.initialize(context);
+        }
+
+        getInstance();
+
         PREFS_NAME = context.getString(R.string.exception_preferences);
-        sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(instance.PREFS_NAME, Context.MODE_PRIVATE);
 
-        editor = sharedPreferences.edit();
+        editor = instance.sharedPreferences.edit();
         editor.apply();
 
         Map<String, ?> store = sharedPreferences.getAll();
@@ -51,30 +75,33 @@ public class ExceptionManager {
         for (String s : keyArray) {
             String excJson = (String) store.get(s);
             Exception e = Exception.fromString(excJson);
+            e.setExceptionType(ExceptionFactory.findById(e.getExceptionTypeId()));
             storedExceptions.add(storedExceptions.size(), e);
         }
 
         starterId = sharedPreferences.getLong("starterId", 0);
     }
 
+    public boolean isInitialized() {
+        return sharedPreferences != null;
+    }
 
-
-    public static int exceptionCount() {
+    public int exceptionCount() {
         return storedExceptions.size();
     }
 
-    public static void saveStarterId(long myId) {
+    public void saveStarterId(long myId) {
         starterId = myId;
         editor.putLong("starterId", myId);
         editor.apply();
     }
 
-    public static long getStarterId() {
+    public long getStarterId() {
         return starterId;
     }
 
 
-    public static long getLastKnownId() {
+    public long getLastKnownId() {
         if (storedExceptions.isEmpty()) {
             return starterId;
         }
@@ -83,7 +110,7 @@ public class ExceptionManager {
     }
 
 
-    public static long getNextId() {
+    public long getNextId() {
         if (storedExceptions.isEmpty()) {
             return starterId;
         }
@@ -91,7 +118,8 @@ public class ExceptionManager {
         return storedExceptions.get(0).getInstanceId() + 1;
     }
 
-    public static void addException(Exception e) {
+
+    public void addException(Exception e) {
         if (storedExceptions.size() >= STORE_SIZE) {
             removeLast();
         }
@@ -99,10 +127,14 @@ public class ExceptionManager {
         storedExceptions.add(0, e);
         editor.putString(Long.toString(e.getInstanceId()), e.toString());
         editor.apply();
+
+        for(ExceptionChangeListener listener : exceptionChangeListeners) {
+            listener.onExceptionsChanged();
+        }
     }
 
 
-    private static void removeLast() {
+    private void removeLast() {
         //Exception removed = storedExceptions.removeLast();
         Exception removed = storedExceptions.remove(storedExceptions.size() - 1);
         editor.remove(Long.toString(removed.getInstanceId()));
@@ -110,8 +142,7 @@ public class ExceptionManager {
 
 
 
-
-    public static void removeException(Exception e) {
+    public void removeException(Exception e) {
         editor.remove(Long.toString(e.getInstanceId()));
         editor.apply();
         for (int i = 0; i < storedExceptions.size(); i++) {
@@ -123,7 +154,17 @@ public class ExceptionManager {
     }
 
 
-    public static List<Exception> getExceptionList() {
+    public List<Exception> getExceptionList() {
         return storedExceptions;
+    }
+
+    @Override
+    public boolean addExceptionChangeListener(ExceptionChangeListener listener) {
+        return exceptionChangeListeners.add(listener);
+    }
+
+    @Override
+    public boolean removeExceptionChangeListener(ExceptionChangeListener listener) {
+        return exceptionChangeListeners.remove(listener);
     }
 }

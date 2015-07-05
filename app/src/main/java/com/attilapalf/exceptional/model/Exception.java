@@ -13,12 +13,13 @@ import java.util.Comparator;
  * Created by Attila on 2015-06-08.
  */
 public class Exception {
-    ExceptionType exceptionType;
+    private transient ExceptionType exceptionType;
 
     // TODO: optimize exceptions: to be like on the server side
 
     // exception instance fields
     private long instanceId;
+    private int exceptionTypeId;
     private double longitude;
     private double latitude;
     private Timestamp date;
@@ -83,6 +84,7 @@ public class Exception {
 
     public void setExceptionType(ExceptionType exceptionType) {
         this.exceptionType = exceptionType;
+        exceptionTypeId = exceptionType.getTypeId();
     }
 
     public String getFullName() {
@@ -134,6 +136,10 @@ public class Exception {
     }
 
     public int getExceptionTypeId() {
-        return exceptionType.getTypeId();
+        return exceptionTypeId;
+    }
+
+    public void setExceptionTypeId(int exceptionTypeId) {
+        this.exceptionTypeId = exceptionTypeId;
     }
 }

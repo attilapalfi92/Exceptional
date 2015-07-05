@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,16 +27,31 @@ public class ExceptionsFragment extends ListFragment implements //OnSharedPrefer
 
     private ExceptionAdapter adapter;
 
+    private boolean dataChanged = false;
+    private Object syncObject = new Object();
 
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        synchronized (syncObject) {
+            if (dataChanged) {
+                dataChanged = false;
+                adapter.notifyDataSetChanged();
+            }
+        }
+    }
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         if (getActivity() instanceof MainActivity) {
-            ((ExceptionSource)getActivity()).addExceptionChangeListener(this);
+            //((ExceptionSource)getActivity()).addExceptionChangeListener(this);
         }
 
         BackendConnector.getInstance().addExceptionChangeListener(this);
+        ExceptionManager.getInstance().addExceptionChangeListener(this);
     }
 
 
@@ -45,7 +59,7 @@ public class ExceptionsFragment extends ListFragment implements //OnSharedPrefer
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        List<Exception> values = ExceptionManager.getExceptionList();
+        List<Exception> values = ExceptionManager.getInstance().getExceptionList();
         adapter = new ExceptionAdapter(getActivity().getApplicationContext(), values);
         onExceptionsChanged();
         setListAdapter(adapter);
@@ -65,9 +79,12 @@ public class ExceptionsFragment extends ListFragment implements //OnSharedPrefer
     @Override
     public void onDetach() {
         if (getActivity() instanceof MainActivity) {
-            ((ExceptionSource)getActivity()).removeExceptionChangeListener(this);
+            //((ExceptionSource)getActivity()).removeExceptionChangeListener(this);
         }
+
         BackendConnector.getInstance().removeExceptionChangeListener(this);
+        ExceptionManager.getInstance().removeExceptionChangeListener(this);
+
         super.onDetach();
     }
 
@@ -75,7 +92,11 @@ public class ExceptionsFragment extends ListFragment implements //OnSharedPrefer
 
     @Override
     public void onExceptionsChanged() {
-        adapter.notifyDataSetChanged();
+        synchronized (syncObject) {
+            dataChanged = true;
+        }
+
+        //adapter.notifyDataSetChanged();
     }
 
 
