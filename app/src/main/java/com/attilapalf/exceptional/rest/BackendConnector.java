@@ -13,6 +13,7 @@ import com.attilapalf.exceptional.rest.messages.ExceptionRefreshResponse;
 import com.attilapalf.exceptional.rest.messages.ExceptionSentResponse;
 import com.attilapalf.exceptional.rest.messages.ExceptionWrapper;
 import com.attilapalf.exceptional.ui.main.ExceptionChangeListener;
+import com.attilapalf.exceptional.ui.main.ExceptionRefreshListener;
 import com.attilapalf.exceptional.ui.main.ExceptionSource;
 import com.attilapalf.exceptional.ui.main.FriendChangeListener;
 import com.attilapalf.exceptional.ui.main.FriendSource;
@@ -36,13 +37,12 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 import retrofit.converter.GsonConverter;
 import retrofit.http.Body;
-import retrofit.http.GET;
 import retrofit.http.POST;
 
 /**
  * Created by Attila on 2015-06-13.
  */
-public class BackendConnector implements BackendService, ExceptionSource, FriendSource,
+public class BackendConnector implements BackendService, FriendSource, //ExceptionSource
         ServerResponseSource {
 
     private final Context context;
@@ -54,9 +54,10 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
     private Gson gson;
     private RestAdapter restAdapter;
     private RestInterface restInterface;
-    private Set<ServerResponseListener> connectionListeners;
-    private Set<ExceptionChangeListener> exceptionChangeListeners;
+    private Set<ServerResponseListener> responseListeners;
+//    private Set<ExceptionChangeListener> exceptionChangeListeners;
     private Set<FriendChangeListener> friendChangeListeners;
+    private ExceptionRefreshListener refreshListener;
 
     private AppStartRequestBody requestBody;
 
@@ -86,8 +87,8 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
 
         projectNumber = context.getString(R.string.project_number);
 
-        connectionListeners = new HashSet<>();
-        exceptionChangeListeners = new HashSet<>();
+        responseListeners = new HashSet<>();
+//        exceptionChangeListeners = new HashSet<>();
         friendChangeListeners = new HashSet<>();
 
         gson = new GsonBuilder()
@@ -103,12 +104,12 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
 
     @Override
     public boolean addConnectionListener(ServerResponseListener listener) {
-        return connectionListeners.add(listener);
+        return responseListeners.add(listener);
     }
 
     @Override
     public boolean removeConnectionListener(ServerResponseListener listener) {
-        return connectionListeners.remove(listener);
+        return responseListeners.remove(listener);
     }
 
     @Override
@@ -132,19 +133,65 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
         @POST("/exception")
         void sendException(@Body ExceptionWrapper exceptionWrapper, Callback<ExceptionSentResponse> cb);
 
-        @GET("/exception")
+        @POST("/exception/refresh")
         void refreshExceptions(@Body BaseRequestBody requestBody, Callback<ExceptionRefreshResponse> cb);
     }
 
 
+    @Override
+    public void refreshExceptions(final ExceptionRefreshListener refreshListenerParam) {
+        this.refreshListener = refreshListenerParam;
 
-    public void refreshExceptions() {
-        try {
-            // TODO: finish
-            //restInterface.refreshExceptions();
-        } catch (java.lang.Exception e) {
+        BaseRequestBody requestBody = new BaseRequestBody(FacebookManager.getInstance().getProfileId(),
+                ExceptionManager.getInstance().getExceptionList());
 
-        }
+        restInterface.refreshExceptions(requestBody, new Callback<ExceptionRefreshResponse>() {
+
+            @Override
+            public void success(ExceptionRefreshResponse exceptionRefreshResponse, Response response) {
+                ExceptionManager.getInstance().addExceptions(exceptionRefreshResponse.getNeededExceptions());
+
+                for (ServerResponseListener l : responseListeners) {
+                    l.onSuccess("Exceptions are synchronized!");
+                }
+                refreshListener.onExceptionRefreshFinished();
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                for (ServerResponseListener l : responseListeners) {
+                    l.onConnectionFailed("Failed to synchronize exceptions.\n", error.getMessage());
+                }
+                refreshListener.onExceptionRefreshFinished();
+            }
+        });
+
+//        try {
+//            // TODO: finish
+//            //restInterface.refreshExceptions();
+//            AsyncTask<Integer, Integer, Integer> task = new AsyncTask<Integer, Integer, Integer>() {
+//
+//                @Override
+//                protected Integer doInBackground(Integer... params) {
+//                    try {
+//                        Thread.sleep(2000);
+//                        return 0;
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                        return 1;
+//                    }
+//                }
+//
+//                @Override
+//                protected void onPostExecute(Integer integer) {
+//                    super.onPostExecute(integer);
+//                    refreshListener.onExceptionRefreshFinished();
+//                }
+//            }.execute();
+//
+//        } catch (java.lang.Exception e) {
+//
+//        }
     }
 
 
@@ -165,29 +212,31 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
                     ExceptionManager.getInstance().saveStarterId(appStartResponseBody.getExceptionIdStarter());
                     int excSize = appStartResponseBody.getMyExceptions().size();
                     if (excSize > 0) {
-                        for (int i = 0; i < excSize; i++) {
-                            ExceptionWrapper eW = appStartResponseBody.getMyExceptions().get(i);
-                            Exception e = new Exception();
-                            e.setExceptionType(ExceptionFactory.findById(eW.getExceptionTypeId()));
-                            e.setFromWho(eW.getFromWho());
-                            e.setToWho(eW.getToWho());
-                            e.setDate(new Timestamp(eW.getTimeInMillis()));
-                            e.setInstanceId(eW.getInstanceId());
-                            ExceptionManager.getInstance().addException(e);
-                        }
-                        for (ExceptionChangeListener l : exceptionChangeListeners) {
-                            l.onExceptionsChanged();
-                        }
+                        ExceptionManager.getInstance().addExceptions(appStartResponseBody.getMyExceptions());
+//                        for (int i = 0; i < excSize; i++) {
+//                            ExceptionWrapper eW = appStartResponseBody.getMyExceptions().get(i);
+//                            Exception e = new Exception();
+//                            e.setExceptionType(ExceptionFactory.findById(eW.getExceptionTypeId()));
+//                            e.setFromWho(eW.getFromWho());
+//                            e.setToWho(eW.getToWho());
+//                            e.setDate(new Timestamp(eW.getTimeInMillis()));
+//                            e.setInstanceId(eW.getInstanceId());
+//                            ExceptionManager.getInstance().addException(e);
+//                        }
+//                        for (ExceptionChangeListener l : exceptionChangeListeners) {
+//                            l.onExceptionsChanged();
+//                        }
                     }
                 }
 
                 @Override
                 public void failure(RetrofitError error) {
-                    for (ServerResponseListener l : connectionListeners) {
+                    for (ServerResponseListener l : responseListeners) {
                         l.onConnectionFailed("Connection to server failed.", error.getMessage());
                     }
                 }
             });
+
         } catch (java.lang.Exception e) {
             e.printStackTrace();
         }
@@ -241,7 +290,7 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
                     backendFirstAppStart();
                 }
 
-                for(ServerResponseListener l : connectionListeners) {
+                for(ServerResponseListener l : responseListeners) {
                     l.onSuccess(message);
                 }
             }
@@ -259,25 +308,26 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
                     ExceptionManager.getInstance().saveStarterId(appStartResponseBody.getExceptionIdStarter());
                     int excSize = appStartResponseBody.getMyExceptions().size();
                     if (excSize > 0) {
-                        for (int i = 0; i < excSize; i++) {
-                            ExceptionWrapper eW = appStartResponseBody.getMyExceptions().get(i);
-                            Exception e = new Exception();
-                            e.setExceptionType(ExceptionFactory.findById(eW.getExceptionTypeId()));
-                            e.setFromWho(eW.getFromWho());
-                            e.setToWho(eW.getToWho());
-                            e.setDate(new Timestamp(eW.getTimeInMillis()));
-                            e.setInstanceId(eW.getInstanceId());
-                            ExceptionManager.getInstance().addException(e);
-                        }
-                        for (ExceptionChangeListener l : exceptionChangeListeners) {
-                            l.onExceptionsChanged();
-                        }
+                        ExceptionManager.getInstance().addExceptions(appStartResponseBody.getMyExceptions());
+//                        for (int i = 0; i < excSize; i++) {
+//                            ExceptionWrapper eW = appStartResponseBody.getMyExceptions().get(i);
+//                            Exception e = new Exception();
+//                            e.setExceptionType(ExceptionFactory.findById(eW.getExceptionTypeId()));
+//                            e.setFromWho(eW.getFromWho());
+//                            e.setToWho(eW.getToWho());
+//                            e.setDate(new Timestamp(eW.getTimeInMillis()));
+//                            e.setInstanceId(eW.getInstanceId());
+//                            ExceptionManager.getInstance().addException(e);
+//                        }
+//                        for (ExceptionChangeListener l : exceptionChangeListeners) {
+//                            l.onExceptionsChanged();
+//                        }
                     }
                 }
 
                 @Override
                 public void failure(RetrofitError error) {
-                    for (ServerResponseListener l : connectionListeners) {
+                    for (ServerResponseListener l : responseListeners) {
                         l.onConnectionFailed("Connection to server failed.", error.getMessage());
                     }
                 }
@@ -300,14 +350,14 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
             restInterface.sendException(exceptionWrapper, new Callback<ExceptionSentResponse>() {
                 @Override
                 public void success(ExceptionSentResponse e, Response response) {
-                    for (ServerResponseListener l : connectionListeners) {
+                    for (ServerResponseListener l : responseListeners) {
                         l.onSuccess(e.getShortName() + " successfully sent to " + e.getToWho());
                     }
                 }
 
                 @Override
                 public void failure(RetrofitError error) {
-                    for (ServerResponseListener l : connectionListeners) {
+                    for (ServerResponseListener l : responseListeners) {
                         l.onConnectionFailed("Failed to send the exception to the server.", error.getMessage());
                     }
                 }
@@ -319,21 +369,21 @@ public class BackendConnector implements BackendService, ExceptionSource, Friend
     }
 
 
-    @Override
-    public boolean addExceptionChangeListener(ExceptionChangeListener listener) {
-        if (exceptionChangeListeners == null) {
-            exceptionChangeListeners = new HashSet<>();
-        }
-        return exceptionChangeListeners.add(listener);
-    }
-
-    @Override
-    public boolean removeExceptionChangeListener(ExceptionChangeListener listener) {
-        if (exceptionChangeListeners == null) {
-            exceptionChangeListeners = new HashSet<>();
-        }
-        return exceptionChangeListeners.remove(listener);
-    }
+//    @Override
+//    public boolean addExceptionChangeListener(ExceptionChangeListener listener) {
+//        if (exceptionChangeListeners == null) {
+//            exceptionChangeListeners = new HashSet<>();
+//        }
+//        return exceptionChangeListeners.add(listener);
+//    }
+//
+//    @Override
+//    public boolean removeExceptionChangeListener(ExceptionChangeListener listener) {
+//        if (exceptionChangeListeners == null) {
+//            exceptionChangeListeners = new HashSet<>();
+//        }
+//        return exceptionChangeListeners.remove(listener);
+//    }
 
     public String getAndroidId() { return androidId; }
 }

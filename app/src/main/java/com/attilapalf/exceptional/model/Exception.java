@@ -2,6 +2,8 @@ package com.attilapalf.exceptional.model;
 
 import android.location.Location;
 
+import com.attilapalf.exceptional.rest.messages.ExceptionWrapper;
+import com.attilapalf.exceptional.utils.ExceptionFactory;
 import com.google.gson.Gson;
 
 import java.sql.Timestamp;
@@ -27,6 +29,17 @@ public class Exception {
     private long toWho;
 
     private static Gson gson = new Gson();
+
+    public Exception(ExceptionWrapper wrapper) {
+        exceptionTypeId = wrapper.getExceptionTypeId();
+        exceptionType = ExceptionFactory.findById(exceptionTypeId);
+        instanceId = wrapper.getInstanceId();
+        longitude = wrapper.getLongitude();
+        latitude = wrapper.getLatitude();
+        date = new Timestamp(wrapper.getTimeInMillis());
+        fromWho = wrapper.getFromWho();
+        toWho = wrapper.getToWho();
+    }
 
     public static class ShortNameComparator implements Comparator<Exception> {
         @Override

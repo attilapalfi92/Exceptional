@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
+import com.attilapalf.exceptional.rest.messages.ExceptionWrapper;
 import com.attilapalf.exceptional.ui.main.ExceptionChangeListener;
 import com.attilapalf.exceptional.ui.main.ExceptionSource;
 
@@ -78,7 +79,7 @@ public class ExceptionManager implements ExceptionSource {
             e.setExceptionType(ExceptionFactory.findById(e.getExceptionTypeId()));
             storedExceptions.add(storedExceptions.size(), e);
         }
-
+        Collections.sort(storedExceptions, new Exception.DateComparator());
         starterId = sharedPreferences.getLong("starterId", 0);
     }
 
@@ -119,7 +120,7 @@ public class ExceptionManager implements ExceptionSource {
     }
 
 
-    public void addException(Exception e) {
+    public void addException(Exception e, boolean notifyNeeded) {
         if (storedExceptions.size() >= STORE_SIZE) {
             removeLast();
         }
@@ -127,6 +128,20 @@ public class ExceptionManager implements ExceptionSource {
         storedExceptions.add(0, e);
         editor.putString(Long.toString(e.getInstanceId()), e.toString());
         editor.apply();
+
+        if (notifyNeeded) {
+            for(ExceptionChangeListener listener : exceptionChangeListeners) {
+                listener.onExceptionsChanged();
+            }
+        }
+    }
+
+
+    public void addExceptions(List<ExceptionWrapper> wrapperList) {
+        for (ExceptionWrapper wrapper : wrapperList) {
+            Exception e = new Exception(wrapper);
+            addException(e, false);
+        }
 
         for(ExceptionChangeListener listener : exceptionChangeListeners) {
             listener.onExceptionsChanged();

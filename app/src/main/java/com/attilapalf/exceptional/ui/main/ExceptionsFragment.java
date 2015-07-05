@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
 
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,26 +24,11 @@ import java.util.List;
 
 /**
  */
-public class ExceptionsFragment extends ListFragment implements //OnSharedPreferenceChangeListener,
-        ExceptionChangeListener {
+public class ExceptionsFragment extends ListFragment implements ExceptionRefreshListener,
+        ExceptionChangeListener, SwipeRefreshLayout.OnRefreshListener {
 
     private ExceptionAdapter adapter;
-
-    private boolean dataChanged = false;
-    private Object syncObject = new Object();
-
-
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        synchronized (syncObject) {
-            if (dataChanged) {
-                dataChanged = false;
-                adapter.notifyDataSetChanged();
-            }
-        }
-    }
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     public void onAttach(Activity activity) {
@@ -50,7 +37,7 @@ public class ExceptionsFragment extends ListFragment implements //OnSharedPrefer
             //((ExceptionSource)getActivity()).addExceptionChangeListener(this);
         }
 
-        BackendConnector.getInstance().addExceptionChangeListener(this);
+//        BackendConnector.getInstance().addExceptionChangeListener(this);
         ExceptionManager.getInstance().addExceptionChangeListener(this);
     }
 
@@ -66,11 +53,24 @@ public class ExceptionsFragment extends ListFragment implements //OnSharedPrefer
     }
 
 
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_exceptions, null);
+        View view = inflater.inflate(R.layout.fragment_exceptions, null);
+
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
+        swipeRefreshLayout.setOnRefreshListener(this);
+        swipeRefreshLayout.setSize(SwipeRefreshLayout.LARGE);
+        swipeRefreshLayout.setColorSchemeColors(
+                android.R.color.holo_blue_light,
+                android.R.color.holo_purple,
+                android.R.color.holo_green_light,
+                android.R.color.holo_red_light
+        );
+
+        return view;
     }
 
 
@@ -82,7 +82,7 @@ public class ExceptionsFragment extends ListFragment implements //OnSharedPrefer
             //((ExceptionSource)getActivity()).removeExceptionChangeListener(this);
         }
 
-        BackendConnector.getInstance().removeExceptionChangeListener(this);
+//        BackendConnector.getInstance().removeExceptionChangeListener(this);
         ExceptionManager.getInstance().removeExceptionChangeListener(this);
 
         super.onDetach();
@@ -92,11 +92,20 @@ public class ExceptionsFragment extends ListFragment implements //OnSharedPrefer
 
     @Override
     public void onExceptionsChanged() {
-        synchronized (syncObject) {
-            dataChanged = true;
-        }
+        adapter.notifyDataSetChanged();
+    }
 
-        //adapter.notifyDataSetChanged();
+
+
+    @Override
+    public void onRefresh() {
+        swipeRefreshLayout.setRefreshing(true);
+        BackendConnector.getInstance().refreshExceptions(this);
+    }
+
+    @Override
+    public void onExceptionRefreshFinished() {
+        swipeRefreshLayout.setRefreshing(false);
     }
 
 

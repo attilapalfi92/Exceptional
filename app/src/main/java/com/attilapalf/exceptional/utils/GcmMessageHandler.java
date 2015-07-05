@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -20,8 +21,11 @@ import java.sql.Timestamp;
  */
 public class GcmMessageHandler extends IntentService {
 
-    String message;
+    private String message;
     private Handler handler;
+    private Exception exception;
+
+
     public GcmMessageHandler() {
         super("GcmMessageHandler");
     }
@@ -30,7 +34,7 @@ public class GcmMessageHandler extends IntentService {
     public void onCreate() {
         // TODO Auto-generated method stub
         super.onCreate();
-        handler = new Handler();
+        handler = new Handler(Looper.getMainLooper());
     }
 
 
@@ -65,36 +69,39 @@ public class GcmMessageHandler extends IntentService {
                     ExceptionFactory.initialize(getApplicationContext());
                 }
 
-                Exception e = new Exception();
-                e.setExceptionType(ExceptionFactory.findById(typeId));
-                e.setInstanceId(instanceId);
-                e.setFromWho(fromWho);
-                e.setToWho(toWho);
-                e.setLongitude(longitude);
-                e.setLatitude(latitude);
-                e.setDate(new Timestamp(timeInMillis));
-                ExceptionManager.getInstance().addException(e);
+                exception = new Exception();
+                exception.setExceptionType(ExceptionFactory.findById(typeId));
+                exception.setInstanceId(instanceId);
+                exception.setFromWho(fromWho);
+                exception.setToWho(toWho);
+                exception.setLongitude(longitude);
+                exception.setLatitude(latitude);
+                exception.setDate(new Timestamp(timeInMillis));
+
+                addException();
+                message = extras.getString("title") + " " + extras.getString("body");
 
                 break;
 
             default:
+                message = "Something else.";
                 break;
         }
 
-        message = extras.getString("title") + " " + extras.getString("body");
-        showToast();
         Log.i("GCM", "Received : (" + messageType + ")  " + extras.getString("title"));
 
         GcmBroadcastReceiver.completeWakefulIntent(intent);
 
     }
 
-    public void showToast(){
+
+    public void addException() {
         handler.post(new Runnable() {
+            @Override
             public void run() {
-                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+                ExceptionManager.getInstance().addException(exception, true);
             }
         });
-
     }
+
 }

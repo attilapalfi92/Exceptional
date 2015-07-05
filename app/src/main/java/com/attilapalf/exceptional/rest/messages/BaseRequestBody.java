@@ -1,5 +1,9 @@
 package com.attilapalf.exceptional.rest.messages;
 
+import com.attilapalf.exceptional.model.*;
+import com.attilapalf.exceptional.model.Exception;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -9,6 +13,17 @@ import java.util.List;
 public class BaseRequestBody {
     protected long userId;
     protected List<Long> exceptionIds;
+
+    public BaseRequestBody() {}
+
+    public BaseRequestBody(long userId, List<Exception> exceptionList) {
+        this.userId = userId;
+
+        exceptionIds = new ArrayList<>(exceptionList.size());
+        for (Exception e : exceptionList) {
+            exceptionIds.add(e.getInstanceId());
+        }
+    }
 
     public long getUserId() {
         return userId;
