@@ -2,7 +2,7 @@ package com.attilapalf.exceptional.rest;
 
 import com.attilapalf.exceptional.model.*;
 import com.attilapalf.exceptional.model.Exception;
-import com.attilapalf.exceptional.ui.main.ExceptionRefreshListener;
+import com.attilapalf.exceptional.ui.main.interfaces.ExceptionRefreshListener;
 
 import java.util.Set;
 

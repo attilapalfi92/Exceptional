@@ -1,17 +1,11 @@
 package com.attilapalf.exceptional.utils;
 
 import android.app.Application;
-import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.hardware.camera2.params.Face;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.util.Log;
 
 import com.attilapalf.exceptional.model.Friend;
-import com.attilapalf.exceptional.ui.main.ExceptionChangeListener;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
@@ -118,18 +112,6 @@ public class FacebookManager {
             public void onSuccess(LoginResult loginResult) {
                 synchronized (syncObject) {
                     accessToken = loginResult.getAccessToken();
-
-//                    String PREFS_NAME = "FirstStart";
-//                    SharedPreferences settings = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-//                    // it means the user logged in and this is the first start
-//                    if (accessToken != null) {
-//                        settings.edit().putBoolean("firstStart", true).apply();
-//                    }
-//                    // it means the user logged out
-//                    else {
-//                        settings.edit().remove("firstStart").apply();
-//                    }
-
                     loginSuccessHandler.onLoginSuccess(loginResult);
                     profile = Profile.getCurrentProfile();
                     firstStart = true;
@@ -174,6 +156,9 @@ public class FacebookManager {
         tokenTracker.startTracking();
         profileTracker.startTracking();
         accessToken = AccessToken.getCurrentAccessToken();
+
+        // experimental:
+        refreshFriends();
     }
 
 
@@ -195,8 +180,9 @@ public class FacebookManager {
                             JSONObject user = jsonArray.getJSONObject(i);
                             String name = user.getString("name");
                             String id = user.getString("id");
-                            String imageUrl = user.getString("picture");
-                            Friend friend = new Friend(Long.parseLong(id), name, imageUrl);
+                            JSONObject imageData = user.getJSONObject("picture").getJSONObject("data");
+                            String imageUrl = imageData.getString("url");
+                            Friend friend = new Friend(Long.parseLong(id), name, imageUrl, null);
                             friends.add(friend);
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -221,33 +207,7 @@ public class FacebookManager {
 
 
     public void testAsyncCall() {
-        GraphRequest request = GraphRequest.newMyFriendsRequest(accessToken, new GraphRequest.GraphJSONArrayCallback() {
-            @Override
-            public void onCompleted(JSONArray jsonArray, GraphResponse graphResponse) {
-                // request successfully returned
-                if (graphResponse.getError() == null) {
-                    Set<Friend> friends = new TreeSet<>(new Friend.NameComparator());
-                    for(int i = 0; i < jsonArray.length(); i++) {
-                        try {
-                            JSONObject user = jsonArray.getJSONObject(i);
-                            String name = user.getString("name");
-                            String id = user.getString("id");
-                            String imageUrl = user.getString("picture");
-                            Friend friend = new Friend(Long.parseLong(id), name, imageUrl);
-                            friends.add(friend);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    friendListListener.onFirstAppStart(friends);
-                }
-            }
-        });
 
-        Bundle parameters = new Bundle();
-        parameters.putString("fields", "id,name,picture");
-        request.setParameters(parameters);
-        request.executeAsync();
     }
 
 

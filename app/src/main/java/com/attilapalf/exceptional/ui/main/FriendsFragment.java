@@ -5,17 +5,18 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.*;
 import com.attilapalf.exceptional.rest.BackendConnector;
+import com.attilapalf.exceptional.ui.main.interfaces.FriendChangeListener;
 import com.attilapalf.exceptional.utils.FriendsManager;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class FriendsFragment extends ListFragment implements FriendChangeListene
         super.onAttach(activity);
 
         BackendConnector.getInstance().addFriendChangeListener(this);
+        FriendsManager.getInstance().setFriendChangeListener(this);
     }
 
 
@@ -40,7 +42,10 @@ public class FriendsFragment extends ListFragment implements FriendChangeListene
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        List<Friend> values = FriendsManager.getInstance(getActivity().getApplicationContext()).getStoredFriends();
+        if (!FriendsManager.getInstance().isInitialized()) {
+            FriendsManager.getInstance().initialize(getActivity().getApplicationContext());
+        }
+        List<Friend> values = FriendsManager.getInstance().getStoredFriends();
         adapter = new FriendAdapter(getActivity().getApplicationContext(), values);
         onFriendsChanged();
         setListAdapter(adapter);
@@ -75,7 +80,7 @@ public class FriendsFragment extends ListFragment implements FriendChangeListene
         List<Friend> values;
 
         public FriendAdapter(Context context, List<Friend> values) {
-            super(context, R.layout.friend_row_layout, values);
+            super(context, R.layout.friend_row_layout_2, values);
             this.context = context;
             this.values = values;
         }
@@ -87,7 +92,7 @@ public class FriendsFragment extends ListFragment implements FriendChangeListene
 
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             if (convertView == null) {
-                convertView = inflater.inflate(R.layout.friend_row_layout, parent, false);
+                convertView = inflater.inflate(R.layout.friend_row_layout_2, parent, false);
                 viewHolder = new RowViewHolder(convertView);
                 convertView.setTag(viewHolder);
 
@@ -103,27 +108,27 @@ public class FriendsFragment extends ListFragment implements FriendChangeListene
 
         private static class RowViewHolder {
             private TextView nameView;
-            private TextView idView;
-            private TextView urlView;
+            private TextView pointsView;
+            private ImageView imageView;
 
             public RowViewHolder(View rowView) {
-                nameView = (TextView) rowView.findViewById(R.id.friendName);
-                idView = (TextView) rowView.findViewById(R.id.friendId);
-                urlView = (TextView) rowView.findViewById(R.id.friendImgUrl);
+                nameView = (TextView) rowView.findViewById(R.id.friendNameView);
+                pointsView = (TextView) rowView.findViewById(R.id.friendPointsView);
+                imageView = (ImageView) rowView.findViewById(R.id.friendImageView);
 
                 nameView.setTextSize(20);
-                idView.setTextSize(15);
-                urlView.setTextSize(15);
+                pointsView.setTextSize(15);
 
                 nameView.setTextColor(Color.BLACK);
-                idView.setTextColor(Color.BLACK);
-                urlView.setTextColor(Color.BLACK);
+                pointsView.setTextColor(Color.BLACK);
             }
 
             public void bindRow(Friend model) {
                 nameView.setText(model.getName());
-                idView.setText(Long.toString(model.getId()));
-                urlView.setText(model.getImageUrl());
+                pointsView.setText("Points: " + Long.toString(model.getId()));
+                if (model.getImage() != null) {
+                    imageView.setImageBitmap(model.getImage());
+                }
             }
         }
 

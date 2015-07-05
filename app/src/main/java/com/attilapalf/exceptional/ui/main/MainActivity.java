@@ -23,8 +23,9 @@ import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.rest.BackendConnector;
 import com.attilapalf.exceptional.rest.ServerResponseListener;
 import com.attilapalf.exceptional.ui.LoginActivity;
+import com.attilapalf.exceptional.ui.SendExceptionListActivity;
+import com.attilapalf.exceptional.ui.main.interfaces.ExceptionChangeListener;
 import com.attilapalf.exceptional.utils.ExceptionFactory;
-import com.attilapalf.exceptional.utils.ExceptionManager;
 import com.attilapalf.exceptional.utils.FacebookManager;
 import com.attilapalf.exceptional.utils.GpsService;
 
@@ -142,6 +143,12 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
     }
 
 
+    public void throwExceptionClicked(View view) {
+        Intent intent = new Intent(this, SendExceptionListActivity.class);
+        startActivity(intent);
+    }
+
+
     public void giveMeExcClicked(View view) {
 
         if (!gpsService.canGetLocation() && mLocation == null) {
@@ -190,11 +197,12 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
 
     @Override
     public void onConnectionFailed(String what, String why) {
-        Toast.makeText(this, what + " " + why, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, what + why, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onSuccess(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
+
 }

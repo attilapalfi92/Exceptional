@@ -48,7 +48,6 @@ public class ExceptionFactory {
         Collections.sort(exceptionTypesById, new ExceptionType.IdComparator());
     }
 
-
     public static Exception createRandomException(long fromWho, long toWho) {
         int random = (int)(Math.random() * exceptionTypesByName.size());
         ExceptionType type = exceptionTypesByName.get(random);
@@ -62,12 +61,17 @@ public class ExceptionFactory {
         return e;
     }
 
+
     public static ExceptionType findById(int id) {
         return exceptionTypesById.get(id);
     }
 
     public static boolean isInitialized() {
         return exceptionTypesById != null;
+    }
+
+    public static List<ExceptionType> getExceptionTypesByName() {
+        return exceptionTypesByName;
     }
 
 }

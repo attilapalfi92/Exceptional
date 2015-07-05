@@ -4,11 +4,12 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="com.google.android.c2dm.permission.SEND" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <permission android:name="com.attilapalf.exceptional.permission.C2D_MESSAGE" />
+
     <uses-permission android:name="com.attilapalf.exceptional.permission.C2D_MESSAGE" />
 
     <application
@@ -17,13 +18,13 @@
         android:icon="@drawable/logo"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-
         <receiver
             android:name=".utils.GcmBroadcastReceiver"
             android:exported="true"
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
                 <category android:name="com.attilapalf.exceptional" />
             </intent-filter>
         </receiver>
@@ -36,7 +37,6 @@
             </intent-filter>
         </service>
 
-
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
@@ -46,21 +46,23 @@
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-
         <activity
             android:name=".ui.LoginActivity"
             android:label="@string/title_activity_login" >
         </activity>
-
+        <activity
+            android:name=".ui.SendExceptionListActivity"
+            android:label="@string/title_activity_send_exception_list" >
+        </activity>
     </application>
 
 </manifest>

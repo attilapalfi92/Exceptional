@@ -17,14 +17,14 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="30dp" />
 
-    <Button
+    <!--<Button
         android:layout_width="200dp"
         android:layout_height="80dp"
         android:text="Test Event Handling"
         android:id="@+id/asyncTestBtn"
         android:layout_above="@+id/throwExcBtn"
         android:layout_centerHorizontal="true"
-        android:onClick="asyncTestBtnClicked" />
+        android:onClick="asyncTestBtnClicked" />-->
 
     <Button
         android:layout_width="200dp"
@@ -32,7 +32,8 @@
         android:text="@string/throw_exc_button"
         android:id="@+id/throwExcBtn"
         android:layout_above="@+id/button3"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:onClick="throwExceptionClicked" />
 
     <Button
         android:layout_width="200dp"
@@ -41,6 +42,7 @@
         android:id="@+id/button3"
         android:layout_gravity="center_horizontal|bottom"
         android:layout_above="@+id/button4"
+        android:layout_alignLeft="@+id/throwExcBtn"
         android:layout_alignStart="@+id/throwExcBtn"
         android:onClick="giveMeExcClicked" />
 
@@ -50,6 +52,7 @@
         android:text="@string/set_exc_button"
         android:id="@+id/button4"
         android:layout_alignParentBottom="true"
+        android:layout_alignLeft="@+id/button3"
         android:layout_alignStart="@+id/button3"
         android:layout_marginBottom="61dp" />
 

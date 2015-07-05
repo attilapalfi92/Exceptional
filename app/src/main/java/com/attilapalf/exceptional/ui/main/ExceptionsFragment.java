@@ -8,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ListFragment;
 
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +17,8 @@ import android.widget.TextView;
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.rest.BackendConnector;
+import com.attilapalf.exceptional.ui.main.interfaces.ExceptionChangeListener;
+import com.attilapalf.exceptional.ui.main.interfaces.ExceptionRefreshListener;
 import com.attilapalf.exceptional.utils.ExceptionManager;
 
 import java.util.List;
@@ -63,7 +64,7 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setSize(SwipeRefreshLayout.LARGE);
-        swipeRefreshLayout.setColorSchemeColors(
+        swipeRefreshLayout.setColorSchemeResources(
                 android.R.color.holo_blue_light,
                 android.R.color.holo_purple,
                 android.R.color.holo_green_light,
@@ -99,7 +100,6 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
 
     @Override
     public void onRefresh() {
-        swipeRefreshLayout.setRefreshing(true);
         BackendConnector.getInstance().refreshExceptions(this);
     }
 

@@ -24,15 +24,17 @@ public class MyApplication extends Application {
         if (!ExceptionManager.getInstance().isInitialized()) {
             ExceptionManager.getInstance().initialize(getApplicationContext());
         }
-        FriendsManager friendsPreference = FriendsManager.getInstance(getApplicationContext());
+        if (!FriendsManager.getInstance().isInitialized()) {
+            FriendsManager.getInstance().initialize(getApplicationContext());
+        }
 
         String aId = Settings.Secure.getString(getApplicationContext()
                 .getContentResolver(), Settings.Secure.ANDROID_ID);
 
         BackendConnector.init(getApplicationContext());
-        friendsPreference.addBackendService(BackendConnector.getInstance().setAndroidId(aId));
+        FriendsManager.getInstance().addBackendService(BackendConnector.getInstance().setAndroidId(aId));
 
-        FacebookManager.getInstance().registerFriendListListener(friendsPreference);
+        FacebookManager.getInstance().registerFriendListListener(FriendsManager.getInstance());
         FacebookManager.getInstance().onAppStart(this);
     }
 

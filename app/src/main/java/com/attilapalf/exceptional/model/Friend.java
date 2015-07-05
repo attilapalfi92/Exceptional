@@ -1,5 +1,7 @@
 package com.attilapalf.exceptional.model;
 
+import android.graphics.Bitmap;
+
 import com.google.gson.Gson;
 
 import java.util.Comparator;
@@ -11,6 +13,7 @@ public class Friend {
     private long id;
     private String name;
     private String imageUrl;
+    private transient Bitmap image;
 
     private static Gson gson = new Gson();
 
@@ -40,10 +43,11 @@ public class Friend {
     public Friend() {
     }
 
-    public Friend(long id, String name, String imageUrl) {
+    public Friend(long id, String name, String imageUrl, Bitmap image) {
         this.id = id;
         this.name = name;
         this.imageUrl = imageUrl;
+        this.image = image;
     }
 
     public long getId() {
@@ -68,5 +72,13 @@ public class Friend {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public Bitmap getImage() {
+        return image;
+    }
+
+    public void setImage(Bitmap image) {
+        this.image = image;
     }
 }
