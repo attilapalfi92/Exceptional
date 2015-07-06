@@ -13,8 +13,12 @@ import com.attilapalf.exceptional.rest.BackendServiceUser;
 import com.attilapalf.exceptional.rest.BackendService;
 import com.attilapalf.exceptional.ui.main.interfaces.FriendChangeListener;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.Exception;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.Buffer;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -152,15 +156,27 @@ public class FriendsManager implements FacebookManager.FriendListListener, Backe
         @Override
         protected Bitmap doInBackground(Void... param) {
             String downloadUrl = friend.getImageUrl();
-            Bitmap mIcon11 = null;
+            Bitmap friendPicture = null;
+
+
             try {
-                InputStream in = new java.net.URL(downloadUrl).openStream();
-                mIcon11 = BitmapFactory.decodeStream(in);
-            } catch (Exception e) {
+                friendPicture = ImageCache.getInstance().getImage(friend);
+
+                if (friendPicture == null) {
+                    URL url = new URL(downloadUrl);
+                    URLConnection connection = url.openConnection();
+                    connection.setUseCaches(true);
+                    InputStream inputStream = (InputStream) connection.getContent();
+                    friendPicture = BitmapFactory.decodeStream(inputStream);
+
+                    ImageCache.getInstance().addImage(friend, friendPicture);
+                }
+
+            } catch (IOException e) {
                 Log.e("Error", e.getMessage());
                 e.printStackTrace();
             }
-            return mIcon11;
+            return friendPicture;
         }
 
         @Override

@@ -8,6 +8,7 @@ import com.attilapalf.exceptional.utils.ExceptionFactory;
 import com.attilapalf.exceptional.utils.ExceptionManager;
 import com.attilapalf.exceptional.utils.FacebookManager;
 import com.attilapalf.exceptional.utils.FriendsManager;
+import com.attilapalf.exceptional.utils.ImageCache;
 
 /**
  * Created by Attila on 2015-06-05.
@@ -17,6 +18,8 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        ImageCache.getInstance().initialize(getApplicationContext());
 
         if (!ExceptionFactory.isInitialized()) {
             ExceptionFactory.initialize(getApplicationContext());
