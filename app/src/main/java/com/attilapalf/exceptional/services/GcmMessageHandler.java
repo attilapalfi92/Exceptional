@@ -1,14 +1,11 @@
-package com.attilapalf.exceptional.utils;
+package com.attilapalf.exceptional.services;
 
 import android.app.IntentService;
-import android.app.Service;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.attilapalf.exceptional.model.Exception;
 import com.google.android.gms.gcm.GoogleCloudMessaging;

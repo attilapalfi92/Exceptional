@@ -1,13 +1,10 @@
 package com.attilapalf.exceptional.model;
 
-import android.location.Location;
-
 import com.attilapalf.exceptional.rest.messages.ExceptionWrapper;
-import com.attilapalf.exceptional.utils.ExceptionFactory;
+import com.attilapalf.exceptional.services.ExceptionFactory;
 import com.google.gson.Gson;
 
 import java.sql.Timestamp;
-import java.util.Calendar;
 import java.util.Comparator;
 
 

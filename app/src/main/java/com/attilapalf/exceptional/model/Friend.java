@@ -1,7 +1,10 @@
 package com.attilapalf.exceptional.model;
 
 import android.graphics.Bitmap;
+import android.os.AsyncTask;
+import android.widget.ImageView;
 
+import com.attilapalf.exceptional.services.ImageCache;
 import com.google.gson.Gson;
 
 import java.util.Comparator;
@@ -78,7 +81,40 @@ public class Friend {
         return image;
     }
 
+    public void setImageToView(final ImageView view) {
+        if (image == null) {
+            new AsyncImageLoader(this, view).execute();
+
+        } else {
+            view.setImageBitmap(image);
+        }
+    }
+
     public void setImage(Bitmap image) {
         this.image = image;
+    }
+
+
+    private static class AsyncImageLoader extends AsyncTask<Void, Void, Bitmap> {
+        private Friend friend;
+        private ImageView imageView;
+
+        public AsyncImageLoader(Friend f, ImageView view) {
+            friend = f;
+            imageView = view;
+        }
+
+        @Override
+        protected Bitmap doInBackground(Void... params) {
+            return ImageCache.getInstance().getImage(friend);
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            friend.setImage(bitmap);
+            imageView.setImageBitmap(bitmap);
+            imageView = null;
+            friend = null;
+        }
     }
 }

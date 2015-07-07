@@ -4,6 +4,9 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import com.attilapalf.exceptional.R;
+import com.attilapalf.exceptional.interfaces.BackendService;
+import com.attilapalf.exceptional.interfaces.ServerResponseListener;
+import com.attilapalf.exceptional.interfaces.ServerResponseSource;
 import com.attilapalf.exceptional.model.*;
 import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.rest.messages.AppStartRequestBody;
@@ -12,11 +15,11 @@ import com.attilapalf.exceptional.rest.messages.BaseRequestBody;
 import com.attilapalf.exceptional.rest.messages.ExceptionRefreshResponse;
 import com.attilapalf.exceptional.rest.messages.ExceptionSentResponse;
 import com.attilapalf.exceptional.rest.messages.ExceptionWrapper;
-import com.attilapalf.exceptional.ui.main.interfaces.ExceptionRefreshListener;
-import com.attilapalf.exceptional.ui.main.interfaces.FriendChangeListener;
-import com.attilapalf.exceptional.ui.main.interfaces.FriendSource;
-import com.attilapalf.exceptional.utils.ExceptionManager;
-import com.attilapalf.exceptional.utils.FacebookManager;
+import com.attilapalf.exceptional.interfaces.ExceptionRefreshListener;
+import com.attilapalf.exceptional.interfaces.FriendChangeListener;
+import com.attilapalf.exceptional.interfaces.FriendSource;
+import com.attilapalf.exceptional.services.ExceptionManager;
+import com.attilapalf.exceptional.services.FacebookManager;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -278,7 +281,7 @@ public class BackendConnector implements BackendService, FriendSource, //Excepti
                 }
             }
 
-        }.execute(null, null, null);
+        }.execute();
     }
 
 

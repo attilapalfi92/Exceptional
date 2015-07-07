@@ -1,4 +1,4 @@
-package com.attilapalf.exceptional.utils;
+package com.attilapalf.exceptional.services;
 
 import android.app.AlertDialog;
 import android.app.Service;

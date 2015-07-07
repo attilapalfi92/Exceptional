@@ -1,8 +1,8 @@
-package com.attilapalf.exceptional.rest;
+package com.attilapalf.exceptional.interfaces;
 
 import com.attilapalf.exceptional.model.*;
 import com.attilapalf.exceptional.model.Exception;
-import com.attilapalf.exceptional.ui.main.interfaces.ExceptionRefreshListener;
+import com.attilapalf.exceptional.interfaces.ExceptionRefreshListener;
 
 import java.util.Set;
 

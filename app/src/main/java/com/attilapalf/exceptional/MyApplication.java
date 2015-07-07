@@ -4,11 +4,11 @@ import android.app.Application;
 import android.provider.Settings;
 
 import com.attilapalf.exceptional.rest.BackendConnector;
-import com.attilapalf.exceptional.utils.ExceptionFactory;
-import com.attilapalf.exceptional.utils.ExceptionManager;
-import com.attilapalf.exceptional.utils.FacebookManager;
-import com.attilapalf.exceptional.utils.FriendsManager;
-import com.attilapalf.exceptional.utils.ImageCache;
+import com.attilapalf.exceptional.services.ExceptionFactory;
+import com.attilapalf.exceptional.services.ExceptionManager;
+import com.attilapalf.exceptional.services.FacebookManager;
+import com.attilapalf.exceptional.services.FriendsManager;
+import com.attilapalf.exceptional.services.ImageCache;
 
 /**
  * Created by Attila on 2015-06-05.

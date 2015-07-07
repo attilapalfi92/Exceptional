@@ -1,4 +1,4 @@
-package com.attilapalf.exceptional.utils;
+package com.attilapalf.exceptional.services;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -7,17 +7,12 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v4.util.LruCache;
 import android.util.Log;
-import android.widget.ImageView;
 
 import com.attilapalf.exceptional.model.Friend;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
 
 /**
  * Created by 212461305 on 2015.07.06..
@@ -69,6 +64,11 @@ public class ImageCache {
     }
 
 
+    /**
+     * Adds the friend and it's image to the ram and disk cache
+     * @param friend who's picture is added
+     * @param image the picture that is added
+     */
     public void addImage(final Friend friend, final Bitmap image) {
         if (imageWarehouse != null && imageWarehouse.get(friend.getId()) == null) {
             imageWarehouse.put(friend.getId(), image);

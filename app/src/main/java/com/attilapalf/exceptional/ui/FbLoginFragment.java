@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.ui.main.MainActivity;
-import com.attilapalf.exceptional.utils.FacebookManager;
+import com.attilapalf.exceptional.services.FacebookManager;
 import com.facebook.Profile;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;

@@ -22,4 +22,8 @@
     
     <string name="project_number">947608408958</string>
     <string name="title_activity_send_exception_list">SendExceptionList</string>
+    <string name="title_activity_friend_chooser">FriendChooserActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="choose_victim">Choose your victim of Exception!</string>
 </resources>

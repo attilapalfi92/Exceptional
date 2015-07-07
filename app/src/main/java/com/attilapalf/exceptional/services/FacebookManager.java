@@ -1,4 +1,4 @@
-package com.attilapalf.exceptional.utils;
+package com.attilapalf.exceptional.services;
 
 import android.app.Application;
 import android.content.Intent;
@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.attilapalf.exceptional.model.Friend;
+import com.attilapalf.exceptional.interfaces.ApplicationStartupListener;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
@@ -67,19 +68,12 @@ public class FacebookManager {
     // ------------------------------------- interfaces ------------------------------------
     // -------------------------------------------------------------------------------------
 
-    /**
-     * When the user starts the application, first thing is that it sends a request to
-     * Facebook to get his friends. When facebook sends his friends back, these methods are called.
-     */
-    public interface FriendListListener {
-        void onFirstAppStart(Set<Friend> friendSet);
-        void onAppStart(Set<Friend> friendSet);
-    }
 
-    public FriendListListener friendListListener;
 
-    public void registerFriendListListener(FriendListListener listener) {
-        friendListListener = listener;
+    public ApplicationStartupListener startupListener;
+
+    public void registerFriendListListener(ApplicationStartupListener listener) {
+        startupListener = listener;
     }
 
     // -------------------------------------------------------------------------------------
@@ -189,10 +183,15 @@ public class FacebookManager {
                         }
                     }
                     if (firstStart) {
-                        friendListListener.onFirstAppStart(friends);
+                        startupListener.onFirstAppStart(friends);
                     } else {
-                        friendListListener.onAppStart(friends);
+                        startupListener.onAppStart(friends);
                     }
+
+
+                } else {
+                    // no internet connection, but we still want stuff
+                    startupListener.onNoInternetStart();
                 }
             }
         });

@@ -13,13 +13,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
+import com.attilapalf.exceptional.model.Friend;
 import com.attilapalf.exceptional.rest.BackendConnector;
-import com.attilapalf.exceptional.ui.main.interfaces.ExceptionChangeListener;
-import com.attilapalf.exceptional.ui.main.interfaces.ExceptionRefreshListener;
-import com.attilapalf.exceptional.utils.ExceptionManager;
+import com.attilapalf.exceptional.interfaces.ExceptionChangeListener;
+import com.attilapalf.exceptional.interfaces.ExceptionRefreshListener;
+import com.attilapalf.exceptional.services.ExceptionManager;
+import com.attilapalf.exceptional.services.FacebookManager;
+import com.attilapalf.exceptional.services.FriendsManager;
 
 import java.util.List;
 
@@ -65,10 +69,10 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setSize(SwipeRefreshLayout.LARGE);
         swipeRefreshLayout.setColorSchemeResources(
-                android.R.color.holo_blue_light,
+                android.R.color.holo_blue_dark,
                 android.R.color.holo_purple,
-                android.R.color.holo_green_light,
-                android.R.color.holo_red_light
+                android.R.color.holo_green_dark,
+                android.R.color.holo_red_dark
         );
 
         return view;
@@ -146,6 +150,8 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
             private TextView descView;
             private TextView dateView;
             private TextView fromWhoView;
+            private static int yourselfCounter = 0;
+            private static boolean toastShown = false;
 
             public RowViewHolder(View rowView) {
                 nameView = (TextView) rowView.findViewById(R.id.excName);
@@ -168,12 +174,31 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
             public void bindRow(Exception model) {
                 nameView.setText(model.getPrefix() + "\n" + model.getShortName());
                 descView.setText(model.getDescription());
-                fromWhoView.setText(Long.toString(model.getFromWho()));
-                String date =
-                        model.getDate().toString();
-//                        model.getDate().get(Calendar.HOUR_OF_DAY) + ":" +
-//                        model.getDate().get(Calendar.MINUTE) + ":" +
-//                        model.getDate().get(Calendar.SECOND);
+
+                Friend fromWho = FriendsManager.getInstance().findFriendById(model.getFromWho());
+                if (fromWho != null) {
+                    fromWhoView.setText("From: " + fromWho.getName());
+                    yourselfCounter = 0;
+
+                } else {
+                    if (FacebookManager.getInstance().getProfileId() == model.getFromWho()) {
+                        fromWhoView.setText("From: yourself");
+                        if (++yourselfCounter == 7) {
+                            yourselfCounter = 0;
+                            if (!toastShown) {
+                                Toast.makeText(fromWhoView.getContext(), "You lonely motherfucker", Toast.LENGTH_SHORT).show();
+                                toastShown = true;
+                            }
+                        }
+                    } else {
+                        fromWhoView.setText("From: unknown :(");
+                        yourselfCounter = 0;
+                    }
+                }
+
+
+                String date = model.getDate().toString();
+
                 dateView.setText(date);
             }
         }

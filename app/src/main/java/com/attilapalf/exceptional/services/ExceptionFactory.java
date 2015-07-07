@@ -1,7 +1,6 @@
-package com.attilapalf.exceptional.utils;
+package com.attilapalf.exceptional.services;
 
 import android.content.Context;
-import android.provider.Settings;
 
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
@@ -11,9 +10,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Set;
 import java.util.List;
-import java.util.TreeSet;
 
 /**
  * Created by Attila on 2015-06-09.

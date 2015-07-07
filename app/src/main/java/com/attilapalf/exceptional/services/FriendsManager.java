@@ -1,4 +1,4 @@
-package com.attilapalf.exceptional.utils;
+package com.attilapalf.exceptional.services;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -9,16 +9,16 @@ import android.util.Log;
 
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.*;
-import com.attilapalf.exceptional.rest.BackendServiceUser;
-import com.attilapalf.exceptional.rest.BackendService;
-import com.attilapalf.exceptional.ui.main.interfaces.FriendChangeListener;
+import com.attilapalf.exceptional.interfaces.BackendServiceUser;
+import com.attilapalf.exceptional.interfaces.BackendService;
+import com.attilapalf.exceptional.interfaces.ApplicationStartupListener;
+import com.attilapalf.exceptional.interfaces.FriendChangeListener;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.Exception;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.Buffer;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +28,7 @@ import java.util.Set;
  * Responsible for storing friends in the device's preferences
  * Created by Attila on 2015-06-12.
  */
-public class FriendsManager implements FacebookManager.FriendListListener, BackendServiceUser {
+public class FriendsManager implements ApplicationStartupListener, BackendServiceUser {
 
     private BackendService backendService;
 
@@ -109,35 +109,36 @@ public class FriendsManager implements FacebookManager.FriendListListener, Backe
 
     @Override
     public void onAppStart(Set<Friend> friendSet) {
-//        // removing known friends from all friends
-//        friendSet.removeAll(storedFriends);
-//        // saving the rest of the all friends (these are the new ones)
-//        if (!friendSet.isEmpty()) {
-//            saveFriends(friendSet);
-//            Collections.sort(storedFriends, new Friend.NameComparator());
-//        }
+        Set<Friend> friendSetCopy = new HashSet<>(friendSet.size());
+        friendSetCopy.addAll(friendSet);
 
-        // refreshing all my friends data:
+        // new friends
+        friendSet.removeAll(storedFriends);
 
-        // these friends are freshly downloaded
+        // checking for changes at old friends
+        for (Friend f1 : friendSetCopy) {
+            for (Friend f2 : storedFriends) {
+
+                // if they are the same
+                if (f1.getId() == f2.getId()) {
+
+                    // if his image is changed
+                    if (!f1.getImageUrl().equals(f2.getImageUrl())) {
+                        new UpdateFriendsImageTask(f2).execute();
+                    }
+
+                    // if his name is changed
+                    if (!f1.getName().equals(f2.getName())) {
+                        updateFriend(f2);
+                    }
+
+                }
+            }
+        }
+
+        // handling new friends
         for (Friend f : friendSet) {
-            // update friends anyway
-            new UpdateFriendTask(f).execute();
-
-
-//            // this friend is already on the device
-//            Friend previous = findFriendById(storedFriends, f);
-//            if (previous != null) {
-//                // if this friend has changed his/her name or image
-//                if (!previous.getImageUrl().equals(f.getImageUrl())
-//                    || !previous.getName().equals(f.getName())) {
-//
-//                    // then we re-add to the storedFriends
-//                    storedFriends.remove(previous);
-//                    storedFriends.add(f);
-//                    editor.putString(Long.toString(f.getId()), f.toString());
-//                }
-//            }
+            new UpdateFriendsImageTask(f).execute();
         }
 
         editor.apply();
@@ -145,11 +146,20 @@ public class FriendsManager implements FacebookManager.FriendListListener, Backe
     }
 
 
+    @Override
+    public void onNoInternetStart() {
+//        for (Friend friend : storedFriends) {
+//            new UpdateFriendsImageTask(friend).execute();
+//        }
+    }
+
+
+
     // TODO: if download failed because of poor internet connection, retry later
-    private static class UpdateFriendTask extends AsyncTask<Void, Void, Bitmap> {
+    private static class UpdateFriendsImageTask extends AsyncTask<Void, Void, Bitmap> {
         Friend friend;
 
-        public UpdateFriendTask(Friend friend) {
+        public UpdateFriendsImageTask(Friend friend) {
             this.friend = friend;
         }
 
@@ -189,9 +199,9 @@ public class FriendsManager implements FacebookManager.FriendListListener, Backe
 
 
 
-    private Friend findFriendById(List<Friend> friends, Friend toBeFound) {
-        for (Friend iterator : friends) {
-            if (iterator.getId() == toBeFound.getId()) {
+    public Friend findFriendById(long friendId) {
+        for (Friend iterator : storedFriends) {
+            if (iterator.getId() == friendId) {
                 return iterator;
             }
         }
@@ -199,8 +209,9 @@ public class FriendsManager implements FacebookManager.FriendListListener, Backe
         return null;
     }
 
+
     public void updateFriend(Friend friend) {
-        Friend previous = findFriendById(storedFriends, friend);
+        Friend previous = findFriendById(friend.getId());
         storedFriends.remove(previous);
         storedFriends.add(friend);
         editor.putString(Long.toString(friend.getId()), friend.toString());
@@ -215,7 +226,7 @@ public class FriendsManager implements FacebookManager.FriendListListener, Backe
         for (Friend f : toBeSaved) {
             editor.putString(Long.toString(f.getId()), f.toString());
             storedFriends.add(f);
-            new UpdateFriendTask(f).execute();
+            new UpdateFriendsImageTask(f).execute();
         }
         editor.apply();
     }

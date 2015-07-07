@@ -16,8 +16,8 @@ import android.widget.TextView;
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.*;
 import com.attilapalf.exceptional.rest.BackendConnector;
-import com.attilapalf.exceptional.ui.main.interfaces.FriendChangeListener;
-import com.attilapalf.exceptional.utils.FriendsManager;
+import com.attilapalf.exceptional.interfaces.FriendChangeListener;
+import com.attilapalf.exceptional.services.FriendsManager;
 
 import java.util.List;
 
@@ -80,7 +80,7 @@ public class FriendsFragment extends ListFragment implements FriendChangeListene
         List<Friend> values;
 
         public FriendAdapter(Context context, List<Friend> values) {
-            super(context, R.layout.friend_row_layout_2, values);
+            super(context, R.layout.friend_row_layout, values);
             this.context = context;
             this.values = values;
         }
@@ -92,7 +92,7 @@ public class FriendsFragment extends ListFragment implements FriendChangeListene
 
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             if (convertView == null) {
-                convertView = inflater.inflate(R.layout.friend_row_layout_2, parent, false);
+                convertView = inflater.inflate(R.layout.friend_row_layout, parent, false);
                 viewHolder = new RowViewHolder(convertView);
                 convertView.setTag(viewHolder);
 
@@ -126,9 +126,7 @@ public class FriendsFragment extends ListFragment implements FriendChangeListene
             public void bindRow(Friend model) {
                 nameView.setText(model.getName());
                 pointsView.setText("Points: " + Long.toString(model.getId()));
-                if (model.getImage() != null) {
-                    imageView.setImageBitmap(model.getImage());
-                }
+                model.setImageToView(imageView);
             }
         }
 

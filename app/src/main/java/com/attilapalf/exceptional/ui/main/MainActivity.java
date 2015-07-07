@@ -21,13 +21,13 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.rest.BackendConnector;
-import com.attilapalf.exceptional.rest.ServerResponseListener;
+import com.attilapalf.exceptional.interfaces.ServerResponseListener;
 import com.attilapalf.exceptional.ui.LoginActivity;
 import com.attilapalf.exceptional.ui.SendExceptionListActivity;
-import com.attilapalf.exceptional.ui.main.interfaces.ExceptionChangeListener;
-import com.attilapalf.exceptional.utils.ExceptionFactory;
-import com.attilapalf.exceptional.utils.FacebookManager;
-import com.attilapalf.exceptional.utils.GpsService;
+import com.attilapalf.exceptional.interfaces.ExceptionChangeListener;
+import com.attilapalf.exceptional.services.ExceptionFactory;
+import com.attilapalf.exceptional.services.FacebookManager;
+import com.attilapalf.exceptional.services.GpsService;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

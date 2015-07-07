@@ -1,4 +1,4 @@
-package com.attilapalf.exceptional.utils;
+package com.attilapalf.exceptional.services;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -6,8 +6,8 @@ import android.content.SharedPreferences;
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.rest.messages.ExceptionWrapper;
-import com.attilapalf.exceptional.ui.main.interfaces.ExceptionChangeListener;
-import com.attilapalf.exceptional.ui.main.interfaces.ExceptionSource;
+import com.attilapalf.exceptional.interfaces.ExceptionChangeListener;
+import com.attilapalf.exceptional.interfaces.ExceptionSource;
 
 import java.util.Collections;
 import java.util.HashSet;

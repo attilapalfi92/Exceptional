@@ -20,7 +20,8 @@
         android:layout_toRightOf="@+id/friendImageView"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true" />
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="10dp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -30,5 +31,6 @@
         android:layout_alignBottom="@+id/friendImageView"
         android:layout_toRightOf="@+id/friendImageView"
         android:layout_alignRight="@+id/friendNameView"
-        android:layout_alignEnd="@+id/friendNameView" />
+        android:layout_alignEnd="@+id/friendNameView"
+        android:layout_marginLeft="10dp" />
 </RelativeLayout>
