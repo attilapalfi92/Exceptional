@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="ANDROID.PERMISSION.READ_EXTERNAL_STORAGE" />
 
-    <permission android:name="com.attilapalf.exceptional.permission.C2D_MESSAGE" />
+    <!-- <permission android:name="com.attilapalf.exceptional.permission.C2D_MESSAGE" /> -->
 
     <uses-permission android:name="com.attilapalf.exceptional.permission.C2D_MESSAGE" />
 
@@ -68,6 +68,13 @@
         <activity
             android:name=".ui.FriendChooserActivity"
             android:label="@string/title_activity_friend_chooser" >
+        </activity>
+        <activity
+            android:name=".ui.ShowNotificationActivity"
+            android:label="@string/title_activity_show_notification"
+            android:launchMode="singleTask"
+            android:taskAffinity=""
+            android:excludeFromRecents="true" >
         </activity>
     </application>
 

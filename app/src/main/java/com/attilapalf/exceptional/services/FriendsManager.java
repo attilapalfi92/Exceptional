@@ -41,6 +41,7 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
 //    private final Set<Friend> storedFriends = Collections.synchronizedSet(
 //            new TreeSet<Friend>(new Friend.NameComparator()));
     private final List<Friend> storedFriends = new LinkedList<>();
+    private Friend yourself;
 
     private FriendChangeListener friendChangeListener;
 
@@ -83,32 +84,42 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
 
         String[] keyArray = new String[keys.size()];
         keys.toArray(keyArray);
-        //synchronized (memoryCacheSyncObj) {
+
         for (String s : keyArray) {
             String friendJson = (String) store.get(s);
             Friend f = Friend.fromString(friendJson);
-            storedFriends.add(f);
+            if ("yourself".equals(s)) {
+                yourself = f;
+            } else {
+                storedFriends.add(f);
+            }
         }
-        //}
-        //Collections.sort(storedFriends, new Friend.NameComparator());
+    }
+
+
+
+    public boolean isItYourself(Friend friend) {
+        return friend.getId() == yourself.getId();
     }
 
 
 
     @Override
-    public void onFirstAppStart(Set<Friend> friendSet) {
-        //synchronized (memoryCacheSyncObj) {
-            // adding facebook friends
-            saveFriends(friendSet);
+    public void onFirstAppStart(Set<Friend> friendSet, Friend yourself) {
+        saveFriends(friendSet);
 
-            // TODO: send facebookFriends to backend database
-            backendService.onFirstAppStart(friendSet);
-        //}
+        // saving yourself
+        saveOrUpdateYourself(yourself);
+
+        backendService.onFirstAppStart(friendSet);
     }
 
 
+
     @Override
-    public void onAppStart(Set<Friend> friendSet) {
+    public void onAppStart(Set<Friend> friendSet, Friend yourself) {
+        saveOrUpdateYourself(yourself);
+
         Set<Friend> friendSetCopy = new HashSet<>(friendSet.size());
         friendSetCopy.addAll(friendSet);
 
@@ -118,21 +129,7 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
         // checking for changes at old friends
         for (Friend f1 : friendSetCopy) {
             for (Friend f2 : storedFriends) {
-
-                // if they are the same
-                if (f1.getId() == f2.getId()) {
-
-                    // if his image is changed
-                    if (!f1.getImageUrl().equals(f2.getImageUrl())) {
-                        new UpdateFriendsImageTask(f2).execute();
-                    }
-
-                    // if his name is changed
-                    if (!f1.getName().equals(f2.getName())) {
-                        updateFriend(f2);
-                    }
-
-                }
+                checkFriendChange(f1, f2);
             }
         }
 
@@ -146,13 +143,58 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
     }
 
 
-    @Override
-    public void onNoInternetStart() {
-//        for (Friend friend : storedFriends) {
-//            new UpdateFriendsImageTask(friend).execute();
-//        }
+
+
+    public void saveOrUpdateYourself(Friend yourself) {
+        if (yourself != null) {
+            if (this.yourself == null) {
+                this.yourself = yourself;
+                editor.putString("yourself", yourself.toString());
+                editor.apply();
+                new UpdateFriendsImageTask(yourself).execute();
+
+            } else {
+                checkFriendChange(yourself, this.yourself);
+            }
+        }
     }
 
+
+
+
+    private void checkFriendChange(Friend newFriendState, Friend oldFriendState) {
+        // if they are the same
+        if (newFriendState.getId() == oldFriendState.getId()) {
+            // if his image is changed
+            if (!newFriendState.getImageUrl().equals(oldFriendState.getImageUrl())) {
+                new UpdateFriendsImageTask(newFriendState).execute();
+            }
+
+            // if his name is changed
+            if (!newFriendState.getName().equals(oldFriendState.getName())) {
+                updateFriendOrYourself(newFriendState);
+            }
+        }
+    }
+
+
+    public void updateFriendOrYourself(Friend friend) {
+        if (friend.getId() != yourself.getId()) {
+            Friend previous = findFriendById(friend.getId());
+            storedFriends.remove(previous);
+            storedFriends.add(friend);
+            editor.putString(Long.toString(friend.getId()), friend.toString());
+            editor.apply();
+            if (friendChangeListener != null) {
+                friendChangeListener.onFriendsChanged();
+            }
+
+        } else {
+            yourself = friend;
+            editor.putString("yourself", yourself.toString());
+            editor.apply();
+        }
+    }
 
 
     // TODO: if download failed because of poor internet connection, retry later
@@ -192,34 +234,34 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             friend.setImage(bitmap);
-            FriendsManager.getInstance().updateFriend(friend);
+            FriendsManager.getInstance().updateFriendOrYourself(friend);
         }
     }
+
 
 
 
 
     public Friend findFriendById(long friendId) {
-        for (Friend iterator : storedFriends) {
-            if (iterator.getId() == friendId) {
-                return iterator;
+        Friend returnFriend = null;
+        for (Friend friend : storedFriends) {
+            if (friend.getId() == friendId) {
+                returnFriend = friend;
+                break;
             }
         }
 
-        return null;
-    }
-
-
-    public void updateFriend(Friend friend) {
-        Friend previous = findFriendById(friend.getId());
-        storedFriends.remove(previous);
-        storedFriends.add(friend);
-        editor.putString(Long.toString(friend.getId()), friend.toString());
-        editor.apply();
-        if (friendChangeListener != null) {
-            friendChangeListener.onFriendsChanged();
+        if (returnFriend == null) {
+            if (friendId == yourself.getId()) {
+                returnFriend = yourself;
+            }
         }
+
+        return returnFriend;
     }
+
+
+
 
 
     private void saveFriends(Set<Friend> toBeSaved) {
@@ -229,6 +271,11 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
             new UpdateFriendsImageTask(f).execute();
         }
         editor.apply();
+    }
+
+
+    @Override
+    public void onNoInternetStart() {
     }
 
 

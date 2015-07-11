@@ -87,7 +87,6 @@ public class BackendConnector implements BackendService, FriendSource, //Excepti
         projectNumber = context.getString(R.string.project_number);
 
         responseListeners = new HashSet<>();
-//        exceptionChangeListeners = new HashSet<>();
         friendChangeListeners = new HashSet<>();
 
         gson = new GsonBuilder()
@@ -164,33 +163,6 @@ public class BackendConnector implements BackendService, FriendSource, //Excepti
                 refreshListener.onExceptionRefreshFinished();
             }
         });
-
-//        try {
-//            // TODO: finish
-//            //restInterface.refreshExceptions();
-//            AsyncTask<Integer, Integer, Integer> task = new AsyncTask<Integer, Integer, Integer>() {
-//
-//                @Override
-//                protected Integer doInBackground(Integer... params) {
-//                    try {
-//                        Thread.sleep(2000);
-//                        return 0;
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                        return 1;
-//                    }
-//                }
-//
-//                @Override
-//                protected void onPostExecute(Integer integer) {
-//                    super.onPostExecute(integer);
-//                    refreshListener.onExceptionRefreshFinished();
-//                }
-//            }.execute();
-//
-//        } catch (java.lang.Exception e) {
-//
-//        }
     }
 
 

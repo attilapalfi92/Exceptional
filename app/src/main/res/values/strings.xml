@@ -26,4 +26,5 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="choose_victim">Choose your victim of Exception!</string>
+    <string name="title_activity_show_notification">ShowNotificationActivity</string>
 </resources>

@@ -7,6 +7,7 @@ import android.widget.ImageView;
 import com.attilapalf.exceptional.services.ImageCache;
 import com.google.gson.Gson;
 
+import java.lang.ref.WeakReference;
 import java.util.Comparator;
 
 /**
@@ -16,7 +17,7 @@ public class Friend {
     private long id;
     private String name;
     private String imageUrl;
-    private transient Bitmap image;
+    private transient WeakReference<Bitmap> imageWeakReference;
 
     private static Gson gson = new Gson();
 
@@ -44,13 +45,21 @@ public class Friend {
     }
 
     public Friend() {
+        imageWeakReference = new WeakReference<>(null);
+    }
+
+    public Friend(long id, String name, String imageUrl) {
+        this.id = id;
+        this.name = name;
+        this.imageUrl = imageUrl;
+        this.imageWeakReference = new WeakReference<>(null);
     }
 
     public Friend(long id, String name, String imageUrl, Bitmap image) {
         this.id = id;
         this.name = name;
         this.imageUrl = imageUrl;
-        this.image = image;
+        this.imageWeakReference = new WeakReference<>(image);
     }
 
     public long getId() {
@@ -77,21 +86,17 @@ public class Friend {
         this.imageUrl = imageUrl;
     }
 
-    public Bitmap getImage() {
-        return image;
-    }
-
     public void setImageToView(final ImageView view) {
-        if (image == null) {
+        if (imageWeakReference.get() == null) {
             new AsyncImageLoader(this, view).execute();
 
         } else {
-            view.setImageBitmap(image);
+            view.setImageBitmap(imageWeakReference.get());
         }
     }
 
     public void setImage(Bitmap image) {
-        this.image = image;
+        this.imageWeakReference = new WeakReference<>(image);
     }
 
 

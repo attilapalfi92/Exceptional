@@ -1,16 +1,24 @@
 package com.attilapalf.exceptional.services;
 
 import android.app.IntentService;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
+import com.attilapalf.exceptional.ui.ShowNotificationActivity;
+import com.attilapalf.exceptional.ui.main.MainActivity;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -18,9 +26,9 @@ import java.sql.Timestamp;
  */
 public class GcmMessageHandler extends IntentService {
 
-    private String message;
     private Handler handler;
     private Exception exception;
+    private static int notificationIdCounter = 0;
 
 
     public GcmMessageHandler() {
@@ -40,12 +48,17 @@ public class GcmMessageHandler extends IntentService {
     protected void onHandleIntent(Intent intent) {
         Bundle extras = intent.getExtras();
 
-        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
+//        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
         // The getMessageType() intent parameter must be the intent you received
         // in your BroadcastReceiver.
-        String messageType = gcm.getMessageType(intent);
+//        String messageType = gcm.getMessageType(intent);
 
         String notificationType = extras.getString("notificationType");
+
+        if (notificationType == null) {
+            GcmBroadcastReceiver.completeWakefulIntent(intent);
+            return;
+        }
 
         switch (notificationType) {
             case "exception":
@@ -76,19 +89,62 @@ public class GcmMessageHandler extends IntentService {
                 exception.setDate(new Timestamp(timeInMillis));
 
                 addException();
-                message = extras.getString("title") + " " + extras.getString("body");
+
+                Bundle bundle = new Bundle();
+                bundle.putInt("typeId", typeId);
+                bundle.putLong("fromWho", fromWho);
+                bundle.putDouble("longitude", longitude);
+                bundle.putDouble("latitude", latitude);
+                bundle.putLong("timeInMillis", timeInMillis);
+
+                showNotification("New exception caught!",
+                        "You caught a(n) " + exception.getShortName(), bundle);
 
                 break;
 
             default:
-                message = "Something else.";
                 break;
         }
 
-        Log.i("GCM", "Received : (" + messageType + ")  " + extras.getString("title"));
 
         GcmBroadcastReceiver.completeWakefulIntent(intent);
 
+    }
+
+
+    public void showNotification(String title, String text, Bundle bundle) {
+        NotificationCompat.Builder notificationBuilder =
+                new NotificationCompat.Builder(this)
+                        .setAutoCancel(true)
+                        .setSmallIcon(R.drawable.logo)
+                        .setContentTitle(title)
+                        .setContentText(text);
+
+
+        // setting activity to start on notification click
+        Intent resultIntent = new Intent(this, ShowNotificationActivity.class);
+        resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        // putting data into the intent
+        resultIntent.putExtras(bundle);
+
+        // Because clicking the notification opens a new ("special") activity, there's
+        // no need to create an artificial back stack.
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(
+                        this,
+                        0,
+                        resultIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+
+        notificationBuilder.setContentIntent(resultPendingIntent);
+
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        notificationManager.notify(notificationIdCounter++, notificationBuilder.build());
     }
 
 

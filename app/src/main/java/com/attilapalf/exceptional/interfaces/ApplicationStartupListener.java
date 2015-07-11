@@ -11,7 +11,7 @@ import java.util.Set;
  * Facebook to get his friends. When facebook sends his friends back, these methods are called.
  */
 public interface ApplicationStartupListener {
-    void onFirstAppStart(Set<Friend> friendSet);
-    void onAppStart(Set<Friend> friendSet);
+    void onFirstAppStart(Set<Friend> friendSet, Friend yourself);
+    void onAppStart(Set<Friend> friendSet, Friend yourself);
     void onNoInternetStart();
 }

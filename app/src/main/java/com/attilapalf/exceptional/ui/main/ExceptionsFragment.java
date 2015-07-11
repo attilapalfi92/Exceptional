@@ -176,24 +176,29 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
                 descView.setText(model.getDescription());
 
                 Friend fromWho = FriendsManager.getInstance().findFriendById(model.getFromWho());
-                if (fromWho != null) {
-                    fromWhoView.setText("From: " + fromWho.getName());
-                    yourselfCounter = 0;
 
-                } else {
-                    if (FacebookManager.getInstance().getProfileId() == model.getFromWho()) {
+                if (fromWho != null) {
+
+                    if (fromWho.getName().equals("yourself")) {
                         fromWhoView.setText("From: yourself");
+
                         if (++yourselfCounter == 7) {
                             yourselfCounter = 0;
+
                             if (!toastShown) {
                                 Toast.makeText(fromWhoView.getContext(), "You lonely motherfucker", Toast.LENGTH_SHORT).show();
                                 toastShown = true;
                             }
                         }
+
                     } else {
-                        fromWhoView.setText("From: unknown :(");
+                        fromWhoView.setText("From: " + fromWho.getName());
                         yourselfCounter = 0;
                     }
+
+                } else {
+                    fromWhoView.setText("From: unknown :(");
+                    yourselfCounter = 0;
                 }
 
 

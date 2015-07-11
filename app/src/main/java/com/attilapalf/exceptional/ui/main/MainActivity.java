@@ -37,8 +37,8 @@ import java.util.Set;
 public class MainActivity extends AppCompatActivity implements ServerResponseListener {
 
     private Location mLocation;
-    private final Set<ExceptionChangeListener> exceptionChangeListeners = new HashSet<>();
     private String androidId;
+    private MainPagerAdapter adapter;
 
     GpsService gpsService;
 
@@ -55,26 +55,10 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
         androidId = Settings.Secure.getString(getApplicationContext()
                 .getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        MainPagerAdapter adapter = new MainPagerAdapter(getSupportFragmentManager());
+        adapter = new MainPagerAdapter(getSupportFragmentManager());
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
         pager.setAdapter(adapter);
-
-        // write release hash key as debug message
-        try {
-            PackageInfo info = getPackageManager().getPackageInfo(
-                    "com.attilapalf.exceptional",
-                    PackageManager.GET_SIGNATURES);
-            for (Signature signature : info.signatures) {
-                MessageDigest md = MessageDigest.getInstance("SHA");
-                md.update(signature.toByteArray());
-                String hash = Base64.encodeToString(md.digest(), Base64.DEFAULT);
-                Log.d("KeyHash:", hash);
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
+        //pager.setCurrentItem(1);
     }
 
 
@@ -128,18 +112,10 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
     @Override
     public void onBackPressed()
     {
-        if(backButtonCount >= 1)
-        {
-            Intent intent = new Intent(Intent.ACTION_MAIN);
-            intent.addCategory(Intent.CATEGORY_HOME);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-        }
-        else
-        {
-            Toast.makeText(this, "Press the back button once again to close the application.", Toast.LENGTH_SHORT).show();
-            backButtonCount++;
-        }
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 
 

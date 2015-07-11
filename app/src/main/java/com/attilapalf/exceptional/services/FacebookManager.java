@@ -2,6 +2,7 @@ package com.attilapalf.exceptional.services;
 
 import android.app.Application;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -23,6 +24,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -39,6 +41,7 @@ public class FacebookManager {
     private Profile profile;
     private ProfileTracker profileTracker;
     private long profileId = 0;
+    private Friend yourself;
 
     private CallbackManager callbackManager;
     private FacebookCallback<LoginResult> facebookCallback;
@@ -107,7 +110,16 @@ public class FacebookManager {
                 synchronized (syncObject) {
                     accessToken = loginResult.getAccessToken();
                     loginSuccessHandler.onLoginSuccess(loginResult);
+
                     profile = Profile.getCurrentProfile();
+                    if (profile != null) {
+                        yourself = new Friend(
+                                Long.parseLong(profile.getId()),
+                                profile.getName(),
+                                profile.getProfilePictureUri(200, 200).toString());
+                        FriendsManager.getInstance().saveOrUpdateYourself(yourself);
+                    }
+                    
                     firstStart = true;
                     refreshFriends();
                 }
@@ -143,6 +155,14 @@ public class FacebookManager {
             protected void onCurrentProfileChanged(Profile oldProfile, Profile newProfile) {
                 synchronized (syncObject) {
                     profile = newProfile;
+                    yourself = new Friend(
+                            Long.parseLong(profile.getId()),
+                            profile.getName(),
+                            profile.getProfilePictureUri(200, 200).toString());
+                    FriendsManager.getInstance().saveOrUpdateYourself(yourself);
+
+                    // experimental:
+                    //refreshFriends();
                 }
             }
         };
@@ -182,10 +202,17 @@ public class FacebookManager {
                             e.printStackTrace();
                         }
                     }
+
+
+                    profile = Profile.getCurrentProfile();
+                    yourself = new Friend(
+                            Long.parseLong(profile.getId()),
+                            profile.getName(),
+                            profile.getProfilePictureUri(200, 200).toString());
                     if (firstStart) {
-                        startupListener.onFirstAppStart(friends);
+                        startupListener.onFirstAppStart(friends, yourself);
                     } else {
-                        startupListener.onAppStart(friends);
+                        startupListener.onAppStart(friends, yourself);
                     }
 
 
