@@ -180,7 +180,6 @@ public class BackendConnector implements BackendService, FriendSource, //Excepti
             restInterface.appStart(requestBody, new Callback<AppStartResponseBody>() {
                 @Override
                 public void success(AppStartResponseBody appStartResponseBody, Response response) {
-                    ExceptionManager.getInstance().saveStarterId(appStartResponseBody.getExceptionIdStarter());
                     int excSize = appStartResponseBody.getMyExceptions().size();
                     if (excSize > 0) {
                         ExceptionManager.getInstance().addExceptions(appStartResponseBody.getMyExceptions());
@@ -263,7 +262,6 @@ public class BackendConnector implements BackendService, FriendSource, //Excepti
             restInterface.firstAppStart(requestBody, new Callback<AppStartResponseBody>() {
                 @Override
                 public void success(AppStartResponseBody appStartResponseBody, Response response) {
-                    ExceptionManager.getInstance().saveStarterId(appStartResponseBody.getExceptionIdStarter());
                     int excSize = appStartResponseBody.getMyExceptions().size();
                     if (excSize > 0) {
                         ExceptionManager.getInstance().addExceptions(appStartResponseBody.getMyExceptions());

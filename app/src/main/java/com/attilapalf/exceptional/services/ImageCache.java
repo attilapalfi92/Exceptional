@@ -13,6 +13,10 @@ import com.attilapalf.exceptional.model.Friend;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * Created by 212461305 on 2015.07.06..
@@ -136,14 +140,30 @@ public class ImageCache {
      */
     public Bitmap getImage(Friend friend) {
 
+        // getting image from memory cache, if available
         Bitmap bitmap = imageWarehouse.get(friend.getId());
 
         if (bitmap == null) {
-            // TODO: check the disk storage for the image
+
+            // getting image from disk cache, if available
             if (imageFileExists(friend)) {
                 bitmap = getFromDisk(friend);
                 if (bitmap != null) {
                     imageWarehouse.put(friend.getId(), bitmap);
+
+                // getting image from network, in worst case
+                } else {
+                    try {
+                        URL url = new URL(friend.getImageUrl());
+                        URLConnection connection = url.openConnection();
+                        connection.setUseCaches(true);
+                        InputStream inputStream = (InputStream) connection.getContent();
+                        bitmap = BitmapFactory.decodeStream(inputStream);
+                        addImage(friend, bitmap);
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -171,56 +191,4 @@ public class ImageCache {
 
         // TODO: remove from disk storage
     }
-
-
-//    public void loadBitmap(Friend friend, ImageView imageView) {
-//        final Bitmap bitmap = getImage(friend);
-//
-//        if (bitmap != null) {
-//            imageView.setImageBitmap(bitmap);
-//        } else {
-//            new BitmapWorkerTask(friend, imageView);
-//        }
-//    }
-//
-//
-//    private static class BitmapWorkerTask extends AsyncTask<Void, Void, Void> {
-//
-//        private Friend friend;
-//        private ImageView imageView;
-//        private Bitmap bitmap;
-//
-//        public BitmapWorkerTask(Friend friend, ImageView imageView) {
-//            this.friend = friend;
-//            this.imageView = imageView;
-//        }
-//
-//        @Override
-//        protected Void doInBackground(Void... params) {
-//            try {
-//                URL url = new URL(friend.getImageUrl());
-//                URLConnection connection = url.openConnection();
-//                InputStream inputStream = (InputStream) connection.getContent();
-//                bitmap = BitmapFactory.decodeStream(inputStream);
-//
-//                ImageCache.getInstance().addImage(friend, bitmap);
-//
-//                return null;
-//
-//            } catch (MalformedURLException e) {
-//                e.printStackTrace();
-//                return null;
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//                return null;
-//            }
-//        }
-//
-//
-//        @Override
-//        protected void onPostExecute(Void aVoid) {
-//            imageView.setImageBitmap(bitmap);
-//        }
-//    }
-
 }

@@ -2,6 +2,7 @@ package com.attilapalf.exceptional.services;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
@@ -9,6 +10,7 @@ import com.attilapalf.exceptional.rest.messages.ExceptionWrapper;
 import com.attilapalf.exceptional.interfaces.ExceptionChangeListener;
 import com.attilapalf.exceptional.interfaces.ExceptionSource;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -29,8 +31,6 @@ public class ExceptionManager implements ExceptionSource {
     private SharedPreferences.Editor editor;
 
     private String PREFS_NAME;
-
-    private long starterId = 0;
 
     private Set<ExceptionChangeListener> exceptionChangeListeners = new HashSet<>();
 
@@ -67,57 +67,77 @@ public class ExceptionManager implements ExceptionSource {
         editor = instance.sharedPreferences.edit();
         editor.apply();
 
-        Map<String, ?> store = sharedPreferences.getAll();
-        store.remove("starterId");
-        Set<String> keys = store.keySet();
-
-        String[] keyArray = new String[keys.size()];
-        keys.toArray(keyArray);
-        for (String s : keyArray) {
-            String excJson = (String) store.get(s);
-            Exception e = Exception.fromString(excJson);
-            e.setExceptionType(ExceptionFactory.findById(e.getExceptionTypeId()));
-            storedExceptions.add(storedExceptions.size(), e);
-        }
-        Collections.sort(storedExceptions, new Exception.DateComparator());
-        starterId = sharedPreferences.getLong("starterId", 0);
+        new AsyncExceptionLoader(storedExceptions, sharedPreferences, editor).execute();
     }
+
+
+
+    private static class AsyncExceptionLoader extends AsyncTask<Void, Void, Void> {
+
+        private List<Exception> resultList;
+        private List<Exception> temporaryList;
+        private SharedPreferences sharedPreferences;
+        private SharedPreferences.Editor editor;
+
+        public AsyncExceptionLoader(List<Exception> resultList, SharedPreferences sharedPreferences,
+                                    SharedPreferences.Editor editor) {
+            this.resultList = resultList;
+            this.sharedPreferences = sharedPreferences;
+            this.editor = editor;
+            temporaryList = new LinkedList<>();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+
+            Map<String, ?> store = sharedPreferences.getAll();
+            Set<String> keys = store.keySet();
+
+            String[] keyArray = new String[keys.size()];
+            keys.toArray(keyArray);
+            for (String s : keyArray) {
+                String excJson = (String) store.get(s);
+                Exception e = Exception.fromString(excJson);
+                e.setExceptionType(ExceptionFactory.findById(e.getExceptionTypeId()));
+                temporaryList.add(temporaryList.size(), e);
+            }
+            Collections.sort(temporaryList, new Exception.DateComparator());
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            for (Exception e : temporaryList) {
+                resultList.add(e);
+            }
+            temporaryList = null;
+        }
+    }
+
+
+
+
 
     public boolean isInitialized() {
         return sharedPreferences != null;
     }
 
+
     public int exceptionCount() {
         return storedExceptions.size();
     }
 
-    public void saveStarterId(long myId) {
-        starterId = myId;
-        editor.putLong("starterId", myId);
-        editor.apply();
-    }
-
-    public long getStarterId() {
-        return starterId;
-    }
 
 
     public long getLastKnownId() {
         if (storedExceptions.isEmpty()) {
-            return starterId;
+            return 0;
         }
 
         return storedExceptions.get(0).getInstanceId();
     }
 
-
-    public long getNextId() {
-        if (storedExceptions.isEmpty()) {
-            return starterId;
-        }
-
-        return storedExceptions.get(0).getInstanceId() + 1;
-    }
 
 
     public void addException(Exception e, boolean notifyNeeded) {

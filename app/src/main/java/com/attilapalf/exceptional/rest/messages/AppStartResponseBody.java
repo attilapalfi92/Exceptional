@@ -8,18 +8,9 @@ import java.util.List;
  */
 public class AppStartResponseBody {
     private List<ExceptionWrapper> myExceptions;
-    private long exceptionIdStarter;
 
     public AppStartResponseBody() {
         myExceptions = new ArrayList<>();
-    }
-
-    public long getExceptionIdStarter() {
-        return exceptionIdStarter;
-    }
-
-    public void setExceptionIdStarter(long exceptionIdStarter) {
-        this.exceptionIdStarter = exceptionIdStarter;
     }
 
     public List<ExceptionWrapper> getMyExceptions() {
