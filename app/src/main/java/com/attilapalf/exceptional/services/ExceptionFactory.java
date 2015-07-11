@@ -45,6 +45,18 @@ public class ExceptionFactory {
         Collections.sort(exceptionTypesById, new ExceptionType.IdComparator());
     }
 
+
+    public static Exception createException(int typeId, long fromWho, long toWho) {
+
+        Exception e = new Exception();
+        e.setFromWho(fromWho);
+        e.setToWho(toWho);
+        e.setDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
+        e.setExceptionType(findById(typeId));
+
+        return e;
+    }
+
     public static Exception createRandomException(long fromWho, long toWho) {
         int random = (int)(Math.random() * exceptionTypesByName.size());
         ExceptionType type = exceptionTypesByName.get(random);

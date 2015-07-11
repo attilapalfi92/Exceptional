@@ -12,13 +12,14 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.util.Log;
+import android.widget.Toast;
 
 /**
  * Created by Attila on 2015-06-20.
  */
 public class GpsService extends Service implements LocationListener {
 
-    private final Context mContext;
+    private Context mContext;
 
     // flag for network status
     boolean isNetworkEnabled = false;
@@ -39,7 +40,19 @@ public class GpsService extends Service implements LocationListener {
     // Declaring a Location Manager
     protected LocationManager locationManager;
 
-    public GpsService(Context context) {
+    private static GpsService instance;
+
+    public static GpsService getInstance() {
+        if (instance == null) {
+            instance = new GpsService();
+        }
+
+        return instance;
+    }
+
+    private GpsService() {}
+
+    public void initialize(Context context) {
         this.mContext = context;
         getLocation();
     }
@@ -102,6 +115,9 @@ public class GpsService extends Service implements LocationListener {
                 .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
         canGetLocation = isNetworkEnabled;
+        if (!canGetLocation) {
+            Toast.makeText(mContext, "Can't get device's location.\nPlease enable location services.", Toast.LENGTH_SHORT).show();
+        }
 
         return canGetLocation;
     }

@@ -2,6 +2,7 @@ package com.attilapalf.exceptional.interfaces;
 
 import com.attilapalf.exceptional.model.Friend;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -11,7 +12,7 @@ import java.util.Set;
  * Facebook to get his friends. When facebook sends his friends back, these methods are called.
  */
 public interface ApplicationStartupListener {
-    void onFirstAppStart(Set<Friend> friendSet, Friend yourself);
-    void onAppStart(Set<Friend> friendSet, Friend yourself);
+    void onFirstAppStart(List<Friend> friendList, Friend yourself);
+    void onAppStart(List<Friend> friendList, Friend yourself);
     void onNoInternetStart();
 }

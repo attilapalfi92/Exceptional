@@ -1,8 +1,9 @@
-package com.attilapalf.exceptional.ui;
+package com.attilapalf.exceptional.ui.exceptionSending;
 
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Location;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -18,10 +19,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.attilapalf.exceptional.R;
-import com.attilapalf.exceptional.model.ExceptionType;
-import com.attilapalf.exceptional.model.Friend;
+import com.attilapalf.exceptional.model.*;
+import com.attilapalf.exceptional.model.Exception;
+import com.attilapalf.exceptional.rest.BackendConnector;
 import com.attilapalf.exceptional.services.ExceptionFactory;
 import com.attilapalf.exceptional.services.FriendsManager;
+import com.attilapalf.exceptional.services.GpsService;
 import com.attilapalf.exceptional.ui.main.FriendsFragment;
 
 import java.util.List;
@@ -29,6 +32,7 @@ import java.util.List;
 public class FriendChooserActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     private MyAdapter adapter;
+    private int exceptionTypeId = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,11 +44,24 @@ public class FriendChooserActivity extends AppCompatActivity implements AdapterV
 
         adapter = new MyAdapter(this.getApplicationContext(), FriendsManager.getInstance().getStoredFriends());
         friendListView.setAdapter(adapter);
+
+        exceptionTypeId = getIntent().getIntExtra("exceptionTypeId", exceptionTypeId);
     }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Friend friend = adapter.getItem(position);
+        Exception exception = ExceptionFactory.createException(exceptionTypeId,
+                FriendsManager.getInstance().getYourself().getId(),
+                friend.getId());
 
+        if (GpsService.getInstance().canGetLocation()) {
+            Location location = GpsService.getInstance().getLocation();
+            exception.setLongitude(location.getLongitude());
+            exception.setLatitude(location.getLatitude());
+            BackendConnector.getInstance().sendException(exception);
+            finish();
+        }
     }
 
 

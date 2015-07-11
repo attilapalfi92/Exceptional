@@ -1,13 +1,12 @@
 package com.attilapalf.exceptional.rest.messages;
 
-import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 
 /**
  * Created by Attila on 2015-06-11.
  */
-public class AppStartRequestBody extends BaseRequestBody {
+public class AppStartRequestBody extends BaseExceptionRequestBody {
     private String deviceId;
     private String regId;
     private Collection<Long> friendsIds;

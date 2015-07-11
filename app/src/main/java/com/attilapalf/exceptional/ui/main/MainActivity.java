@@ -2,16 +2,11 @@ package com.attilapalf.exceptional.ui.main;
 
 
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
 import android.location.Location;
 import android.provider.Settings;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Base64;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,16 +18,10 @@ import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.rest.BackendConnector;
 import com.attilapalf.exceptional.interfaces.ServerResponseListener;
 import com.attilapalf.exceptional.ui.LoginActivity;
-import com.attilapalf.exceptional.ui.SendExceptionListActivity;
-import com.attilapalf.exceptional.interfaces.ExceptionChangeListener;
+import com.attilapalf.exceptional.ui.exceptionSending.SendExceptionListActivity;
 import com.attilapalf.exceptional.services.ExceptionFactory;
 import com.attilapalf.exceptional.services.FacebookManager;
 import com.attilapalf.exceptional.services.GpsService;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashSet;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements ServerResponseListener {
 
@@ -48,7 +37,8 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        gpsService = new GpsService(getApplicationContext());
+        GpsService.getInstance().initialize(getApplicationContext());
+        gpsService = GpsService.getInstance();
 
         BackendConnector.getInstance().addConnectionListener(this);
 
@@ -58,7 +48,14 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
         adapter = new MainPagerAdapter(getSupportFragmentManager());
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
         pager.setAdapter(adapter);
-        //pager.setCurrentItem(1);
+
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            int startPage = bundle.getInt("startPage");
+            if (startPage != 0) {
+                pager.setCurrentItem(startPage);
+            }
+        }
     }
 
 
@@ -128,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
     public void giveMeExcClicked(View view) {
 
         if (!gpsService.canGetLocation() && mLocation == null) {
-            Toast.makeText(this, "Can't get device's location.\nPlease enable location services.", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Can't get device's location.\nPlease enable location services.", Toast.LENGTH_SHORT).show();
 
         } else {
 

@@ -24,6 +24,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -188,7 +189,7 @@ public class FacebookManager {
                 // request successfully returned
                 if (graphResponse.getError() == null) {
                     Log.d("response length: ", Integer.toString(jsonArray.length()));
-                    Set<Friend> friends = new TreeSet<>(new Friend.NameComparator());
+                    List<Friend> friends = new ArrayList<>();
                     for(int i = 0; i < jsonArray.length(); i++) {
                         try {
                             JSONObject user = jsonArray.getJSONObject(i);
@@ -205,10 +206,12 @@ public class FacebookManager {
 
 
                     profile = Profile.getCurrentProfile();
-                    yourself = new Friend(
-                            Long.parseLong(profile.getId()),
-                            profile.getName(),
-                            profile.getProfilePictureUri(200, 200).toString());
+                    if (profile != null) {
+                        yourself = new Friend(
+                                Long.parseLong(profile.getId()),
+                                profile.getName(),
+                                profile.getProfilePictureUri(200, 200).toString());
+                    }
                     if (firstStart) {
                         startupListener.onFirstAppStart(friends, yourself);
                     } else {

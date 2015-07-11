@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -105,38 +107,46 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
 
 
     @Override
-    public void onFirstAppStart(Set<Friend> friendSet, Friend yourself) {
-        saveFriends(friendSet);
+    public void onFirstAppStart(List<Friend> friendList, Friend yourself) {
+        saveFriends(friendList);
 
         // saving yourself
         saveOrUpdateYourself(yourself);
 
-        backendService.onFirstAppStart(friendSet);
+        backendService.onFirstAppStart(friendList);
     }
 
 
 
     @Override
-    public void onAppStart(Set<Friend> friendSet, Friend yourself) {
+    public void onAppStart(List<Friend> friendList, Friend yourself) {
         saveOrUpdateYourself(yourself);
 
-        Set<Friend> friendSetCopy = new HashSet<>(friendSet.size());
-        friendSetCopy.addAll(friendSet);
-
-        // new friends
-        friendSet.removeAll(storedFriends);
+        List<Friend> knownFriends = new ArrayList<>(friendList.size());
+        knownFriends.addAll(friendList);
 
         // checking for changes at old friends
-        for (Friend f1 : friendSetCopy) {
+        for (Friend f1 : knownFriends) {
             for (Friend f2 : storedFriends) {
                 checkFriendChange(f1, f2);
             }
         }
 
+        // deleted friends
+        List<Friend> deletedFriends = new ArrayList<>();
+        deletedFriends.addAll(storedFriends);
+        deletedFriends.removeAll(friendList);
+
+        // new friends
+        friendList.removeAll(storedFriends);
+
         // handling new friends
-        for (Friend f : friendSet) {
+        for (Friend f : friendList) {
             new UpdateFriendsImageTask(f).execute();
         }
+
+        // deleting friends
+        deleteFriends(deletedFriends);
 
         editor.apply();
         backendService.onAppStart();
@@ -264,7 +274,7 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
 
 
 
-    private void saveFriends(Set<Friend> toBeSaved) {
+    private void saveFriends(List<Friend> toBeSaved) {
         for (Friend f : toBeSaved) {
             editor.putString(Long.toString(f.getId()), f.toString());
             storedFriends.add(f);
@@ -279,7 +289,7 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
     }
 
 
-    private void deleteFriends(Set<Friend> toBeDeleted) {
+    private void deleteFriends(List<Friend> toBeDeleted) {
         for (Friend f : toBeDeleted) {
             editor.remove(Long.toString(f.getId()));
         }
@@ -299,5 +309,9 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
 
     public List<Friend> getStoredFriends() {
         return storedFriends;
+    }
+
+    public Friend getYourself() {
+        return yourself;
     }
 }

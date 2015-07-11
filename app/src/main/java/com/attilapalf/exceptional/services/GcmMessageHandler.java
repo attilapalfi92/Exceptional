@@ -3,22 +3,20 @@ package com.attilapalf.exceptional.services;
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
+import android.support.v4.app.TaskStackBuilder;
 
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.ui.ShowNotificationActivity;
 import com.attilapalf.exceptional.ui.main.MainActivity;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.Map;
 
 
 /**
@@ -97,11 +95,18 @@ public class GcmMessageHandler extends IntentService {
                 bundle.putDouble("latitude", latitude);
                 bundle.putLong("timeInMillis", timeInMillis);
 
-                showNotification("New exception caught!",
+                showExceptionNotification("New exception caught!",
                         "You caught a(n) " + exception.getShortName(), bundle);
 
                 break;
 
+            case "friend":
+
+                long friendId = Long.parseLong(extras.getString("friendId"));
+
+                showFriendNotification("New friend joined!", "Throw an exception into his/her face!");
+
+                break;
             default:
                 break;
         }
@@ -112,7 +117,42 @@ public class GcmMessageHandler extends IntentService {
     }
 
 
-    public void showNotification(String title, String text, Bundle bundle) {
+    private void showFriendNotification(String title, String text) {
+        Intent resultIntent = new Intent(this, MainActivity.class);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+
+        Bundle bundle = new Bundle();
+        bundle.putInt("startPage", 2);
+
+        // putting data into the intent
+        resultIntent.putExtras(bundle);
+
+        // Adds the back stack
+        stackBuilder.addParentStack(MainActivity.class);
+
+        // Adds the Intent to the top of the stack
+        stackBuilder.addNextIntent(resultIntent);
+
+        // Gets a PendingIntent containing the entire back stack
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+                .setAutoCancel(true)
+                .setSmallIcon(R.drawable.logo)
+                .setContentTitle(title)
+                .setContentText(text);
+
+        builder.setContentIntent(resultPendingIntent);
+
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        mNotificationManager.notify(notificationIdCounter++, builder.build());
+    }
+
+
+    private void showExceptionNotification(String title, String text, Bundle bundle) {
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this)
                         .setAutoCancel(true)

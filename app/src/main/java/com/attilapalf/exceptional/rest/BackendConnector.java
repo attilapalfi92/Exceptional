@@ -11,7 +11,7 @@ import com.attilapalf.exceptional.model.*;
 import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.rest.messages.AppStartRequestBody;
 import com.attilapalf.exceptional.rest.messages.AppStartResponseBody;
-import com.attilapalf.exceptional.rest.messages.BaseRequestBody;
+import com.attilapalf.exceptional.rest.messages.BaseExceptionRequestBody;
 import com.attilapalf.exceptional.rest.messages.ExceptionRefreshResponse;
 import com.attilapalf.exceptional.rest.messages.ExceptionSentResponse;
 import com.attilapalf.exceptional.rest.messages.ExceptionWrapper;
@@ -132,7 +132,7 @@ public class BackendConnector implements BackendService, FriendSource, //Excepti
         void sendException(@Body ExceptionWrapper exceptionWrapper, Callback<ExceptionSentResponse> cb);
 
         @POST("/exception/refresh")
-        void refreshExceptions(@Body BaseRequestBody requestBody, Callback<ExceptionRefreshResponse> cb);
+        void refreshExceptions(@Body BaseExceptionRequestBody requestBody, Callback<ExceptionRefreshResponse> cb);
     }
 
 
@@ -140,7 +140,7 @@ public class BackendConnector implements BackendService, FriendSource, //Excepti
     public void refreshExceptions(final ExceptionRefreshListener refreshListenerParam) {
         this.refreshListener = refreshListenerParam;
 
-        BaseRequestBody requestBody = new BaseRequestBody(FacebookManager.getInstance().getProfileId(),
+        BaseExceptionRequestBody requestBody = new BaseExceptionRequestBody(FacebookManager.getInstance().getProfileId(),
                 ExceptionManager.getInstance().getExceptionList());
 
         restInterface.refreshExceptions(requestBody, new Callback<ExceptionRefreshResponse>() {
@@ -201,10 +201,10 @@ public class BackendConnector implements BackendService, FriendSource, //Excepti
 
 
     @Override
-    public void onFirstAppStart(Set<Friend> friendSet) {
+    public void onFirstAppStart(List<Friend> friendList) {
         long userId = FacebookManager.getInstance().getProfileId();
-        List<Long> friendIdList = new ArrayList<>(friendSet.size());
-        for(Friend f : friendSet) {
+        List<Long> friendIdList = new ArrayList<>(friendList.size());
+        for(Friend f : friendList) {
             friendIdList.add(f.getId());
         }
 

@@ -1,4 +1,4 @@
-package com.attilapalf.exceptional.ui;
+package com.attilapalf.exceptional.ui.exceptionSending;
 
 import android.content.Context;
 import android.content.Intent;
@@ -12,12 +12,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.ExceptionType;
 import com.attilapalf.exceptional.services.ExceptionFactory;
-import com.attilapalf.exceptional.ui.main.FriendsFragment;
 
 import java.util.List;
 
@@ -41,7 +39,9 @@ public class SendExceptionListActivity extends AppCompatActivity implements Adap
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ExceptionType exceptionType = adapter.getItem(position);
         Intent intent = new Intent(this, FriendChooserActivity.class);
+        intent.putExtra("exceptionTypeId", exceptionType.getTypeId());
         startActivity(intent);
+        finish();
     }
 
 
