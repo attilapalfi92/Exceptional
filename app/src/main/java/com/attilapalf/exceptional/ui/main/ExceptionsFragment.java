@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.attilapalf.exceptional.MyApplication;
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.model.Friend;
@@ -104,7 +105,12 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
 
     @Override
     public void onRefresh() {
-        BackendConnector.getInstance().refreshExceptions(this);
+        if (MyApplication.isLoggedIn()) {
+            BackendConnector.getInstance().refreshExceptions(this);
+        } else {
+            Toast.makeText(getActivity().getApplicationContext(), "You have to login first!", Toast.LENGTH_SHORT).show();
+            onExceptionRefreshFinished();
+        }
     }
 
     @Override

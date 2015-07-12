@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.attilapalf.exceptional.MyApplication;
 import com.attilapalf.exceptional.model.Friend;
 import com.attilapalf.exceptional.interfaces.ApplicationStartupListener;
 import com.facebook.AccessToken;
@@ -111,17 +112,9 @@ public class FacebookManager {
                 synchronized (syncObject) {
                     accessToken = loginResult.getAccessToken();
                     loginSuccessHandler.onLoginSuccess(loginResult);
-
                     profile = Profile.getCurrentProfile();
-                    if (profile != null) {
-                        yourself = new Friend(
-                                Long.parseLong(profile.getId()),
-                                profile.getName(),
-                                profile.getProfilePictureUri(200, 200).toString());
-                        FriendsManager.getInstance().saveOrUpdateYourself(yourself);
-                    }
-                    
                     firstStart = true;
+                    MyApplication.setLoggedIn(true);
                     refreshFriends();
                 }
             }
@@ -133,7 +126,7 @@ public class FacebookManager {
 
             @Override
             public void onError(FacebookException e) {
-
+                MyApplication.setLoggedIn(false);
             }
         };
 
@@ -142,9 +135,20 @@ public class FacebookManager {
             @Override
             protected void onCurrentAccessTokenChanged(AccessToken oldToken, AccessToken newToken) {
                 synchronized (syncObject) {
-                    accessToken = newToken;
-                    if (!firstStart) {
-                        refreshFriends();
+                    if (newToken != null) {
+                        accessToken = newToken;
+                        if (!firstStart) {
+                            refreshFriends();
+                        }
+                        MyApplication.setLoggedIn(true);
+
+                    // if the access token is null, the user is logged out
+                    } else {
+                        FriendsManager.getInstance().wipe();
+                        ImageCache.getInstance().wipe();
+                        ExceptionManager.getInstance().wipe();
+                        MyApplication.setLoggedIn(false);
+//                        System.exit(0);
                     }
                 }
             }
@@ -155,15 +159,9 @@ public class FacebookManager {
             @Override
             protected void onCurrentProfileChanged(Profile oldProfile, Profile newProfile) {
                 synchronized (syncObject) {
-                    profile = newProfile;
-                    yourself = new Friend(
-                            Long.parseLong(profile.getId()),
-                            profile.getName(),
-                            profile.getProfilePictureUri(200, 200).toString());
-                    FriendsManager.getInstance().saveOrUpdateYourself(yourself);
-
-                    // experimental:
-                    //refreshFriends();
+                    if (newProfile != null) {
+                        profile = newProfile;
+                    }
                 }
             }
         };
@@ -172,7 +170,7 @@ public class FacebookManager {
         profileTracker.startTracking();
         accessToken = AccessToken.getCurrentAccessToken();
 
-        // experimental:
+        // experimental
         refreshFriends();
     }
 
@@ -211,17 +209,22 @@ public class FacebookManager {
                                 Long.parseLong(profile.getId()),
                                 profile.getName(),
                                 profile.getProfilePictureUri(200, 200).toString());
-                    }
-                    if (firstStart) {
-                        startupListener.onFirstAppStart(friends, yourself);
-                    } else {
-                        startupListener.onAppStart(friends, yourself);
+                        FriendsManager.getInstance().saveOrUpdateYourself(yourself);
                     }
 
+                    if (MyApplication.isLoggedIn()) {
+                        if (firstStart) {
+                            startupListener.onFirstAppStart(friends, yourself);
+                        } else {
+                            startupListener.onAppStart(friends, yourself);
+                        }
+                    }
 
                 } else {
-                    // no internet connection, but we still want stuff
-                    startupListener.onNoInternetStart();
+                    if (MyApplication.isLoggedIn()) {
+                        // no internet connection, but we still want stuff
+                        startupListener.onNoInternetStart();
+                    }
                 }
             }
         });
@@ -229,15 +232,16 @@ public class FacebookManager {
         Bundle parameters = new Bundle();
         parameters.putString("fields", "id,name,picture");
         request.setParameters(parameters);
+        if (accessToken != null) {
+            MyApplication.setLoggedIn(true);
+        } else {
+            MyApplication.setLoggedIn(false);
+        }
         request.executeAsync();
     }
 
 
 
-
-    public void testAsyncCall() {
-
-    }
 
 
 

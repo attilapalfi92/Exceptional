@@ -23,6 +23,8 @@ import java.security.NoSuchAlgorithmException;
  */
 public class MyApplication extends Application {
 
+    private static volatile boolean loggedIn = false;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -72,5 +74,14 @@ public class MyApplication extends Application {
     public void onTerminate() {
         super.onTerminate();
         FacebookManager.getInstance().onAppKilled();
+    }
+
+
+    public static boolean isLoggedIn() {
+        return loggedIn;
+    }
+
+    public static void setLoggedIn(boolean loggedIn) {
+        MyApplication.loggedIn = loggedIn;
     }
 }

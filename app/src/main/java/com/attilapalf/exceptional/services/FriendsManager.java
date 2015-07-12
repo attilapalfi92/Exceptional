@@ -206,6 +206,15 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
         }
     }
 
+    public void wipe() {
+        storedFriends.clear();
+        editor.clear();
+        editor.apply();
+        if (friendChangeListener != null) {
+            friendChangeListener.onFriendsChanged();
+        }
+    }
+
 
     // TODO: if download failed because of poor internet connection, retry later
     private static class UpdateFriendsImageTask extends AsyncTask<Void, Void, Bitmap> {
@@ -262,8 +271,12 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
         }
 
         if (returnFriend == null) {
-            if (friendId == yourself.getId()) {
-                returnFriend = yourself;
+            if (yourself != null) {
+                if (friendId == yourself.getId()) {
+                    returnFriend = yourself;
+                }
+            } else {
+                return new Friend(0, "", "");
             }
         }
 

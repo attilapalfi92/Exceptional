@@ -184,10 +184,15 @@ public class ImageCache {
 
 
 
-
-
     public void removeImage(Friend friend) {
         imageWarehouse.remove(friend.getId());
+
+        // TODO: remove from disk storage
+    }
+
+
+    public void wipe() {
+        imageWarehouse.evictAll();
 
         // TODO: remove from disk storage
     }

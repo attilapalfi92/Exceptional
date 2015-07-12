@@ -67,9 +67,18 @@ public class ExceptionManager implements ExceptionSource {
         editor = instance.sharedPreferences.edit();
         editor.apply();
 
-        new AsyncExceptionLoader(storedExceptions, sharedPreferences, editor).execute();
+        new AsyncExceptionLoader(storedExceptions, sharedPreferences).execute();
     }
 
+
+    public void wipe() {
+        storedExceptions.clear();
+        editor.clear();
+        editor.apply();
+        for (ExceptionChangeListener listener : exceptionChangeListeners) {
+            listener.onExceptionsChanged();
+        }
+    }
 
 
     private static class AsyncExceptionLoader extends AsyncTask<Void, Void, Void> {
@@ -77,13 +86,10 @@ public class ExceptionManager implements ExceptionSource {
         private List<Exception> resultList;
         private List<Exception> temporaryList;
         private SharedPreferences sharedPreferences;
-        private SharedPreferences.Editor editor;
 
-        public AsyncExceptionLoader(List<Exception> resultList, SharedPreferences sharedPreferences,
-                                    SharedPreferences.Editor editor) {
+        public AsyncExceptionLoader(List<Exception> resultList, SharedPreferences sharedPreferences) {
             this.resultList = resultList;
             this.sharedPreferences = sharedPreferences;
-            this.editor = editor;
             temporaryList = new LinkedList<>();
         }
 

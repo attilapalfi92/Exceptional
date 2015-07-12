@@ -13,11 +13,13 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.attilapalf.exceptional.MyApplication;
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.rest.BackendConnector;
 import com.attilapalf.exceptional.interfaces.ServerResponseListener;
 import com.attilapalf.exceptional.ui.LoginActivity;
+import com.attilapalf.exceptional.ui.OptionsActivity;
 import com.attilapalf.exceptional.ui.exceptionSending.SendExceptionListActivity;
 import com.attilapalf.exceptional.services.ExceptionFactory;
 import com.attilapalf.exceptional.services.FacebookManager;
@@ -93,6 +95,8 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, OptionsActivity.class);
+            startActivity(intent);
             return true;
         }
 
@@ -117,55 +121,59 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
 
 
     public void throwExceptionClicked(View view) {
-        Intent intent = new Intent(this, SendExceptionListActivity.class);
-        startActivity(intent);
+        if (MyApplication.isLoggedIn()) {
+            Intent intent = new Intent(this, SendExceptionListActivity.class);
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, "You have to login first!", Toast.LENGTH_SHORT).show();
+        }
     }
 
 
     public void giveMeExcClicked(View view) {
+        if (MyApplication.isLoggedIn()) {
+            if (!gpsService.canGetLocation() && mLocation == null) {
+                //Toast.makeText(this, "Can't get device's location.\nPlease enable location services.", Toast.LENGTH_SHORT).show();
 
-        if (!gpsService.canGetLocation() && mLocation == null) {
-            //Toast.makeText(this, "Can't get device's location.\nPlease enable location services.", Toast.LENGTH_SHORT).show();
+            } else {
 
-        } else {
+                mLocation = gpsService.getLocation();
+                // TODO: giving exception to myself: not setting the instance ID, and not saving the exception here.
+                // TODO: save the exception when in arrives from the backend
+                Exception e = ExceptionFactory.createRandomException(FacebookManager.getInstance().getProfileId(),
+                        FacebookManager.getInstance().getProfileId());
 
-            mLocation = gpsService.getLocation();
-            // TODO: giving exception to myself: not setting the instance ID, and not saving the exception here.
-            // TODO: save the exception when in arrives from the backend
-            Exception e = ExceptionFactory.createRandomException(FacebookManager.getInstance().getProfileId(),
-                    FacebookManager.getInstance().getProfileId());
-
-            e.setLongitude(mLocation.getLongitude());
-            e.setLatitude(mLocation.getLatitude());
-            //ExceptionManager.addException(e);
+                e.setLongitude(mLocation.getLongitude());
+                e.setLatitude(mLocation.getLatitude());
+                //ExceptionManager.addException(e);
 
 //            for (ExceptionChangeListener listener : exceptionChangeListeners) {
 //                listener.onExceptionsChanged();
 //            }
 
-            BackendConnector.getInstance().sendException(e);
+                BackendConnector.getInstance().sendException(e);
 
-            String data =
-                    "Description: " + e.getDescription() + "\n\n" +
-                            "From: " + e.getFromWho() + "\n\n" +
-                            "Where: " + e.getLongitude() + ", " +
-                            e.getLatitude();
+                String data =
+                        "Description: " + e.getDescription() + "\n\n" +
+                                "From: " + e.getFromWho() + "\n\n" +
+                                "Where: " + e.getLongitude() + ", " +
+                                e.getLatitude();
 
-            new MaterialDialog.Builder(this)
-                    .title(e.getPrefix() + "\n" + e.getShortName())
-                    .content(data)
-                    .positiveText("LOL")
-                    .negativeText("OK")
-                    .show();
+                new MaterialDialog.Builder(this)
+                        .title(e.getPrefix() + "\n" + e.getShortName())
+                        .content(data)
+                        .positiveText("LOL")
+                        .negativeText("OK")
+                        .show();
+            }
+
+
+        } else {
+            Toast.makeText(this, "You have to login first!", Toast.LENGTH_SHORT).show();
         }
     }
 
 
-
-    public void asyncTestBtnClicked(View view) {
-//        FacebookManager.getInstance().testAsyncCall();
-        BackendConnector.getInstance().gcmFirstAppStart();
-    }
 
 
     @Override
