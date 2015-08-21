@@ -1,4 +1,4 @@
-package com.attilapalf.exceptional.interfaces;
+package com.attilapalf.exceptional.rest;
 
 import com.attilapalf.exceptional.model.*;
 import com.attilapalf.exceptional.model.Exception;
@@ -12,7 +12,7 @@ import java.util.Set;
  */
 public interface BackendService {
     void onFirstAppStart(List<Friend> friendList);
-    void onAppStart();
+    void onRegularAppStart(List<Friend> friendList);
     void sendException(Exception e);
     void refreshExceptions(final ExceptionRefreshListener refreshListenerParam);
 }

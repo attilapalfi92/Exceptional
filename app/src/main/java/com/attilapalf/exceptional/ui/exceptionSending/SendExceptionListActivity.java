@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.ExceptionType;
-import com.attilapalf.exceptional.services.ExceptionFactory;
+import com.attilapalf.exceptional.services.ExceptionTypeManager;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ public class SendExceptionListActivity extends AppCompatActivity implements Adap
         ListView exceptionListView = (ListView) findViewById(R.id.send_exception_list);
         exceptionListView.setOnItemClickListener(this);
 
-        adapter = new MyAdapter(this.getApplicationContext(), ExceptionFactory.getExceptionTypesByName());
+        adapter = new MyAdapter(this.getApplicationContext(), ExceptionTypeManager.getInstance().getExceptionTypesByName());
         exceptionListView.setAdapter(adapter);
     }
 
@@ -39,7 +39,7 @@ public class SendExceptionListActivity extends AppCompatActivity implements Adap
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ExceptionType exceptionType = adapter.getItem(position);
         Intent intent = new Intent(this, FriendChooserActivity.class);
-        intent.putExtra("exceptionTypeId", exceptionType.getTypeId());
+        intent.putExtra("exceptionTypeId", exceptionType.getId());
         startActivity(intent);
         finish();
     }

@@ -2,9 +2,9 @@ package com.attilapalf.exceptional.rest;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Build;
 
 import com.attilapalf.exceptional.R;
-import com.attilapalf.exceptional.interfaces.BackendService;
 import com.attilapalf.exceptional.interfaces.ServerResponseListener;
 import com.attilapalf.exceptional.interfaces.ServerResponseSource;
 import com.attilapalf.exceptional.model.*;
@@ -18,13 +18,16 @@ import com.attilapalf.exceptional.rest.messages.ExceptionWrapper;
 import com.attilapalf.exceptional.interfaces.ExceptionRefreshListener;
 import com.attilapalf.exceptional.interfaces.FriendChangeListener;
 import com.attilapalf.exceptional.interfaces.FriendSource;
-import com.attilapalf.exceptional.services.ExceptionManager;
-import com.attilapalf.exceptional.services.FacebookManager;
+import com.attilapalf.exceptional.services.Converter;
+import com.attilapalf.exceptional.services.ExceptionInstanceManager;
+import com.attilapalf.exceptional.services.ExceptionTypeManager;
+import com.attilapalf.exceptional.services.MetadataStore;
+import com.attilapalf.exceptional.services.facebook.FacebookManager;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -35,120 +38,58 @@ import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 import retrofit.converter.GsonConverter;
-import retrofit.http.Body;
-import retrofit.http.POST;
 
 /**
  * Created by Attila on 2015-06-13.
  */
-public class BackendConnector implements BackendService, FriendSource, //ExceptionSource
-        ServerResponseSource {
+public class BackendServiceImpl implements BackendService, FriendSource, ServerResponseSource {
 
+    private static BackendServiceImpl instance;
     private final Context context;
     private final String projectNumber;
+
     private GoogleCloudMessaging googleCloudMessaging;
     private String registrationId;
-
     private String androidId;
-    private Gson gson;
-    private RestAdapter restAdapter;
     private RestInterface restInterface;
-    private Set<ServerResponseListener> responseListeners;
-//    private Set<ExceptionChangeListener> exceptionChangeListeners;
-    private Set<FriendChangeListener> friendChangeListeners;
-    private ExceptionRefreshListener refreshListener;
-
-    private AppStartRequestBody requestBody;
-
-    // http://188.36.23.85:8090
-    private final String backendAddress = "http://188.36.23.85:8090";
-
-    private static BackendConnector instance;
-
+    private Set<ServerResponseListener> responseListeners = new HashSet<>();
+    private Set<FriendChangeListener> friendChangeListeners = new HashSet<>();
+    private AppStartRequestBody requestBody = new AppStartRequestBody();;
 
     public static void init(Context context) {
-        instance = new BackendConnector(context);
+        instance = new BackendServiceImpl(context);
     }
 
-
-    // TODO: separate to init and getInstance
-    public static BackendConnector getInstance() {
+    public static BackendServiceImpl getInstance() {
         return instance;
     }
 
-    public BackendConnector setAndroidId(String aId) {
+    public BackendServiceImpl setAndroidId(String aId) {
         androidId = aId;
         return this;
     }
 
-    private BackendConnector(Context context){
+    private BackendServiceImpl(Context context){
         this.context = context;
-
         projectNumber = context.getString(R.string.project_number);
-
-        responseListeners = new HashSet<>();
-        friendChangeListeners = new HashSet<>();
-
-        gson = new GsonBuilder()
-                .create();
-
-        restAdapter = new RestAdapter.Builder()
-                .setEndpoint(backendAddress)
-                .setConverter(new GsonConverter((gson)))
+        RestAdapter restAdapter = new RestAdapter.Builder()
+                .setEndpoint(context.getString(R.string.backend_address))
+                .setConverter(new GsonConverter((new GsonBuilder().create())))
                 .build();
-
         restInterface = restAdapter.create(RestInterface.class);
     }
 
     @Override
-    public boolean addConnectionListener(ServerResponseListener listener) {
-        return responseListeners.add(listener);
-    }
-
-    @Override
-    public boolean removeConnectionListener(ServerResponseListener listener) {
-        return responseListeners.remove(listener);
-    }
-
-    @Override
-    public boolean addFriendChangeListener(FriendChangeListener listener) {
-        return friendChangeListeners.add(listener);
-    }
-
-    @Override
-    public boolean removeFriendChangeListener(FriendChangeListener listener) {
-        return friendChangeListeners.remove(listener);
-    }
-
-
-    public interface RestInterface {
-        @POST("/user/firstAppStart")
-        void firstAppStart(@Body AppStartRequestBody requestBody, Callback<AppStartResponseBody> cb);
-
-        @POST("/user/appStart")
-        void appStart(@Body AppStartRequestBody requestBody, Callback<AppStartResponseBody> cb);
-
-        @POST("/exception")
-        void sendException(@Body ExceptionWrapper exceptionWrapper, Callback<ExceptionSentResponse> cb);
-
-        @POST("/exception/refresh")
-        void refreshExceptions(@Body BaseExceptionRequestBody requestBody, Callback<ExceptionRefreshResponse> cb);
-    }
-
-
-    @Override
-    public void refreshExceptions(final ExceptionRefreshListener refreshListenerParam) {
-        this.refreshListener = refreshListenerParam;
-
-        BaseExceptionRequestBody requestBody = new BaseExceptionRequestBody(FacebookManager.getInstance().getProfileId(),
-                ExceptionManager.getInstance().getExceptionList());
+    public void refreshExceptions(final ExceptionRefreshListener refreshListener) {
+        BaseExceptionRequestBody requestBody = new BaseExceptionRequestBody(
+                FacebookManager.getInstance().getProfileId(),
+                ExceptionInstanceManager.getInstance().getExceptionList()
+        );
 
         restInterface.refreshExceptions(requestBody, new Callback<ExceptionRefreshResponse>() {
-
             @Override
             public void success(ExceptionRefreshResponse exceptionRefreshResponse, Response response) {
-                ExceptionManager.getInstance().addExceptions(exceptionRefreshResponse.getNeededExceptions());
-
+                ExceptionInstanceManager.getInstance().addExceptions(exceptionRefreshResponse.getNeededExceptions());
                 for (ServerResponseListener l : responseListeners) {
                     l.onSuccess("Exceptions are synchronized!");
                 }
@@ -168,21 +109,24 @@ public class BackendConnector implements BackendService, FriendSource, //Excepti
 
 
     @Override
-    public void onAppStart() {
-        Long lastKnownExcId = ExceptionManager.getInstance().getLastKnownId();
-        List<Long> exceptionIds = new ArrayList<>();
-        exceptionIds.add(lastKnownExcId);
-        long userId = FacebookManager.getInstance().getProfileId();
-        AppStartRequestBody requestBody = new AppStartRequestBody(androidId, userId,
-                new ArrayList<Long>(), exceptionIds);
+    public void onRegularAppStart(List<Friend> friendList) {
+        initRequestBody(friendList);
+        requestBody.setExceptionVersion(MetadataStore.getInstance().getExceptionVersion());
 
         try {
-            restInterface.appStart(requestBody, new Callback<AppStartResponseBody>() {
+            restInterface.regularAppStart(requestBody, new Callback<AppStartResponseBody>() {
                 @Override
-                public void success(AppStartResponseBody appStartResponseBody, Response response) {
-                    int excSize = appStartResponseBody.getMyExceptions().size();
-                    if (excSize > 0) {
-                        ExceptionManager.getInstance().addExceptions(appStartResponseBody.getMyExceptions());
+                public void success(AppStartResponseBody responseBody, Response response) {
+                    ExceptionTypeManager.getInstance().setVotedExceptionTypes(responseBody.getBeingVotedTypes());
+                    if (responseBody.getMyExceptions().size() > 0) {
+                        ExceptionInstanceManager.getInstance().addExceptions(responseBody.getMyExceptions());
+                    }
+                    if (responseBody.getExceptionVersion() > MetadataStore.getInstance().getExceptionVersion()) {
+                        MetadataStore.getInstance().setExceptionVersion(responseBody.getExceptionVersion());
+                        ExceptionTypeManager.getInstance().addExceptionTypes2(responseBody.getExceptionTypes());
+                    }
+                    if (responseBody.getPoints() != MetadataStore.getInstance().getPoints()) {
+                        MetadataStore.getInstance().setPoints(responseBody.getPoints());
                     }
                 }
 
@@ -199,54 +143,42 @@ public class BackendConnector implements BackendService, FriendSource, //Excepti
         }
     }
 
-
     @Override
     public void onFirstAppStart(List<Friend> friendList) {
-        long userId = FacebookManager.getInstance().getProfileId();
-        List<Long> friendIdList = new ArrayList<>(friendList.size());
-        for(Friend f : friendList) {
-            friendIdList.add(f.getId());
-        }
-
-        requestBody = new AppStartRequestBody();
-        requestBody.setDeviceId(androidId);
-        requestBody.setUserId(userId);
-        requestBody.setFriendsIds(friendIdList);
-        requestBody.setExceptionIds(new ArrayList<Long>());
-
+        initRequestBody(friendList);
+        requestBody.setDeviceName(getDeviceName());
         gcmFirstAppStart();
     }
 
+    private void initRequestBody(List<Friend> friendList) {
+        requestBody.setDeviceId(androidId);
+        requestBody.setUserFacebookId(FacebookManager.getInstance().getProfileId());
+        requestBody.setFriendsFacebookIds(Converter.fromFriendsToLongs(friendList));
+        requestBody.setKnownExceptionIds(new ArrayList<BigInteger>());
+    }
 
-    // TODO: private
-    public void gcmFirstAppStart() {
+
+    private void gcmFirstAppStart() {
         new AsyncTask<Void, Void, String>() {
-
-            String message;
-
             @Override
             protected String doInBackground(Void... params) {
+                String message;
                 googleCloudMessaging = GoogleCloudMessaging.getInstance(context);
                 try {
-
                     registrationId = googleCloudMessaging.register(projectNumber);
                     message = "Device registered, ID: " + registrationId;
-
                 } catch (IOException e) {
                     message = "Error: " + e.getMessage();
                 }
-
                 return message;
             }
 
             @Override
-            protected void onPostExecute(String s) {
-
+            protected void onPostExecute(String message) {
                 if (registrationId != null) {
-                    requestBody.setRegId(registrationId);
+                    requestBody.setGcmId(registrationId);
                     backendFirstAppStart();
                 }
-
                 for(ServerResponseListener l : responseListeners) {
                     l.onSuccess(message);
                 }
@@ -255,16 +187,17 @@ public class BackendConnector implements BackendService, FriendSource, //Excepti
         }.execute();
     }
 
-
-
     private void backendFirstAppStart() {
         try {
             restInterface.firstAppStart(requestBody, new Callback<AppStartResponseBody>() {
                 @Override
-                public void success(AppStartResponseBody appStartResponseBody, Response response) {
-                    int excSize = appStartResponseBody.getMyExceptions().size();
-                    if (excSize > 0) {
-                        ExceptionManager.getInstance().addExceptions(appStartResponseBody.getMyExceptions());
+                public void success(AppStartResponseBody responseBody, Response response) {
+                    ExceptionTypeManager.getInstance().addExceptionTypes(responseBody.getExceptionTypes());
+                    ExceptionTypeManager.getInstance().setVotedExceptionTypes(responseBody.getExceptionTypes());
+                    MetadataStore.getInstance().setExceptionVersion(responseBody.getExceptionVersion());
+                    MetadataStore.getInstance().setPoints(responseBody.getPoints());
+                    if (responseBody.getMyExceptions().size() > 0) {
+                        ExceptionInstanceManager.getInstance().addExceptions(responseBody.getMyExceptions());
                     }
                 }
 
@@ -279,11 +212,6 @@ public class BackendConnector implements BackendService, FriendSource, //Excepti
             e.printStackTrace();
         }
     }
-
-
-
-
-
 
     @Override
     public void sendException(Exception e) {
@@ -311,7 +239,46 @@ public class BackendConnector implements BackendService, FriendSource, //Excepti
         }
     }
 
+    @Override
+    public boolean addConnectionListener(ServerResponseListener listener) {
+        return responseListeners.add(listener);
+    }
+
+    @Override
+    public boolean removeConnectionListener(ServerResponseListener listener) {
+        return responseListeners.remove(listener);
+    }
+
+    @Override
+    public boolean addFriendChangeListener(FriendChangeListener listener) {
+        return friendChangeListeners.add(listener);
+    }
+
+    @Override
+    public boolean removeFriendChangeListener(FriendChangeListener listener) {
+        return friendChangeListeners.remove(listener);
+    }
+
+    public String getDeviceName() {
+        String manufacturer = Build.MANUFACTURER;
+        String model = Build.MODEL;
+        if (model.startsWith(manufacturer)) {
+            return capitalize(model);
+        } else {
+            return capitalize(manufacturer) + " " + model;
+        }
+    }
 
 
-    public String getAndroidId() { return androidId; }
+    private String capitalize(String s) {
+        if (s == null || s.length() == 0) {
+            return "";
+        }
+        char first = s.charAt(0);
+        if (Character.isUpperCase(first)) {
+            return s;
+        } else {
+            return Character.toUpperCase(first) + s.substring(1);
+        }
+    }
 }

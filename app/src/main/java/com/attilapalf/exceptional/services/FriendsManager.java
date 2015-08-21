@@ -10,17 +10,16 @@ import android.util.Log;
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.*;
 import com.attilapalf.exceptional.interfaces.BackendServiceUser;
-import com.attilapalf.exceptional.interfaces.BackendService;
-import com.attilapalf.exceptional.interfaces.ApplicationStartupListener;
+import com.attilapalf.exceptional.rest.BackendService;
+import com.attilapalf.exceptional.services.facebook.FacebookEventListener;
 import com.attilapalf.exceptional.interfaces.FriendChangeListener;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -30,32 +29,14 @@ import java.util.Set;
  * Responsible for storing friends in the device's preferences
  * Created by Attila on 2015-06-12.
  */
-public class FriendsManager implements ApplicationStartupListener, BackendServiceUser {
+public class FriendsManager implements FacebookEventListener, BackendServiceUser {
 
     private BackendService backendService;
-
-    /** This is the application's preferences */
     private SharedPreferences sharedPreferences;
-
-    /** This is the application's sharedPreferences editor*/
     private SharedPreferences.Editor editor;
-
-//    private final Set<Friend> storedFriends = Collections.synchronizedSet(
-//            new TreeSet<Friend>(new Friend.NameComparator()));
     private final List<Friend> storedFriends = new LinkedList<>();
     private Friend yourself;
-
     private FriendChangeListener friendChangeListener;
-
-    /**
-     * On app start the first thing is to load the storedFriends with data from
-     * the preferences file. After that a callback can come from facebook to access
-     * storedFriends. If the callback comes too soon, it would be bad, so we synchronize
-     * with this object.
-     */
-    // TODO: not needed
-    //private final Object memoryCacheSyncObj = new Object();
-
     private static FriendsManager instance;
 
     public static FriendsManager getInstance() {
@@ -101,7 +82,7 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
 
 
     public boolean isItYourself(Friend friend) {
-        return friend.getId() == yourself.getId();
+        return friend.getId().equals(yourself.getId());
     }
 
 
@@ -109,24 +90,21 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
     @Override
     public void onFirstAppStart(List<Friend> friendList, Friend yourself) {
         saveFriends(friendList);
-
-        // saving yourself
         saveOrUpdateYourself(yourself);
-
         backendService.onFirstAppStart(friendList);
     }
 
 
 
     @Override
-    public void onAppStart(List<Friend> friendList, Friend yourself) {
+    public void onRegularAppStart(List<Friend> friendList, Friend yourself) {
         saveOrUpdateYourself(yourself);
 
-        List<Friend> knownFriends = new ArrayList<>(friendList.size());
-        knownFriends.addAll(friendList);
+        List<Friend> knownCurrentFriends = new ArrayList<>(friendList.size());
+        knownCurrentFriends.addAll(friendList);
 
         // checking for changes at old friends
-        for (Friend f1 : knownFriends) {
+        for (Friend f1 : knownCurrentFriends) {
             for (Friend f2 : storedFriends) {
                 checkFriendChange(f1, f2);
             }
@@ -149,13 +127,13 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
         deleteFriends(deletedFriends);
 
         editor.apply();
-        backendService.onAppStart();
+        backendService.onRegularAppStart(knownCurrentFriends);
     }
 
 
 
 
-    public void saveOrUpdateYourself(Friend yourself) {
+    public synchronized void saveOrUpdateYourself(Friend yourself) {
         if (yourself != null) {
             if (this.yourself == null) {
                 this.yourself = yourself;
@@ -174,14 +152,14 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
 
     private void checkFriendChange(Friend newFriendState, Friend oldFriendState) {
         // if they are the same
-        if (newFriendState.getId() == oldFriendState.getId()) {
+        if (newFriendState.getId().equals(oldFriendState.getId())) {
             // if his image is changed
             if (!newFriendState.getImageUrl().equals(oldFriendState.getImageUrl())) {
                 new UpdateFriendsImageTask(newFriendState).execute();
             }
 
             // if his name is changed
-            if (!newFriendState.getName().equals(oldFriendState.getName())) {
+            if (!newFriendState.getFirstName().equals(oldFriendState.getFirstName())) {
                 updateFriendOrYourself(newFriendState);
             }
         }
@@ -189,11 +167,11 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
 
 
     public void updateFriendOrYourself(Friend friend) {
-        if (friend.getId() != yourself.getId()) {
+        if (!friend.getId().equals(yourself.getId())) {
             Friend previous = findFriendById(friend.getId());
             storedFriends.remove(previous);
             storedFriends.add(friend);
-            editor.putString(Long.toString(friend.getId()), friend.toString());
+            editor.putString(friend.getId().toString(), friend.toString());
             editor.apply();
             if (friendChangeListener != null) {
                 friendChangeListener.onFriendsChanged();
@@ -239,7 +217,6 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
                     connection.setUseCaches(true);
                     InputStream inputStream = (InputStream) connection.getContent();
                     friendPicture = BitmapFactory.decodeStream(inputStream);
-
                     ImageCache.getInstance().addImage(friend, friendPicture);
                 }
 
@@ -261,10 +238,10 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
 
 
 
-    public Friend findFriendById(long friendId) {
+    public Friend findFriendById(BigInteger friendId) {
         Friend returnFriend = null;
         for (Friend friend : storedFriends) {
-            if (friend.getId() == friendId) {
+            if (friend.getId().equals(friendId)) {
                 returnFriend = friend;
                 break;
             }
@@ -272,11 +249,11 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
 
         if (returnFriend == null) {
             if (yourself != null) {
-                if (friendId == yourself.getId()) {
+                if (friendId.equals(yourself.getId())) {
                     returnFriend = yourself;
                 }
             } else {
-                return new Friend(0, "", "");
+                return new Friend(new BigInteger("0"), "", "", "");
             }
         }
 
@@ -289,7 +266,7 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
 
     private void saveFriends(List<Friend> toBeSaved) {
         for (Friend f : toBeSaved) {
-            editor.putString(Long.toString(f.getId()), f.toString());
+            editor.putString(f.getId().toString(), f.toString());
             storedFriends.add(f);
             new UpdateFriendsImageTask(f).execute();
         }
@@ -304,7 +281,7 @@ public class FriendsManager implements ApplicationStartupListener, BackendServic
 
     private void deleteFriends(List<Friend> toBeDeleted) {
         for (Friend f : toBeDeleted) {
-            editor.remove(Long.toString(f.getId()));
+            editor.remove((f.getId().toString()));
         }
         editor.apply();
         storedFriends.removeAll(toBeDeleted);

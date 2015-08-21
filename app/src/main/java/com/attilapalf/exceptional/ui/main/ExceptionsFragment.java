@@ -19,11 +19,10 @@ import com.attilapalf.exceptional.MyApplication;
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.model.Friend;
-import com.attilapalf.exceptional.rest.BackendConnector;
+import com.attilapalf.exceptional.rest.BackendServiceImpl;
 import com.attilapalf.exceptional.interfaces.ExceptionChangeListener;
 import com.attilapalf.exceptional.interfaces.ExceptionRefreshListener;
-import com.attilapalf.exceptional.services.ExceptionManager;
-import com.attilapalf.exceptional.services.FacebookManager;
+import com.attilapalf.exceptional.services.ExceptionInstanceManager;
 import com.attilapalf.exceptional.services.FriendsManager;
 
 import java.util.List;
@@ -43,8 +42,8 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
             //((ExceptionSource)getActivity()).addExceptionChangeListener(this);
         }
 
-//        BackendConnector.getInstance().addExceptionChangeListener(this);
-        ExceptionManager.getInstance().addExceptionChangeListener(this);
+//        BackendServiceImpl.getInstance().addExceptionChangeListener(this);
+        ExceptionInstanceManager.getInstance().addExceptionChangeListener(this);
     }
 
 
@@ -52,7 +51,7 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        List<Exception> values = ExceptionManager.getInstance().getExceptionList();
+        List<Exception> values = ExceptionInstanceManager.getInstance().getExceptionList();
         adapter = new ExceptionAdapter(getActivity().getApplicationContext(), values);
         onExceptionsChanged();
         setListAdapter(adapter);
@@ -88,8 +87,8 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
             //((ExceptionSource)getActivity()).removeExceptionChangeListener(this);
         }
 
-//        BackendConnector.getInstance().removeExceptionChangeListener(this);
-        ExceptionManager.getInstance().removeExceptionChangeListener(this);
+//        BackendServiceImpl.getInstance().removeExceptionChangeListener(this);
+        ExceptionInstanceManager.getInstance().removeExceptionChangeListener(this);
 
         super.onDetach();
     }
@@ -106,7 +105,7 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
     @Override
     public void onRefresh() {
         if (MyApplication.isLoggedIn()) {
-            BackendConnector.getInstance().refreshExceptions(this);
+            BackendServiceImpl.getInstance().refreshExceptions(this);
         } else {
             Toast.makeText(getActivity().getApplicationContext(), "You have to login first!", Toast.LENGTH_SHORT).show();
             onExceptionRefreshFinished();
@@ -185,7 +184,7 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
 
                 if (fromWho != null) {
 
-                    if (fromWho.getName().equals("yourself")) {
+                    if (fromWho.getFirstName().equals("yourself")) {
                         fromWhoView.setText("From: yourself");
 
                         if (++yourselfCounter == 7) {
@@ -198,7 +197,7 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
                         }
 
                     } else {
-                        fromWhoView.setText("From: " + fromWho.getName());
+                        fromWhoView.setText("From: " + fromWho.getFirstName());
                         yourselfCounter = 0;
                     }
 

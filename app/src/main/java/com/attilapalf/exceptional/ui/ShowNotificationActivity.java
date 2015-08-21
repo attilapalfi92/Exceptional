@@ -8,9 +8,10 @@ import android.widget.TextView;
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.ExceptionType;
 import com.attilapalf.exceptional.model.Friend;
-import com.attilapalf.exceptional.services.ExceptionFactory;
+import com.attilapalf.exceptional.services.ExceptionTypeManager;
 import com.attilapalf.exceptional.services.FriendsManager;
 
+import java.math.BigInteger;
 import java.sql.Timestamp;
 
 
@@ -23,7 +24,7 @@ public class ShowNotificationActivity extends AppCompatActivity {
 
         Bundle bundle = getIntent().getExtras();
         int typeId = bundle.getInt("typeId");
-        long fromWho = bundle.getLong("fromWho");
+        BigInteger fromWho = new BigInteger(bundle.getString("fromWho"));
         double longitude = bundle.getDouble("longitude");
         double latitude = bundle.getDouble("latitude");
         long timeInMillis = bundle.getLong("timeInMillis");
@@ -35,7 +36,7 @@ public class ShowNotificationActivity extends AppCompatActivity {
         TextView senderPosView = (TextView) findViewById(R.id.senderPositionText);
         TextView sendDateView = (TextView) findViewById(R.id.sendDateText);
 
-        ExceptionType exceptionType = ExceptionFactory.findById(typeId);
+        ExceptionType exceptionType = ExceptionTypeManager.getInstance().findById(typeId);
         exceptionNameView.setText(exceptionType.getPrefix() + "\n" + exceptionType.getShortName());
         exceptionDescView.setText(exceptionType.getDescription());
         Friend sender = FriendsManager.getInstance().findFriendById(fromWho);
@@ -44,7 +45,7 @@ public class ShowNotificationActivity extends AppCompatActivity {
             if (FriendsManager.getInstance().isItYourself(sender)) {
                 senderNameView.setText("Yourself");
             } else {
-                senderNameView.setText(sender.getName());
+                senderNameView.setText(sender.getFirstName());
             }
 
             sender.setImageToView(senderImageView);

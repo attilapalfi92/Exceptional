@@ -16,6 +16,7 @@ import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.ui.ShowNotificationActivity;
 import com.attilapalf.exceptional.ui.main.MainActivity;
 
+import java.math.BigInteger;
 import java.sql.Timestamp;
 
 
@@ -62,23 +63,23 @@ public class GcmMessageHandler extends IntentService {
             case "exception":
 
                 int typeId = Integer.parseInt(extras.getString("typeId"));
-                long instanceId = Long.parseLong(extras.getString("instanceId"));
-                long fromWho = Long.parseLong(extras.getString("fromWho"));
-                long toWho = Long.parseLong(extras.getString("toWho"));
+                BigInteger instanceId = new BigInteger(extras.getString("instanceId"));
+                BigInteger fromWho = new BigInteger(extras.getString("fromWho"));
+                BigInteger toWho = new BigInteger(extras.getString("toWho"));
                 double longitude = Double.parseDouble(extras.getString("longitude"));
                 double latitude = Double.parseDouble(extras.getString("latitude"));
                 long timeInMillis = Long.parseLong(extras.getString("timeInMillis"));
 
-                if (!ExceptionManager.getInstance().isInitialized()) {
-                    ExceptionManager.getInstance().initialize(getApplicationContext());
+                if (!ExceptionInstanceManager.getInstance().isInitialized()) {
+                    ExceptionInstanceManager.getInstance().initialize(getApplicationContext());
                 }
 
-                if (!ExceptionFactory.isInitialized()) {
-                    ExceptionFactory.initialize(getApplicationContext());
+                if (!ExceptionTypeManager.getInstance().isInitialized()) {
+                    ExceptionTypeManager.getInstance().initialize(getApplicationContext());
                 }
 
                 exception = new Exception();
-                exception.setExceptionType(ExceptionFactory.findById(typeId));
+                exception.setExceptionType(ExceptionTypeManager.getInstance().findById(typeId));
                 exception.setInstanceId(instanceId);
                 exception.setFromWho(fromWho);
                 exception.setToWho(toWho);
@@ -90,7 +91,7 @@ public class GcmMessageHandler extends IntentService {
 
                 Bundle bundle = new Bundle();
                 bundle.putInt("typeId", typeId);
-                bundle.putLong("fromWho", fromWho);
+                bundle.putString("fromWho", fromWho.toString());
                 bundle.putDouble("longitude", longitude);
                 bundle.putDouble("latitude", latitude);
                 bundle.putLong("timeInMillis", timeInMillis);
@@ -192,7 +193,7 @@ public class GcmMessageHandler extends IntentService {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                ExceptionManager.getInstance().addException(exception, true);
+                ExceptionInstanceManager.getInstance().addException(exception, true);
             }
         });
     }

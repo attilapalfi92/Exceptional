@@ -8,14 +8,16 @@ import com.attilapalf.exceptional.services.ImageCache;
 import com.google.gson.Gson;
 
 import java.lang.ref.WeakReference;
+import java.math.BigInteger;
 import java.util.Comparator;
 
 /**
  * Created by Attila on 2015-06-12.
  */
 public class Friend {
-    private long id;
-    private String name;
+    private BigInteger id;
+    private String firstName;
+    private String lastName;
     private String imageUrl;
     private transient WeakReference<Bitmap> imageWeakReference;
 
@@ -24,7 +26,7 @@ public class Friend {
     public static class NameComparator implements Comparator<Friend> {
         @Override
         public int compare(Friend lhs, Friend rhs) {
-            return lhs.name.compareTo(rhs.name);
+            return lhs.firstName.compareTo(rhs.firstName);
         }
     }
 
@@ -48,34 +50,44 @@ public class Friend {
         imageWeakReference = new WeakReference<>(null);
     }
 
-    public Friend(long id, String name, String imageUrl) {
+    public Friend(BigInteger id, String firstName, String lastName, String imageUrl) {
         this.id = id;
-        this.name = name;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.imageUrl = imageUrl;
         this.imageWeakReference = new WeakReference<>(null);
     }
 
-    public Friend(long id, String name, String imageUrl, Bitmap image) {
+    public Friend(BigInteger id, String firstName, String lastName, String imageUrl, Bitmap image) {
         this.id = id;
-        this.name = name;
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.imageUrl = imageUrl;
         this.imageWeakReference = new WeakReference<>(image);
     }
 
-    public long getId() {
+    public BigInteger getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(BigInteger id) {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
     public String getImageUrl() {

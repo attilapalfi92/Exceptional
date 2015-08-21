@@ -10,7 +10,7 @@ import com.attilapalf.exceptional.rest.messages.ExceptionWrapper;
 import com.attilapalf.exceptional.interfaces.ExceptionChangeListener;
 import com.attilapalf.exceptional.interfaces.ExceptionSource;
 
-import java.util.ArrayList;
+import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -22,51 +22,34 @@ import java.util.Set;
 /**
  * Created by Attila on 2015-06-08.
  */
-public class ExceptionManager implements ExceptionSource {
+public class ExceptionInstanceManager implements ExceptionSource {
 
-    /** This is the application's preferences */
-    private SharedPreferences sharedPreferences;
-
-    /** This is the application's sharedPreferences editor*/
-    private SharedPreferences.Editor editor;
-
-    private String PREFS_NAME;
-
-    private Set<ExceptionChangeListener> exceptionChangeListeners = new HashSet<>();
-
-    /**
-     * This LinkedList stores the last 30 exceptions the user got.
-     * */
-    //private static List<Exception> storedExceptions = Collections.synchronizedList(new LinkedList<Exception>());
-    private List<Exception> storedExceptions = new LinkedList<>();
     public final int STORE_SIZE = Integer.MAX_VALUE;
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
+    private String PREFS_NAME;
+    private Set<ExceptionChangeListener> exceptionChangeListeners = new HashSet<>();
+    private List<Exception> storedExceptions = new LinkedList<>();
+    private static ExceptionInstanceManager instance;
 
-
-    private static ExceptionManager instance;
-
-    public static ExceptionManager getInstance () {
+    public static ExceptionInstanceManager getInstance () {
         if (instance == null) {
-            instance = new ExceptionManager();
+            instance = new ExceptionInstanceManager();
         }
 
         return instance;
     }
 
-    private ExceptionManager() {}
+    private ExceptionInstanceManager() {}
 
     public void initialize(Context context) {
-        if (!ExceptionFactory.isInitialized()) {
-            ExceptionFactory.initialize(context);
+        if (!ExceptionTypeManager.getInstance().isInitialized()) {
+            ExceptionTypeManager.getInstance().initialize(context);
         }
-
-        getInstance();
-
         PREFS_NAME = context.getString(R.string.exception_preferences);
         sharedPreferences = context.getSharedPreferences(instance.PREFS_NAME, Context.MODE_PRIVATE);
-
-        editor = instance.sharedPreferences.edit();
+        editor = sharedPreferences.edit();
         editor.apply();
-
         new AsyncExceptionLoader(storedExceptions, sharedPreferences).execute();
     }
 
@@ -104,7 +87,7 @@ public class ExceptionManager implements ExceptionSource {
             for (String s : keyArray) {
                 String excJson = (String) store.get(s);
                 Exception e = Exception.fromString(excJson);
-                e.setExceptionType(ExceptionFactory.findById(e.getExceptionTypeId()));
+                e.setExceptionType(ExceptionTypeManager.getInstance().findById(e.getExceptionTypeId()));
                 temporaryList.add(temporaryList.size(), e);
             }
             Collections.sort(temporaryList, new Exception.DateComparator());
@@ -136,9 +119,9 @@ public class ExceptionManager implements ExceptionSource {
 
 
 
-    public long getLastKnownId() {
+    public BigInteger getLastKnownId() {
         if (storedExceptions.isEmpty()) {
-            return 0;
+            return new BigInteger("0");
         }
 
         return storedExceptions.get(0).getInstanceId();
@@ -152,7 +135,7 @@ public class ExceptionManager implements ExceptionSource {
         }
         //storedExceptions.addFirst(e);
         storedExceptions.add(0, e);
-        editor.putString(Long.toString(e.getInstanceId()), e.toString());
+        editor.putString(e.getInstanceId().toString(), e.toString());
         editor.apply();
 
         if (notifyNeeded) {
@@ -178,13 +161,13 @@ public class ExceptionManager implements ExceptionSource {
     private void removeLast() {
         //Exception removed = storedExceptions.removeLast();
         Exception removed = storedExceptions.remove(storedExceptions.size() - 1);
-        editor.remove(Long.toString(removed.getInstanceId()));
+        editor.remove(removed.getInstanceId().toString());
     }
 
 
 
     public void removeException(Exception e) {
-        editor.remove(Long.toString(e.getInstanceId()));
+        editor.remove(e.getInstanceId().toString());
         editor.apply();
         for (int i = 0; i < storedExceptions.size(); i++) {
             if (storedExceptions.get(i).getInstanceId() == e.getInstanceId()) {

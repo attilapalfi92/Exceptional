@@ -1,4 +1,4 @@
-package com.attilapalf.exceptional.interfaces;
+package com.attilapalf.exceptional.services.facebook;
 
 import com.attilapalf.exceptional.model.Friend;
 
@@ -11,8 +11,8 @@ import java.util.Set;
  * When the user starts the application, first thing is that it sends a request to
  * Facebook to get his friends. When facebook sends his friends back, these methods are called.
  */
-public interface ApplicationStartupListener {
+public interface FacebookEventListener {
     void onFirstAppStart(List<Friend> friendList, Friend yourself);
-    void onAppStart(List<Friend> friendList, Friend yourself);
+    void onRegularAppStart(List<Friend> friendList, Friend yourself);
     void onNoInternetStart();
 }

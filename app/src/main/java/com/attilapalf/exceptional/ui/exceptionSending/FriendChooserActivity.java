@@ -1,15 +1,11 @@
 package com.attilapalf.exceptional.ui.exceptionSending;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -21,11 +17,10 @@ import android.widget.TextView;
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.*;
 import com.attilapalf.exceptional.model.Exception;
-import com.attilapalf.exceptional.rest.BackendConnector;
-import com.attilapalf.exceptional.services.ExceptionFactory;
+import com.attilapalf.exceptional.rest.BackendServiceImpl;
+import com.attilapalf.exceptional.services.ExceptionTypeManager;
 import com.attilapalf.exceptional.services.FriendsManager;
 import com.attilapalf.exceptional.services.GpsService;
-import com.attilapalf.exceptional.ui.main.FriendsFragment;
 
 import java.util.List;
 
@@ -51,7 +46,7 @@ public class FriendChooserActivity extends AppCompatActivity implements AdapterV
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Friend friend = adapter.getItem(position);
-        Exception exception = ExceptionFactory.createException(exceptionTypeId,
+        Exception exception = ExceptionTypeManager.getInstance().createException(exceptionTypeId,
                 FriendsManager.getInstance().getYourself().getId(),
                 friend.getId());
 
@@ -59,7 +54,7 @@ public class FriendChooserActivity extends AppCompatActivity implements AdapterV
             Location location = GpsService.getInstance().getLocation();
             exception.setLongitude(location.getLongitude());
             exception.setLatitude(location.getLatitude());
-            BackendConnector.getInstance().sendException(exception);
+            BackendServiceImpl.getInstance().sendException(exception);
             finish();
         }
     }
@@ -118,8 +113,8 @@ public class FriendChooserActivity extends AppCompatActivity implements AdapterV
             }
 
             public void bindRow(Friend model) {
-                nameView.setText(model.getName());
-                pointsView.setText("Points: " + Long.toString(model.getId()));
+                nameView.setText(model.getFirstName());
+                pointsView.setText("Points: " + model.getId().toString());
                 model.setImageToView(imageView);
             }
         }

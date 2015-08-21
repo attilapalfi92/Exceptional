@@ -3,16 +3,18 @@ package com.attilapalf.exceptional.rest.messages;
 
 import com.attilapalf.exceptional.model.Exception;
 
+import java.math.BigInteger;
+
 
 /**
  * Created by Attila on 2015-06-11.
  */
 public class ExceptionWrapper {
-    private long fromWho, toWho;
+    private BigInteger fromWho, toWho;
     private long timeInMillis;
     private double longitude, latitude;
     private int exceptionTypeId;
-    private long instanceId;
+    private BigInteger instanceId;
 
     public ExceptionWrapper() {
     }
@@ -27,8 +29,8 @@ public class ExceptionWrapper {
         instanceId = e.getInstanceId();
     }
 
-    public ExceptionWrapper(Long fromWho, Long toWho, long timeInMillis,
-                            double longitude, double latitude, int exceptionTypeId, long instanceId) {
+    public ExceptionWrapper(BigInteger fromWho, BigInteger toWho, long timeInMillis,
+                            double longitude, double latitude, int exceptionTypeId, BigInteger instanceId) {
         this.fromWho = fromWho;
         this.toWho = toWho;
         this.timeInMillis = timeInMillis;
@@ -38,27 +40,27 @@ public class ExceptionWrapper {
         this.instanceId = instanceId;
     }
 
-    public long getInstanceId() {
+    public BigInteger getInstanceId() {
         return instanceId;
     }
 
-    public void setInstanceId(long instanceId) {
+    public void setInstanceId(BigInteger instanceId) {
         this.instanceId = instanceId;
     }
 
-    public long getFromWho() {
+    public BigInteger getFromWho() {
         return fromWho;
     }
 
-    public void setFromWho(long fromWho) {
+    public void setFromWho(BigInteger fromWho) {
         this.fromWho = fromWho;
     }
 
-    public long getToWho() {
+    public BigInteger getToWho() {
         return toWho;
     }
 
-    public void setToWho(long toWho) {
+    public void setToWho(BigInteger toWho) {
         this.toWho = toWho;
     }
 

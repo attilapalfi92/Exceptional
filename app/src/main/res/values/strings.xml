@@ -21,6 +21,8 @@
     <string name="new_exception_text">You got a new Exception!</string>
     
     <string name="project_number">947608408958</string>
+    <string name="backend_address">http://188.36.23.85:8090</string>
+
     <string name="title_activity_send_exception_list">SendExceptionList</string>
     <string name="title_activity_friend_chooser">FriendChooserActivity</string>
 

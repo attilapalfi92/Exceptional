@@ -1,9 +1,10 @@
 package com.attilapalf.exceptional.model;
 
 import com.attilapalf.exceptional.rest.messages.ExceptionWrapper;
-import com.attilapalf.exceptional.services.ExceptionFactory;
+import com.attilapalf.exceptional.services.ExceptionTypeManager;
 import com.google.gson.Gson;
 
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.Comparator;
 
@@ -17,19 +18,19 @@ public class Exception {
     // TODO: optimize exceptions: to be like on the server side
 
     // exception instance fields
-    private long instanceId;
+    private BigInteger instanceId;
     private int exceptionTypeId;
     private double longitude;
     private double latitude;
     private Timestamp date;
-    private long fromWho;
-    private long toWho;
+    private BigInteger fromWho;
+    private BigInteger toWho;
 
     private static Gson gson = new Gson();
 
     public Exception(ExceptionWrapper wrapper) {
         exceptionTypeId = wrapper.getExceptionTypeId();
-        exceptionType = ExceptionFactory.findById(exceptionTypeId);
+        exceptionType = ExceptionTypeManager.getInstance().findById(exceptionTypeId);
         instanceId = wrapper.getInstanceId();
         longitude = wrapper.getLongitude();
         latitude = wrapper.getLatitude();
@@ -94,18 +95,18 @@ public class Exception {
 
     public void setExceptionType(ExceptionType exceptionType) {
         this.exceptionType = exceptionType;
-        exceptionTypeId = exceptionType.getTypeId();
+        exceptionTypeId = exceptionType.getId();
     }
 
     public String getFullName() {
         return exceptionType.getPrefix() + exceptionType.getShortName();
     }
 
-    public long getInstanceId() {
+    public BigInteger getInstanceId() {
         return instanceId;
     }
 
-    public void setInstanceId(long instanceId) {
+    public void setInstanceId(BigInteger instanceId) {
         this.instanceId = instanceId;
     }
 
@@ -121,19 +122,19 @@ public class Exception {
         this.date = date;
     }
 
-    public long getFromWho() {
+    public BigInteger getFromWho() {
         return fromWho;
     }
 
-    public void setFromWho(long fromWho) {
+    public void setFromWho(BigInteger fromWho) {
         this.fromWho = fromWho;
     }
 
-    public long getToWho() {
+    public BigInteger getToWho() {
         return toWho;
     }
 
-    public void setToWho(long toWho) {
+    public void setToWho(BigInteger toWho) {
         this.toWho = toWho;
     }
 

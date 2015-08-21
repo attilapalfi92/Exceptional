@@ -1,25 +1,27 @@
 package com.attilapalf.exceptional.rest.messages;
 
+import java.math.BigInteger;
+
 /**
  * Created by Attila on 2015-06-21.
  */
 public class ExceptionSentResponse {
-    private long toWho;
+    private BigInteger toWho;
     private String shortName;
 
     public ExceptionSentResponse() {
     }
 
-    public ExceptionSentResponse(long toWho, String shortName) {
+    public ExceptionSentResponse(BigInteger toWho, String shortName) {
         this.toWho = toWho;
         this.shortName = shortName;
     }
 
-    public long getToWho() {
+    public BigInteger getToWho() {
         return toWho;
     }
 
-    public void setToWho(long toWho) {
+    public void setToWho(BigInteger toWho) {
         this.toWho = toWho;
     }
 

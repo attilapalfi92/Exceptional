@@ -1,16 +1,18 @@
 package com.attilapalf.exceptional.rest.messages;
 
+import java.math.BigInteger;
+
 /**
  * Created by 212461305 on 2015.07.11..
  */
 public abstract class BaseRequestBody {
-    protected long userId;
+    protected BigInteger userFacebookId;
 
-    public long getUserId() {
-        return userId;
+    public BigInteger getUserFacebookId() {
+        return userFacebookId;
     }
 
-    public void setUserId(long userId) {
-        this.userId = userId;
+    public void setUserFacebookId(BigInteger userFacebookId) {
+        this.userFacebookId = userFacebookId;
     }
 }

@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -22,7 +23,7 @@ import java.net.URLConnection;
  * Created by 212461305 on 2015.07.06..
  */
 public class ImageCache {
-    private LruCache<Long, Bitmap> imageWarehouse;
+    private LruCache<BigInteger, Bitmap> imageWarehouse;
     private Context applicationContext;
     private String filePath;
 
@@ -41,9 +42,9 @@ public class ImageCache {
         final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
         final int cacheSize = maxMemory / 8;
 
-        imageWarehouse = new LruCache<Long, Bitmap>(cacheSize) {
+        imageWarehouse = new LruCache<BigInteger, Bitmap>(cacheSize) {
             @Override
-            protected int sizeOf(Long key, Bitmap value) {
+            protected int sizeOf(BigInteger key, Bitmap value) {
                 // The cache size will be measured in kilobytes rather than number of items.
                 int bitmapByteCount = value.getRowBytes() * value.getHeight();
 

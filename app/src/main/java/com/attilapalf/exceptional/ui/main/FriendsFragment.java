@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.*;
-import com.attilapalf.exceptional.rest.BackendConnector;
+import com.attilapalf.exceptional.rest.BackendServiceImpl;
 import com.attilapalf.exceptional.interfaces.FriendChangeListener;
 import com.attilapalf.exceptional.services.FriendsManager;
 
@@ -33,7 +33,7 @@ public class FriendsFragment extends ListFragment implements FriendChangeListene
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-        BackendConnector.getInstance().addFriendChangeListener(this);
+        BackendServiceImpl.getInstance().addFriendChangeListener(this);
         FriendsManager.getInstance().setFriendChangeListener(this);
     }
 
@@ -64,7 +64,7 @@ public class FriendsFragment extends ListFragment implements FriendChangeListene
 
     @Override
     public void onDetach() {
-        BackendConnector.getInstance().removeFriendChangeListener(this);
+        BackendServiceImpl.getInstance().removeFriendChangeListener(this);
         super.onDetach();
     }
 
@@ -124,8 +124,8 @@ public class FriendsFragment extends ListFragment implements FriendChangeListene
             }
 
             public void bindRow(Friend model) {
-                nameView.setText(model.getName());
-                pointsView.setText("Points: " + Long.toString(model.getId()));
+                nameView.setText(model.getFirstName());
+                pointsView.setText("Points: " + model.getId().toString());
                 model.setImageToView(imageView);
             }
         }

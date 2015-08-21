@@ -10,8 +10,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.attilapalf.exceptional.R;
+import com.attilapalf.exceptional.services.facebook.FacebookLoginSuccessHandler;
 import com.attilapalf.exceptional.ui.main.MainActivity;
-import com.attilapalf.exceptional.services.FacebookManager;
+import com.attilapalf.exceptional.services.facebook.FacebookManager;
 import com.facebook.Profile;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
@@ -19,7 +20,7 @@ import com.facebook.login.widget.LoginButton;
 
 /**
  */
-public class FbLoginFragment extends Fragment implements FacebookManager.LoginSuccessHandler {
+public class FbLoginFragment extends Fragment implements FacebookLoginSuccessHandler {
 
     private TextView welcomeText;
 

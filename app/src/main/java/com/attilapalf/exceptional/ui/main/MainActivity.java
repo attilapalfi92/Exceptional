@@ -16,13 +16,13 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.attilapalf.exceptional.MyApplication;
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
-import com.attilapalf.exceptional.rest.BackendConnector;
+import com.attilapalf.exceptional.rest.BackendServiceImpl;
 import com.attilapalf.exceptional.interfaces.ServerResponseListener;
 import com.attilapalf.exceptional.ui.LoginActivity;
 import com.attilapalf.exceptional.ui.OptionsActivity;
 import com.attilapalf.exceptional.ui.exceptionSending.SendExceptionListActivity;
-import com.attilapalf.exceptional.services.ExceptionFactory;
-import com.attilapalf.exceptional.services.FacebookManager;
+import com.attilapalf.exceptional.services.ExceptionTypeManager;
+import com.attilapalf.exceptional.services.facebook.FacebookManager;
 import com.attilapalf.exceptional.services.GpsService;
 
 public class MainActivity extends AppCompatActivity implements ServerResponseListener {
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
         GpsService.getInstance().initialize(getApplicationContext());
         gpsService = GpsService.getInstance();
 
-        BackendConnector.getInstance().addConnectionListener(this);
+        BackendServiceImpl.getInstance().addConnectionListener(this);
 
         androidId = Settings.Secure.getString(getApplicationContext()
                 .getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        BackendConnector.getInstance().removeConnectionListener(this);
+        BackendServiceImpl.getInstance().removeConnectionListener(this);
     }
 
     @Override
@@ -140,18 +140,18 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
                 mLocation = gpsService.getLocation();
                 // TODO: giving exception to myself: not setting the instance ID, and not saving the exception here.
                 // TODO: save the exception when in arrives from the backend
-                Exception e = ExceptionFactory.createRandomException(FacebookManager.getInstance().getProfileId(),
+                Exception e = ExceptionTypeManager.getInstance().createRandomException(FacebookManager.getInstance().getProfileId(),
                         FacebookManager.getInstance().getProfileId());
 
                 e.setLongitude(mLocation.getLongitude());
                 e.setLatitude(mLocation.getLatitude());
-                //ExceptionManager.addException(e);
+                //ExceptionInstanceManager.addException(e);
 
 //            for (ExceptionChangeListener listener : exceptionChangeListeners) {
 //                listener.onExceptionsChanged();
 //            }
 
-                BackendConnector.getInstance().sendException(e);
+                BackendServiceImpl.getInstance().sendException(e);
 
                 String data =
                         "Description: " + e.getDescription() + "\n\n" +

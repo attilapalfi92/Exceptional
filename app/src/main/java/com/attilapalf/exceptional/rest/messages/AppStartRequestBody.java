@@ -1,5 +1,6 @@
 package com.attilapalf.exceptional.rest.messages;
 
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.List;
 
@@ -8,27 +9,37 @@ import java.util.List;
  */
 public class AppStartRequestBody extends BaseExceptionRequestBody {
     private String deviceId;
-    private String regId;
-    private Collection<Long> friendsIds;
+    private String gcmId;
+    private Collection<BigInteger> friendsFacebookIds;
+    private int exceptionVersion;
+    private String firstName, lastName;
+    private String deviceName;
 
     public AppStartRequestBody() {
     }
 
-    public AppStartRequestBody(String deviceId, long userId, String regId,
-                               List<Long> friendsIds, List<Long> exceptionIds) {
+    public AppStartRequestBody(String deviceId, String gcmId, Collection<BigInteger> friendsFacebookIds) {
         this.deviceId = deviceId;
-        this.userId = userId;
-        this.regId = regId;
-        this.friendsIds = friendsIds;
-        this.exceptionIds = exceptionIds;
+        this.gcmId = gcmId;
+        this.friendsFacebookIds = friendsFacebookIds;
     }
 
-    public AppStartRequestBody(String deviceId, long userId,
-                               List<Long> friendsIds, List<Long> exceptionIds) {
+    public AppStartRequestBody(BigInteger userId, List<com.attilapalf.exceptional.model.Exception> exceptionList,
+                               String deviceId, String gcmId, Collection<BigInteger> friendsFacebookIds,
+                               List<BigInteger> deletedFacebookFriendIds, List<BigInteger> newFacebookFriendIds) {
+        super(userId, exceptionList);
         this.deviceId = deviceId;
-        this.userId = userId;
-        this.friendsIds = friendsIds;
-        this.exceptionIds = exceptionIds;
+        this.gcmId = gcmId;
+        this.friendsFacebookIds = friendsFacebookIds;
+    }
+
+    public AppStartRequestBody(String deviceId, BigInteger userId,
+                               List<BigInteger> friendsFacebookIds, List<BigInteger> exceptionIds,
+                               List<BigInteger> deletedFacebookFriendIds, List<BigInteger> newFacebookFriendIds) {
+        this.deviceId = deviceId;
+        this.userFacebookId = userId;
+        this.friendsFacebookIds = friendsFacebookIds;
+        this.knownExceptionIds = exceptionIds;
     }
 
     public String getDeviceId() {
@@ -39,35 +50,67 @@ public class AppStartRequestBody extends BaseExceptionRequestBody {
         this.deviceId = deviceId;
     }
 
-    public long getUserId() {
-        return userId;
+    public BigInteger getUserFacebookId() {
+        return userFacebookId;
     }
 
-    public void setUserId(long userId) {
-        this.userId = userId;
+    public void setUserFacebookId(BigInteger userId) {
+        this.userFacebookId = userId;
     }
 
-    public Collection<Long> getFriendsIds() {
-        return friendsIds;
+    public Collection<BigInteger> getFriendsFacebookIds() {
+        return friendsFacebookIds;
     }
 
-    public void setFriendsIds(Collection<Long> friendsIds) {
-        this.friendsIds = friendsIds;
+    public void setFriendsFacebookIds(Collection<BigInteger> friendsFacebookIds) {
+        this.friendsFacebookIds = friendsFacebookIds;
     }
 
-    public List<Long> getExceptionIds() {
-        return exceptionIds;
+    public List<BigInteger> getKnownExceptionIds() {
+        return knownExceptionIds;
     }
 
-    public void setExceptionIds(List<Long> exceptionIds) {
-        this.exceptionIds = exceptionIds;
+    public void setKnownExceptionIds(List<BigInteger> exceptionIds) {
+        this.knownExceptionIds = exceptionIds;
     }
 
-    public String getRegId() {
-        return regId;
+    public String getGcmId() {
+        return gcmId;
     }
 
-    public void setRegId(String regId) {
-        this.regId = regId;
+    public void setGcmId(String gcmId) {
+        this.gcmId = gcmId;
+    }
+
+    public int getExceptionVersion() {
+        return exceptionVersion;
+    }
+
+    public void setExceptionVersion(int exceptionVersion) {
+        this.exceptionVersion = exceptionVersion;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
     }
 }
