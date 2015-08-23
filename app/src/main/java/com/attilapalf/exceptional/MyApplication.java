@@ -10,12 +10,12 @@ import android.util.Base64;
 import android.util.Log;
 
 import com.attilapalf.exceptional.rest.BackendServiceImpl;
-import com.attilapalf.exceptional.services.ExceptionTypeManager;
-import com.attilapalf.exceptional.services.ExceptionInstanceManager;
-import com.attilapalf.exceptional.services.MetadataStore;
+import com.attilapalf.exceptional.services.persistent_stores.ExceptionTypeManager;
+import com.attilapalf.exceptional.services.persistent_stores.ExceptionInstanceManager;
+import com.attilapalf.exceptional.services.persistent_stores.MetadataStore;
 import com.attilapalf.exceptional.services.facebook.FacebookManager;
-import com.attilapalf.exceptional.services.FriendsManager;
-import com.attilapalf.exceptional.services.ImageCache;
+import com.attilapalf.exceptional.services.persistent_stores.FriendsManager;
+import com.attilapalf.exceptional.services.persistent_stores.ImageCache;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -24,8 +24,6 @@ import java.security.NoSuchAlgorithmException;
  * Created by Attila on 2015-06-05.
  */
 public class MyApplication extends Application {
-
-    private static volatile boolean loggedIn = false;
 
     @Override
     public void onCreate() {
@@ -70,13 +68,5 @@ public class MyApplication extends Application {
         } catch (PackageManager.NameNotFoundException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-    }
-
-    public static boolean isLoggedIn() {
-        return loggedIn;
-    }
-
-    public static void setLoggedIn(boolean loggedIn) {
-        MyApplication.loggedIn = loggedIn;
     }
 }

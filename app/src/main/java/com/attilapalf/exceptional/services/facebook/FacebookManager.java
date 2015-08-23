@@ -7,11 +7,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.attilapalf.exceptional.MyApplication;
 import com.attilapalf.exceptional.model.Friend;
-import com.attilapalf.exceptional.services.ExceptionInstanceManager;
-import com.attilapalf.exceptional.services.FriendsManager;
-import com.attilapalf.exceptional.services.ImageCache;
+import com.attilapalf.exceptional.services.persistent_stores.ExceptionInstanceManager;
+import com.attilapalf.exceptional.services.persistent_stores.ExceptionTypeManager;
+import com.attilapalf.exceptional.services.persistent_stores.FriendsManager;
+import com.attilapalf.exceptional.services.persistent_stores.ImageCache;
+import com.attilapalf.exceptional.services.persistent_stores.MetadataStore;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
@@ -36,25 +37,18 @@ import java.util.List;
  * Created by Attila on 2015-06-06.
  */
 public class FacebookManager {
+    private static FacebookManager instance;
+
     private AccessToken accessToken;
-    /**
-     * Protects the accessToken and the profile objects
-     */
-    private final Object syncObject = new Object();
     private AccessTokenTracker tokenTracker;
     private Profile profile;
     private ProfileTracker profileTracker;
     private BigInteger profileId = new BigInteger("0");
     private Friend yourself;
-
     private CallbackManager callbackManager;
     private FacebookCallback<LoginResult> facebookCallback;
     private FacebookEventListener startupListener;
     private FacebookLoginSuccessHandler loginSuccessHandler;
-
-    private boolean firstStart = false;
-
-    private static FacebookManager instance;
 
     public static FacebookManager getInstance() {
         if (instance == null) {
@@ -87,10 +81,8 @@ public class FacebookManager {
         profileTracker = new ProfileTracker() {
             @Override
             protected void onCurrentProfileChanged(Profile oldProfile, Profile newProfile) {
-                synchronized (syncObject) {
-                    if (newProfile != null) {
-                        profile = newProfile;
-                    }
+                if (newProfile != null) {
+                    profile = newProfile;
                 }
             }
         };
@@ -100,13 +92,10 @@ public class FacebookManager {
         tokenTracker = new AccessTokenTracker() {
             @Override
             protected void onCurrentAccessTokenChanged(AccessToken oldToken, AccessToken newToken) {
-                synchronized (syncObject) {
-                    if (newToken != null) {
-                        setUserLoggedIn(newToken);
-                    } else {
-                        setUserLoggedOut();
-                    }
+                if (newToken == null) {
+                    setUserLoggedOut();
                 }
+                accessToken = newToken;
             }
         };
     }
@@ -115,36 +104,24 @@ public class FacebookManager {
         FriendsManager.getInstance().wipe();
         ImageCache.getInstance().wipe();
         ExceptionInstanceManager.getInstance().wipe();
-        MyApplication.setLoggedIn(false);
-    }
-
-    private void setUserLoggedIn(AccessToken newToken) {
-        accessToken = newToken;
-        if (!firstStart) {
-            refreshFriends();
-        }
-        MyApplication.setLoggedIn(true);
+        ExceptionTypeManager.getInstance().wipe();
+        MetadataStore.getInstance().wipe();
     }
 
     private void initFacebookCallback() {
         facebookCallback = new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                synchronized (syncObject) {
-                    accessToken = loginResult.getAccessToken();
-                    loginSuccessHandler.onLoginSuccess(loginResult);
-                    profile = Profile.getCurrentProfile();
-                    firstStart = true;
-                    MyApplication.setLoggedIn(true);
-                    refreshFriends();
-                }
+                accessToken = loginResult.getAccessToken();
+                loginSuccessHandler.onLoginSuccess(loginResult);
+                initYourself();
+                MetadataStore.getInstance().setLoggedIn(true);
+                refreshFriends();
             }
             @Override
             public void onCancel() {}
             @Override
-            public void onError(FacebookException e) {
-                MyApplication.setLoggedIn(false);
-            }
+            public void onError(FacebookException e) {}
         };
     }
 
@@ -159,39 +136,13 @@ public class FacebookManager {
                     continueAppStart(friends);
 
                 } else {
-                    if (MyApplication.isLoggedIn()) {
+                    if (MetadataStore.getInstance().isLoggedIn()) {
                         startupListener.onNoInternetStart();
                     }
                 }
             }
         });
-        setLoginState();
         initGraphRequest(request);
-    }
-
-    private void setLoginState() {
-        if (accessToken != null) {
-            MyApplication.setLoggedIn(true);
-        } else {
-            MyApplication.setLoggedIn(false);
-        }
-    }
-
-    private void initGraphRequest(GraphRequest request) {
-        Bundle parameters = new Bundle();
-        parameters.putString("fields", "id,name,picture");
-        request.setParameters(parameters);
-        request.executeAsync();
-    }
-
-    private void continueAppStart(List<Friend> friends) {
-        if (MyApplication.isLoggedIn()) {
-            if (firstStart) {
-                startupListener.onFirstAppStart(friends, yourself);
-            } else {
-                startupListener.onRegularAppStart(friends, yourself);
-            }
-        }
     }
 
     @NonNull
@@ -212,19 +163,44 @@ public class FacebookManager {
     private void updateProfileInBackground() {
         new AsyncTask<Void, Void, Void>() {
             @Override
-            protected Void doInBackground(Void... voids) {
-                profile = Profile.getCurrentProfile();
+            protected Void doInBackground(Void... params) {
+                initYourself();
                 if (profile != null) {
-                    yourself = new Friend(
-                            new BigInteger(profile.getId()),
-                            profile.getFirstName() + " " + profile.getMiddleName(),
-                            profile.getLastName(),
-                            profile.getProfilePictureUri(200, 200).toString());
                     FriendsManager.getInstance().saveOrUpdateYourself(yourself);
                 }
                 return null;
             }
         }.execute();
+    }
+
+    private void continueAppStart(List<Friend> friends) {
+        if (MetadataStore.getInstance().isLoggedIn()) {
+            if (!MetadataStore.getInstance().isFirstStartFinished()) {
+                initYourself();
+                startupListener.onFirstAppStart(friends, yourself);
+            } else {
+                initYourself();
+                startupListener.onRegularAppStart(friends, yourself);
+            }
+        }
+    }
+
+    private void initGraphRequest(GraphRequest request) {
+        Bundle parameters = new Bundle();
+        parameters.putString("fields", "id,name,picture");
+        request.setParameters(parameters);
+        request.executeAsync();
+    }
+
+    private void initYourself() {
+        profile = Profile.getCurrentProfile();
+        if (profile != null) {
+            yourself = new Friend(
+                    new BigInteger(profile.getId()),
+                    profile.getFirstName() + " " + profile.getMiddleName(),
+                    profile.getLastName(),
+                    profile.getProfilePictureUri(200, 200).toString());
+        }
     }
 
     @NonNull
@@ -259,16 +235,6 @@ public class FacebookManager {
         }
 
         return profileId;
-    }
-
-
-    public boolean isUserLoggedIn() {
-        synchronized (syncObject) {
-            if (accessToken == null) {
-                accessToken = AccessToken.getCurrentAccessToken();
-            }
-        }
-        return accessToken != null;
     }
 
 

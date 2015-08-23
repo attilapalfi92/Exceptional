@@ -15,15 +15,15 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.attilapalf.exceptional.MyApplication;
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.model.Friend;
 import com.attilapalf.exceptional.rest.BackendServiceImpl;
 import com.attilapalf.exceptional.interfaces.ExceptionChangeListener;
 import com.attilapalf.exceptional.interfaces.ExceptionRefreshListener;
-import com.attilapalf.exceptional.services.ExceptionInstanceManager;
-import com.attilapalf.exceptional.services.FriendsManager;
+import com.attilapalf.exceptional.services.persistent_stores.ExceptionInstanceManager;
+import com.attilapalf.exceptional.services.persistent_stores.FriendsManager;
+import com.attilapalf.exceptional.services.persistent_stores.MetadataStore;
 
 import java.util.List;
 
@@ -104,7 +104,7 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
 
     @Override
     public void onRefresh() {
-        if (MyApplication.isLoggedIn()) {
+        if (MetadataStore.getInstance().isLoggedIn()) {
             BackendServiceImpl.getInstance().refreshExceptions(this);
         } else {
             Toast.makeText(getActivity().getApplicationContext(), "You have to login first!", Toast.LENGTH_SHORT).show();

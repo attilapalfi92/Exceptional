@@ -17,7 +17,7 @@ import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.*;
 import com.attilapalf.exceptional.rest.BackendServiceImpl;
 import com.attilapalf.exceptional.interfaces.FriendChangeListener;
-import com.attilapalf.exceptional.services.FriendsManager;
+import com.attilapalf.exceptional.services.persistent_stores.FriendsManager;
 
 import java.util.List;
 

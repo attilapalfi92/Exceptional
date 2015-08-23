@@ -18,8 +18,8 @@ import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.*;
 import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.rest.BackendServiceImpl;
-import com.attilapalf.exceptional.services.ExceptionTypeManager;
-import com.attilapalf.exceptional.services.FriendsManager;
+import com.attilapalf.exceptional.services.persistent_stores.ExceptionTypeManager;
+import com.attilapalf.exceptional.services.persistent_stores.FriendsManager;
 import com.attilapalf.exceptional.services.GpsService;
 
 import java.util.List;
@@ -33,13 +33,10 @@ public class FriendChooserActivity extends AppCompatActivity implements AdapterV
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friend_chooser);
-
         ListView friendListView = (ListView) findViewById(R.id.send_friend_list);
         friendListView.setOnItemClickListener(this);
-
         adapter = new MyAdapter(this.getApplicationContext(), FriendsManager.getInstance().getStoredFriends());
         friendListView.setAdapter(adapter);
-
         exceptionTypeId = getIntent().getIntExtra("exceptionTypeId", exceptionTypeId);
     }
 
@@ -54,7 +51,7 @@ public class FriendChooserActivity extends AppCompatActivity implements AdapterV
             Location location = GpsService.getInstance().getLocation();
             exception.setLongitude(location.getLongitude());
             exception.setLatitude(location.getLatitude());
-            BackendServiceImpl.getInstance().sendException(exception);
+            BackendServiceImpl.getInstance().throwException(exception);
             finish();
         }
     }

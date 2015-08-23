@@ -13,15 +13,15 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.attilapalf.exceptional.MyApplication;
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
 import com.attilapalf.exceptional.rest.BackendServiceImpl;
 import com.attilapalf.exceptional.interfaces.ServerResponseListener;
+import com.attilapalf.exceptional.services.persistent_stores.MetadataStore;
 import com.attilapalf.exceptional.ui.LoginActivity;
 import com.attilapalf.exceptional.ui.OptionsActivity;
 import com.attilapalf.exceptional.ui.exceptionSending.SendExceptionListActivity;
-import com.attilapalf.exceptional.services.ExceptionTypeManager;
+import com.attilapalf.exceptional.services.persistent_stores.ExceptionTypeManager;
 import com.attilapalf.exceptional.services.facebook.FacebookManager;
 import com.attilapalf.exceptional.services.GpsService;
 
@@ -41,9 +41,7 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
 
         GpsService.getInstance().initialize(getApplicationContext());
         gpsService = GpsService.getInstance();
-
         BackendServiceImpl.getInstance().addConnectionListener(this);
-
         androidId = Settings.Secure.getString(getApplicationContext()
                 .getContentResolver(), Settings.Secure.ANDROID_ID);
 
@@ -66,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
     protected void onResume() {
         super.onResume();
 
-        if(!FacebookManager.getInstance().isUserLoggedIn()) {
+        if(!MetadataStore.getInstance().isLoggedIn()) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }
@@ -88,28 +86,15 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             Intent intent = new Intent(this, OptionsActivity.class);
             startActivity(intent);
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
-
-    private int backButtonCount = 0;
-
-    /**
-     * Back button listener.
-     * Will close the application if the back button pressed twice.
-     */
     @Override
     public void onBackPressed()
     {
@@ -119,9 +104,8 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
         startActivity(intent);
     }
 
-
     public void throwExceptionClicked(View view) {
-        if (MyApplication.isLoggedIn()) {
+        if (MetadataStore.getInstance().isLoggedIn()) {
             Intent intent = new Intent(this, SendExceptionListActivity.class);
             startActivity(intent);
         } else {
@@ -129,9 +113,8 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
         }
     }
 
-
     public void giveMeExcClicked(View view) {
-        if (MyApplication.isLoggedIn()) {
+        if (MetadataStore.getInstance().isLoggedIn()) {
             if (!gpsService.canGetLocation() && mLocation == null) {
                 //Toast.makeText(this, "Can't get device's location.\nPlease enable location services.", Toast.LENGTH_SHORT).show();
 
@@ -151,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
 //                listener.onExceptionsChanged();
 //            }
 
-                BackendServiceImpl.getInstance().sendException(e);
+                BackendServiceImpl.getInstance().throwException(e);
 
                 String data =
                         "Description: " + e.getDescription() + "\n\n" +

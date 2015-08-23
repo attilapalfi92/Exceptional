@@ -1,4 +1,4 @@
-package com.attilapalf.exceptional.services;
+package com.attilapalf.exceptional.services.persistent_stores;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -6,7 +6,7 @@ import android.os.AsyncTask;
 
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
-import com.attilapalf.exceptional.rest.messages.ExceptionWrapper;
+import com.attilapalf.exceptional.rest.messages.ExceptionInstanceWrapper;
 import com.attilapalf.exceptional.interfaces.ExceptionChangeListener;
 import com.attilapalf.exceptional.interfaces.ExceptionSource;
 
@@ -22,7 +22,7 @@ import java.util.Set;
 /**
  * Created by Attila on 2015-06-08.
  */
-public class ExceptionInstanceManager implements ExceptionSource {
+public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
 
     public final int STORE_SIZE = Integer.MAX_VALUE;
     private SharedPreferences sharedPreferences;
@@ -53,11 +53,10 @@ public class ExceptionInstanceManager implements ExceptionSource {
         new AsyncExceptionLoader(storedExceptions, sharedPreferences).execute();
     }
 
-
+    @Override
     public void wipe() {
         storedExceptions.clear();
-        editor.clear();
-        editor.apply();
+        editor.clear().apply();
         for (ExceptionChangeListener listener : exceptionChangeListeners) {
             listener.onExceptionsChanged();
         }
@@ -146,8 +145,8 @@ public class ExceptionInstanceManager implements ExceptionSource {
     }
 
 
-    public void addExceptions(List<ExceptionWrapper> wrapperList) {
-        for (ExceptionWrapper wrapper : wrapperList) {
+    public void saveExceptions(List<ExceptionInstanceWrapper> wrapperList) {
+        for (ExceptionInstanceWrapper wrapper : wrapperList) {
             Exception e = new Exception(wrapper);
             addException(e, false);
         }

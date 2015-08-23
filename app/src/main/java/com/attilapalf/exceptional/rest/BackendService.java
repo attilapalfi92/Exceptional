@@ -13,6 +13,6 @@ import java.util.Set;
 public interface BackendService {
     void onFirstAppStart(List<Friend> friendList);
     void onRegularAppStart(List<Friend> friendList);
-    void sendException(Exception e);
+    void throwException(Exception e);
     void refreshExceptions(final ExceptionRefreshListener refreshListenerParam);
 }

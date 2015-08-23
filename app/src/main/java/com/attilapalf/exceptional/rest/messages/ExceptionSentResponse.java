@@ -8,13 +8,15 @@ import java.math.BigInteger;
 public class ExceptionSentResponse {
     private BigInteger toWho;
     private String shortName;
+    private int points;
 
     public ExceptionSentResponse() {
     }
 
-    public ExceptionSentResponse(BigInteger toWho, String shortName) {
+    public ExceptionSentResponse(BigInteger toWho, String shortName, int points) {
         this.toWho = toWho;
         this.shortName = shortName;
+        this.points = points;
     }
 
     public BigInteger getToWho() {
@@ -31,5 +33,13 @@ public class ExceptionSentResponse {
 
     public void setShortName(String shortName) {
         this.shortName = shortName;
+    }
+
+    public int getPoints() {
+        return points;
+    }
+
+    public void setPoints(int points) {
+        this.points = points;
     }
 }

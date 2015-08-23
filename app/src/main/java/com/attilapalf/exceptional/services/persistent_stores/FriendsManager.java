@@ -1,4 +1,4 @@
-package com.attilapalf.exceptional.services;
+package com.attilapalf.exceptional.services.persistent_stores;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -29,7 +29,7 @@ import java.util.Set;
  * Responsible for storing friends in the device's preferences
  * Created by Attila on 2015-06-12.
  */
-public class FriendsManager implements FacebookEventListener, BackendServiceUser {
+public class FriendsManager implements FacebookEventListener, BackendServiceUser, Wipeable {
 
     private BackendService backendService;
     private SharedPreferences sharedPreferences;
@@ -184,6 +184,7 @@ public class FriendsManager implements FacebookEventListener, BackendServiceUser
         }
     }
 
+    @Override
     public void wipe() {
         storedFriends.clear();
         editor.clear();
@@ -206,8 +207,6 @@ public class FriendsManager implements FacebookEventListener, BackendServiceUser
         protected Bitmap doInBackground(Void... param) {
             String downloadUrl = friend.getImageUrl();
             Bitmap friendPicture = null;
-
-
             try {
                 friendPicture = ImageCache.getInstance().getImage(friend);
 

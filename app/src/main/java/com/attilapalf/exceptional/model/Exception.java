@@ -1,7 +1,7 @@
 package com.attilapalf.exceptional.model;
 
-import com.attilapalf.exceptional.rest.messages.ExceptionWrapper;
-import com.attilapalf.exceptional.services.ExceptionTypeManager;
+import com.attilapalf.exceptional.rest.messages.ExceptionInstanceWrapper;
+import com.attilapalf.exceptional.services.persistent_stores.ExceptionTypeManager;
 import com.google.gson.Gson;
 
 import java.math.BigInteger;
@@ -13,11 +13,9 @@ import java.util.Comparator;
  * Created by Attila on 2015-06-08.
  */
 public class Exception {
+    private static Gson gson = new Gson();
+
     private transient ExceptionType exceptionType;
-
-    // TODO: optimize exceptions: to be like on the server side
-
-    // exception instance fields
     private BigInteger instanceId;
     private int exceptionTypeId;
     private double longitude;
@@ -26,9 +24,7 @@ public class Exception {
     private BigInteger fromWho;
     private BigInteger toWho;
 
-    private static Gson gson = new Gson();
-
-    public Exception(ExceptionWrapper wrapper) {
+    public Exception(ExceptionInstanceWrapper wrapper) {
         exceptionTypeId = wrapper.getExceptionTypeId();
         exceptionType = ExceptionTypeManager.getInstance().findById(exceptionTypeId);
         instanceId = wrapper.getInstanceId();

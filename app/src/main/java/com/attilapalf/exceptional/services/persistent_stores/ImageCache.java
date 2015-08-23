@@ -1,4 +1,4 @@
-package com.attilapalf.exceptional.services;
+package com.attilapalf.exceptional.services.persistent_stores;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -15,14 +15,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
 /**
  * Created by 212461305 on 2015.07.06..
  */
-public class ImageCache {
+public class ImageCache implements Wipeable {
     private LruCache<BigInteger, Bitmap> imageWarehouse;
     private Context applicationContext;
     private String filePath;
@@ -187,14 +186,12 @@ public class ImageCache {
 
     public void removeImage(Friend friend) {
         imageWarehouse.remove(friend.getId());
-
         // TODO: remove from disk storage
     }
 
-
+    @Override
     public void wipe() {
         imageWarehouse.evictAll();
-
         // TODO: remove from disk storage
     }
 }

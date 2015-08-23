@@ -14,14 +14,15 @@ import com.attilapalf.exceptional.rest.messages.AppStartResponseBody;
 import com.attilapalf.exceptional.rest.messages.BaseExceptionRequestBody;
 import com.attilapalf.exceptional.rest.messages.ExceptionRefreshResponse;
 import com.attilapalf.exceptional.rest.messages.ExceptionSentResponse;
-import com.attilapalf.exceptional.rest.messages.ExceptionWrapper;
+import com.attilapalf.exceptional.rest.messages.ExceptionInstanceWrapper;
 import com.attilapalf.exceptional.interfaces.ExceptionRefreshListener;
 import com.attilapalf.exceptional.interfaces.FriendChangeListener;
 import com.attilapalf.exceptional.interfaces.FriendSource;
 import com.attilapalf.exceptional.services.Converter;
-import com.attilapalf.exceptional.services.ExceptionInstanceManager;
-import com.attilapalf.exceptional.services.ExceptionTypeManager;
-import com.attilapalf.exceptional.services.MetadataStore;
+import com.attilapalf.exceptional.services.persistent_stores.ExceptionInstanceManager;
+import com.attilapalf.exceptional.services.persistent_stores.ExceptionTypeManager;
+import com.attilapalf.exceptional.services.persistent_stores.FriendsManager;
+import com.attilapalf.exceptional.services.persistent_stores.MetadataStore;
 import com.attilapalf.exceptional.services.facebook.FacebookManager;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.gson.GsonBuilder;
@@ -80,54 +81,23 @@ public class BackendServiceImpl implements BackendService, FriendSource, ServerR
     }
 
     @Override
-    public void refreshExceptions(final ExceptionRefreshListener refreshListener) {
-        BaseExceptionRequestBody requestBody = new BaseExceptionRequestBody(
-                FacebookManager.getInstance().getProfileId(),
-                ExceptionInstanceManager.getInstance().getExceptionList()
-        );
-
-        restInterface.refreshExceptions(requestBody, new Callback<ExceptionRefreshResponse>() {
-            @Override
-            public void success(ExceptionRefreshResponse exceptionRefreshResponse, Response response) {
-                ExceptionInstanceManager.getInstance().addExceptions(exceptionRefreshResponse.getNeededExceptions());
-                for (ServerResponseListener l : responseListeners) {
-                    l.onSuccess("Exceptions are synchronized!");
-                }
-                refreshListener.onExceptionRefreshFinished();
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-                for (ServerResponseListener l : responseListeners) {
-                    l.onConnectionFailed("Failed to synchronize exceptions.\n", error.getMessage());
-                }
-                refreshListener.onExceptionRefreshFinished();
-            }
-        });
+    public void onFirstAppStart(List<Friend> friendList) {
+        initRequestBody(friendList);
+        requestBody.setDeviceName(getDeviceName());
+        gcmFirstAppStart();
     }
-
-
 
     @Override
     public void onRegularAppStart(List<Friend> friendList) {
         initRequestBody(friendList);
         requestBody.setExceptionVersion(MetadataStore.getInstance().getExceptionVersion());
-
         try {
             restInterface.regularAppStart(requestBody, new Callback<AppStartResponseBody>() {
                 @Override
                 public void success(AppStartResponseBody responseBody, Response response) {
-                    ExceptionTypeManager.getInstance().setVotedExceptionTypes(responseBody.getBeingVotedTypes());
-                    if (responseBody.getMyExceptions().size() > 0) {
-                        ExceptionInstanceManager.getInstance().addExceptions(responseBody.getMyExceptions());
-                    }
-                    if (responseBody.getExceptionVersion() > MetadataStore.getInstance().getExceptionVersion()) {
-                        MetadataStore.getInstance().setExceptionVersion(responseBody.getExceptionVersion());
-                        ExceptionTypeManager.getInstance().addExceptionTypes2(responseBody.getExceptionTypes());
-                    }
-                    if (responseBody.getPoints() != MetadataStore.getInstance().getPoints()) {
-                        MetadataStore.getInstance().setPoints(responseBody.getPoints());
-                    }
+                    saveExceptionInstancesToStore(responseBody);
+                    saveExceptionTypesToStore(responseBody);
+                    savePointsToStore(responseBody);
                 }
 
                 @Override
@@ -143,11 +113,24 @@ public class BackendServiceImpl implements BackendService, FriendSource, ServerR
         }
     }
 
-    @Override
-    public void onFirstAppStart(List<Friend> friendList) {
-        initRequestBody(friendList);
-        requestBody.setDeviceName(getDeviceName());
-        gcmFirstAppStart();
+    private void saveExceptionInstancesToStore(AppStartResponseBody responseBody) {
+        ExceptionTypeManager.getInstance().setVotedExceptionTypes(responseBody.getBeingVotedTypes());
+        if (responseBody.getMyExceptions().size() > 0) {
+            ExceptionInstanceManager.getInstance().saveExceptions(responseBody.getMyExceptions());
+        }
+    }
+
+    private void saveExceptionTypesToStore(AppStartResponseBody responseBody) {
+        if (responseBody.getExceptionVersion() > MetadataStore.getInstance().getExceptionVersion()) {
+            MetadataStore.getInstance().setExceptionVersion(responseBody.getExceptionVersion());
+            ExceptionTypeManager.getInstance().addExceptionTypes(responseBody.getExceptionTypes());
+        }
+    }
+
+    private void savePointsToStore(AppStartResponseBody responseBody) {
+        if (responseBody.getPoints() != MetadataStore.getInstance().getPoints()) {
+            MetadataStore.getInstance().setPoints(responseBody.getPoints());
+        }
     }
 
     private void initRequestBody(List<Friend> friendList) {
@@ -155,6 +138,8 @@ public class BackendServiceImpl implements BackendService, FriendSource, ServerR
         requestBody.setUserFacebookId(FacebookManager.getInstance().getProfileId());
         requestBody.setFriendsFacebookIds(Converter.fromFriendsToLongs(friendList));
         requestBody.setKnownExceptionIds(new ArrayList<BigInteger>());
+        requestBody.setFirstName(FriendsManager.getInstance().getYourself().getFirstName());
+        requestBody.setLastName(FriendsManager.getInstance().getYourself().getLastName());
     }
 
 
@@ -197,8 +182,9 @@ public class BackendServiceImpl implements BackendService, FriendSource, ServerR
                     MetadataStore.getInstance().setExceptionVersion(responseBody.getExceptionVersion());
                     MetadataStore.getInstance().setPoints(responseBody.getPoints());
                     if (responseBody.getMyExceptions().size() > 0) {
-                        ExceptionInstanceManager.getInstance().addExceptions(responseBody.getMyExceptions());
+                        ExceptionInstanceManager.getInstance().saveExceptions(responseBody.getMyExceptions());
                     }
+                    MetadataStore.getInstance().setFirstStartFinished(true);
                 }
 
                 @Override
@@ -214,11 +200,10 @@ public class BackendServiceImpl implements BackendService, FriendSource, ServerR
     }
 
     @Override
-    public void sendException(Exception e) {
-        ExceptionWrapper exceptionWrapper = new ExceptionWrapper(e);
-
+    public void throwException(Exception e) {
+        ExceptionInstanceWrapper exceptionInstanceWrapper = new ExceptionInstanceWrapper(e);
         try{
-            restInterface.sendException(exceptionWrapper, new Callback<ExceptionSentResponse>() {
+            restInterface.sendException(exceptionInstanceWrapper, new Callback<ExceptionSentResponse>() {
                 @Override
                 public void success(ExceptionSentResponse e, Response response) {
                     for (ServerResponseListener l : responseListeners) {
@@ -229,14 +214,43 @@ public class BackendServiceImpl implements BackendService, FriendSource, ServerR
                 @Override
                 public void failure(RetrofitError error) {
                     for (ServerResponseListener l : responseListeners) {
-                        l.onConnectionFailed("Failed to send the exception to the server.", error.getMessage());
+                        l.onConnectionFailed("Failed to throw the exception to the server.", error.getMessage());
                     }
                 }
             });
 
         } catch (java.lang.Exception exception) {
-
+            for (ServerResponseListener l : responseListeners) {
+                l.onConnectionFailed("Failed to throw the exception to the server.", exception.getMessage());
+            }
         }
+    }
+
+    @Override
+    public void refreshExceptions(final ExceptionRefreshListener refreshListener) {
+        BaseExceptionRequestBody requestBody = new BaseExceptionRequestBody(
+                FacebookManager.getInstance().getProfileId(),
+                ExceptionInstanceManager.getInstance().getExceptionList()
+        );
+
+        restInterface.refreshExceptions(requestBody, new Callback<ExceptionRefreshResponse>() {
+            @Override
+            public void success(ExceptionRefreshResponse exceptionRefreshResponse, Response response) {
+                ExceptionInstanceManager.getInstance().saveExceptions(exceptionRefreshResponse.getNeededExceptions());
+                for (ServerResponseListener l : responseListeners) {
+                    l.onSuccess("Exceptions are synchronized!");
+                }
+                refreshListener.onExceptionRefreshFinished();
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                for (ServerResponseListener l : responseListeners) {
+                    l.onConnectionFailed("Failed to synchronize exceptions.\n", error.getMessage());
+                }
+                refreshListener.onExceptionRefreshFinished();
+            }
+        });
     }
 
     @Override

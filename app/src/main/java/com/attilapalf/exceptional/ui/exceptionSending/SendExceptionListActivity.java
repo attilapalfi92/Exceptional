@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.ExceptionType;
-import com.attilapalf.exceptional.services.ExceptionTypeManager;
+import com.attilapalf.exceptional.services.persistent_stores.ExceptionTypeManager;
 
 import java.util.List;
 
@@ -27,10 +27,8 @@ public class SendExceptionListActivity extends AppCompatActivity implements Adap
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send_exception_list);
-
         ListView exceptionListView = (ListView) findViewById(R.id.send_exception_list);
         exceptionListView.setOnItemClickListener(this);
-
         adapter = new MyAdapter(this.getApplicationContext(), ExceptionTypeManager.getInstance().getExceptionTypesByName());
         exceptionListView.setAdapter(adapter);
     }
@@ -87,10 +85,8 @@ public class SendExceptionListActivity extends AppCompatActivity implements Adap
             public RowViewHolder(View rowView) {
                 nameView = (TextView) rowView.findViewById(R.id.exceptionChooserName);
                 descView = (TextView) rowView.findViewById(R.id.exceptionChooserDescription);
-
                 nameView.setTextSize(20);
                 descView.setTextSize(15);
-
                 nameView.setTextColor(Color.BLACK);
                 descView.setTextColor(Color.BLACK);
             }

@@ -9,17 +9,17 @@ import java.math.BigInteger;
 /**
  * Created by Attila on 2015-06-11.
  */
-public class ExceptionWrapper {
+public class ExceptionInstanceWrapper {
     private BigInteger fromWho, toWho;
     private long timeInMillis;
     private double longitude, latitude;
     private int exceptionTypeId;
     private BigInteger instanceId;
 
-    public ExceptionWrapper() {
+    public ExceptionInstanceWrapper() {
     }
 
-    public ExceptionWrapper(Exception e) {
+    public ExceptionInstanceWrapper(Exception e) {
         fromWho = e.getFromWho();
         toWho = e.getToWho();
         timeInMillis = e.getDate().getTime();
@@ -29,8 +29,8 @@ public class ExceptionWrapper {
         instanceId = e.getInstanceId();
     }
 
-    public ExceptionWrapper(BigInteger fromWho, BigInteger toWho, long timeInMillis,
-                            double longitude, double latitude, int exceptionTypeId, BigInteger instanceId) {
+    public ExceptionInstanceWrapper(BigInteger fromWho, BigInteger toWho, long timeInMillis,
+                                    double longitude, double latitude, int exceptionTypeId, BigInteger instanceId) {
         this.fromWho = fromWho;
         this.toWho = toWho;
         this.timeInMillis = timeInMillis;

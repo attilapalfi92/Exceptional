@@ -8,8 +8,8 @@ import android.widget.TextView;
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.ExceptionType;
 import com.attilapalf.exceptional.model.Friend;
-import com.attilapalf.exceptional.services.ExceptionTypeManager;
-import com.attilapalf.exceptional.services.FriendsManager;
+import com.attilapalf.exceptional.services.persistent_stores.ExceptionTypeManager;
+import com.attilapalf.exceptional.services.persistent_stores.FriendsManager;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;

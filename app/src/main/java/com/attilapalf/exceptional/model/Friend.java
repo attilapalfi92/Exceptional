@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.widget.ImageView;
 
-import com.attilapalf.exceptional.services.ImageCache;
+import com.attilapalf.exceptional.services.persistent_stores.ImageCache;
 import com.google.gson.Gson;
 
 import java.lang.ref.WeakReference;

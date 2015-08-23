@@ -5,7 +5,7 @@ import com.attilapalf.exceptional.rest.messages.AppStartResponseBody;
 import com.attilapalf.exceptional.rest.messages.BaseExceptionRequestBody;
 import com.attilapalf.exceptional.rest.messages.ExceptionRefreshResponse;
 import com.attilapalf.exceptional.rest.messages.ExceptionSentResponse;
-import com.attilapalf.exceptional.rest.messages.ExceptionWrapper;
+import com.attilapalf.exceptional.rest.messages.ExceptionInstanceWrapper;
 
 import retrofit.Callback;
 import retrofit.http.Body;
@@ -22,7 +22,7 @@ public interface RestInterface {
     void regularAppStart(@Body AppStartRequestBody requestBody, Callback<AppStartResponseBody> cb);
 
     @POST("/exception")
-    void sendException(@Body ExceptionWrapper exceptionWrapper, Callback<ExceptionSentResponse> cb);
+    void sendException(@Body ExceptionInstanceWrapper exceptionInstanceWrapper, Callback<ExceptionSentResponse> cb);
 
     @POST("/exception/refresh")
     void refreshExceptions(@Body BaseExceptionRequestBody requestBody, Callback<ExceptionRefreshResponse> cb);

@@ -13,6 +13,9 @@ import android.support.v4.app.TaskStackBuilder;
 
 import com.attilapalf.exceptional.R;
 import com.attilapalf.exceptional.model.Exception;
+import com.attilapalf.exceptional.services.persistent_stores.ExceptionInstanceManager;
+import com.attilapalf.exceptional.services.persistent_stores.ExceptionTypeManager;
+import com.attilapalf.exceptional.services.persistent_stores.MetadataStore;
 import com.attilapalf.exceptional.ui.ShowNotificationActivity;
 import com.attilapalf.exceptional.ui.main.MainActivity;
 
@@ -41,17 +44,9 @@ public class GcmMessageHandler extends IntentService {
         handler = new Handler(Looper.getMainLooper());
     }
 
-
-    // TODO: this should run on the UI thread.
     @Override
     protected void onHandleIntent(Intent intent) {
         Bundle extras = intent.getExtras();
-
-//        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
-        // The getMessageType() intent parameter must be the intent you received
-        // in your BroadcastReceiver.
-//        String messageType = gcm.getMessageType(intent);
-
         String notificationType = extras.getString("notificationType");
 
         if (notificationType == null) {
@@ -61,40 +56,27 @@ public class GcmMessageHandler extends IntentService {
 
         switch (notificationType) {
             case "exception":
-
-                int typeId = Integer.parseInt(extras.getString("typeId"));
-                BigInteger instanceId = new BigInteger(extras.getString("instanceId"));
-                BigInteger fromWho = new BigInteger(extras.getString("fromWho"));
-                BigInteger toWho = new BigInteger(extras.getString("toWho"));
-                double longitude = Double.parseDouble(extras.getString("longitude"));
-                double latitude = Double.parseDouble(extras.getString("latitude"));
-                long timeInMillis = Long.parseLong(extras.getString("timeInMillis"));
-
-                if (!ExceptionInstanceManager.getInstance().isInitialized()) {
-                    ExceptionInstanceManager.getInstance().initialize(getApplicationContext());
+                parseNotificationToException(extras);
+                int points = Integer.parseInt(extras.getString("points"));
+                if (!MetadataStore.getInstance().isInitialized()) {
+                    MetadataStore.getInstance().initialize(getApplicationContext());
                 }
+                MetadataStore.getInstance().setPoints(points);
 
-                if (!ExceptionTypeManager.getInstance().isInitialized()) {
-                    ExceptionTypeManager.getInstance().initialize(getApplicationContext());
-                }
+                saveExceptionToStore();
 
-                exception = new Exception();
-                exception.setExceptionType(ExceptionTypeManager.getInstance().findById(typeId));
-                exception.setInstanceId(instanceId);
-                exception.setFromWho(fromWho);
-                exception.setToWho(toWho);
-                exception.setLongitude(longitude);
-                exception.setLatitude(latitude);
-                exception.setDate(new Timestamp(timeInMillis));
 
-                addException();
+
+
+
+
 
                 Bundle bundle = new Bundle();
-                bundle.putInt("typeId", typeId);
-                bundle.putString("fromWho", fromWho.toString());
-                bundle.putDouble("longitude", longitude);
-                bundle.putDouble("latitude", latitude);
-                bundle.putLong("timeInMillis", timeInMillis);
+                bundle.putInt("typeId", exception.getExceptionTypeId());
+                bundle.putString("fromWho", exception.getFromWho().toString());
+                bundle.putDouble("longitude", exception.getLongitude());
+                bundle.putDouble("latitude", exception.getLatitude());
+                bundle.putLong("timeInMillis", exception.getDate().getTime());
 
                 showExceptionNotification("New exception caught!",
                         "You caught a(n) " + exception.getShortName(), bundle);
@@ -115,6 +97,41 @@ public class GcmMessageHandler extends IntentService {
 
         GcmBroadcastReceiver.completeWakefulIntent(intent);
 
+    }
+
+    private void parseNotificationToException(Bundle extras) {
+        if (!ExceptionTypeManager.getInstance().isInitialized()) {
+            ExceptionTypeManager.getInstance().initialize(getApplicationContext());
+        }
+        int typeId = Integer.parseInt(extras.getString("typeId"));
+        BigInteger instanceId = new BigInteger(extras.getString("instanceId"));
+        BigInteger fromWho = new BigInteger(extras.getString("fromWho"));
+        BigInteger toWho = new BigInteger(extras.getString("toWho"));
+        double longitude = Double.parseDouble(extras.getString("longitude"));
+        double latitude = Double.parseDouble(extras.getString("latitude"));
+        long timeInMillis = Long.parseLong(extras.getString("timeInMillis"));
+
+        exception = new Exception();
+        exception.setExceptionType(ExceptionTypeManager.getInstance().findById(typeId));
+        exception.setInstanceId(instanceId);
+        exception.setFromWho(fromWho);
+        exception.setToWho(toWho);
+        exception.setLongitude(longitude);
+        exception.setLatitude(latitude);
+        exception.setDate(new Timestamp(timeInMillis));
+    }
+
+
+    private void saveExceptionToStore() {
+        if (!ExceptionInstanceManager.getInstance().isInitialized()) {
+            ExceptionInstanceManager.getInstance().initialize(getApplicationContext());
+        }
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                ExceptionInstanceManager.getInstance().addException(exception, true);
+            }
+        });
     }
 
 
@@ -186,16 +203,6 @@ public class GcmMessageHandler extends IntentService {
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         notificationManager.notify(notificationIdCounter++, notificationBuilder.build());
-    }
-
-
-    public void addException() {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                ExceptionInstanceManager.getInstance().addException(exception, true);
-            }
-        });
     }
 
 }

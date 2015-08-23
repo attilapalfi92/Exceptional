@@ -9,7 +9,7 @@ import java.util.List;
  * Created by Attila on 2015-06-11.
  */
 public class AppStartResponseBody {
-    private List<ExceptionWrapper> myExceptions;
+    private List<ExceptionInstanceWrapper> myExceptions;
     private List<ExceptionType> exceptionTypes;
     private List<ExceptionType> beingVotedTypes;
     private int points;
@@ -22,11 +22,11 @@ public class AppStartResponseBody {
         beingVotedTypes = new ArrayList<>();
     }
 
-    public List<ExceptionWrapper> getMyExceptions() {
+    public List<ExceptionInstanceWrapper> getMyExceptions() {
         return myExceptions;
     }
 
-    public void setMyExceptions(List<ExceptionWrapper> myExceptions) {
+    public void setMyExceptions(List<ExceptionInstanceWrapper> myExceptions) {
         this.myExceptions = myExceptions;
     }
 
