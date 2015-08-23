@@ -15,7 +15,7 @@ import android.widget.Toast;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.model.Exception;
-import com.attilapalfi.exceptional.rest.BackendServiceImpl;
+import com.attilapalfi.exceptional.rest.BackendService;
 import com.attilapalfi.exceptional.interfaces.ServerResponseListener;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
 import com.attilapalfi.exceptional.ui.LoginActivity;
@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
 
         GpsService.getInstance().initialize(getApplicationContext());
         gpsService = GpsService.getInstance();
-        BackendServiceImpl.getInstance().addConnectionListener(this);
+        BackendService.getInstance().addConnectionListener(this);
         androidId = Settings.Secure.getString(getApplicationContext()
                 .getContentResolver(), Settings.Secure.ANDROID_ID);
 
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        BackendServiceImpl.getInstance().removeConnectionListener(this);
+        BackendService.getInstance().removeConnectionListener(this);
     }
 
     @Override
@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
 //                listener.onExceptionsChanged();
 //            }
 
-                BackendServiceImpl.getInstance().throwException(e);
+                BackendService.getInstance().throwException(e);
 
                 String data =
                         "Description: " + e.getDescription() + "\n\n" +

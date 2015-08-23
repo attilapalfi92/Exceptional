@@ -18,7 +18,7 @@ import android.widget.Toast;
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.model.Friend;
-import com.attilapalfi.exceptional.rest.BackendServiceImpl;
+import com.attilapalfi.exceptional.rest.BackendService;
 import com.attilapalfi.exceptional.interfaces.ExceptionChangeListener;
 import com.attilapalfi.exceptional.interfaces.ExceptionRefreshListener;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
@@ -42,7 +42,7 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
             //((ExceptionSource)getActivity()).addExceptionChangeListener(this);
         }
 
-//        BackendServiceImpl.getInstance().addExceptionChangeListener(this);
+//        BackendService.getInstance().addExceptionChangeListener(this);
         ExceptionInstanceManager.getInstance().addExceptionChangeListener(this);
     }
 
@@ -87,7 +87,7 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
             //((ExceptionSource)getActivity()).removeExceptionChangeListener(this);
         }
 
-//        BackendServiceImpl.getInstance().removeExceptionChangeListener(this);
+//        BackendService.getInstance().removeExceptionChangeListener(this);
         ExceptionInstanceManager.getInstance().removeExceptionChangeListener(this);
 
         super.onDetach();
@@ -105,7 +105,7 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
     @Override
     public void onRefresh() {
         if (MetadataStore.getInstance().isLoggedIn()) {
-            BackendServiceImpl.getInstance().refreshExceptions(this);
+            BackendService.getInstance().refreshExceptions(this);
         } else {
             Toast.makeText(getActivity().getApplicationContext(), "You have to login first!", Toast.LENGTH_SHORT).show();
             onExceptionRefreshFinished();

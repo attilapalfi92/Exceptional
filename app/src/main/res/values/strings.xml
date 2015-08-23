@@ -31,5 +31,8 @@
     <string name="title_activity_show_notification">ShowNotificationActivity</string>
     <string name="title_activity_options">Options</string>
 
-    <string name="welcome_before_name">Hello yolo</string>
+    <string name="main_welcome_before_name">Hello yolo</string>
+    <string name="main_point_view_pre">You have incredible</string>
+    <string name="main_point_view_post">points!</string>
+    <string name="fragment_main_exception_history">Exception history</string>
 </resources>

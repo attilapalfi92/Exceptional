@@ -3,6 +3,13 @@ package com.attilapalfi.exceptional.services.persistent_stores;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.attilapalfi.exceptional.interfaces.FirstStartFinishedListener;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 /**
  * Created by palfi on 2015-08-21.
  */
@@ -22,6 +29,7 @@ public class MetadataStore implements Wipeable {
     private int exceptionVersion = 0;
     private boolean loggedIn = false;
     private boolean firstStartFinished = false;
+    private Set<FirstStartFinishedListener> firstStartFinishedListeners = new HashSet<>();
 
     private MetadataStore() {
     }
@@ -79,6 +87,9 @@ public class MetadataStore implements Wipeable {
             this.firstStartFinished = firstStartFinished;
             storeBoolean(FIRST_START_FINISHED, firstStartFinished);
         }
+        for (FirstStartFinishedListener l : firstStartFinishedListeners) {
+            l.onFirstStartFinished(firstStartFinished);
+        }
     }
 
     public boolean isFirstStartFinished() {
@@ -113,5 +124,13 @@ public class MetadataStore implements Wipeable {
         loggedIn = false;
         firstStartFinished = false;
         editor.clear().apply();
+    }
+
+    public boolean addFirstStartFinishedListener(FirstStartFinishedListener listener) {
+        return firstStartFinishedListeners.add(listener);
+    }
+
+    public boolean removeFirstStartFinishedListener(FirstStartFinishedListener listener) {
+        return firstStartFinishedListeners.remove(listener);
     }
 }

@@ -62,51 +62,6 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
         }
     }
 
-
-    private static class AsyncExceptionLoader extends AsyncTask<Void, Void, Void> {
-
-        private List<Exception> resultList;
-        private List<Exception> temporaryList;
-        private SharedPreferences sharedPreferences;
-
-        public AsyncExceptionLoader(List<Exception> resultList, SharedPreferences sharedPreferences) {
-            this.resultList = resultList;
-            this.sharedPreferences = sharedPreferences;
-            temporaryList = new LinkedList<>();
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-
-            Map<String, ?> store = sharedPreferences.getAll();
-            Set<String> keys = store.keySet();
-
-            String[] keyArray = new String[keys.size()];
-            keys.toArray(keyArray);
-            for (String s : keyArray) {
-                String excJson = (String) store.get(s);
-                Exception e = Exception.fromString(excJson);
-                e.setExceptionType(ExceptionTypeManager.getInstance().findById(e.getExceptionTypeId()));
-                temporaryList.add(temporaryList.size(), e);
-            }
-            Collections.sort(temporaryList, new Exception.DateComparator());
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            for (Exception e : temporaryList) {
-                resultList.add(e);
-            }
-            temporaryList = null;
-        }
-    }
-
-
-
-
-
     public boolean isInitialized() {
         return sharedPreferences != null;
     }
@@ -169,7 +124,7 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
         editor.remove(e.getInstanceId().toString());
         editor.apply();
         for (int i = 0; i < storedExceptions.size(); i++) {
-            if (storedExceptions.get(i).getInstanceId() == e.getInstanceId()) {
+            if (storedExceptions.get(i).getInstanceId().equals(e.getInstanceId())) {
                 storedExceptions.remove(i);
                 return;
             }
@@ -189,5 +144,44 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
     @Override
     public boolean removeExceptionChangeListener(ExceptionChangeListener listener) {
         return exceptionChangeListeners.remove(listener);
+    }
+
+    private static class AsyncExceptionLoader extends AsyncTask<Void, Void, Void> {
+
+        private List<Exception> resultList;
+        private List<Exception> temporaryList;
+        private SharedPreferences sharedPreferences;
+
+        public AsyncExceptionLoader(List<Exception> resultList, SharedPreferences sharedPreferences) {
+            this.resultList = resultList;
+            this.sharedPreferences = sharedPreferences;
+            temporaryList = new LinkedList<>();
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            Map<String, ?> store = sharedPreferences.getAll();
+            Set<String> keys = store.keySet();
+            for (String s : keys) {
+                parseExceptionToTemporaryList(store, s);
+            }
+            Collections.sort(temporaryList, new Exception.DateComparator());
+            return null;
+        }
+
+        private void parseExceptionToTemporaryList(Map<String, ?> store, String exceptionString) {
+            String excJson = (String) store.get(exceptionString);
+            Exception e = Exception.fromString(excJson);
+            e.setExceptionType(ExceptionTypeManager.getInstance().findById(e.getExceptionTypeId()));
+            temporaryList.add(temporaryList.size(), e);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            for (Exception e : temporaryList) {
+                resultList.add(e);
+            }
+            temporaryList = null;
+        }
     }
 }

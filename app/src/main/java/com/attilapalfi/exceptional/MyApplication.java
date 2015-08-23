@@ -9,7 +9,7 @@ import android.provider.Settings;
 import android.util.Base64;
 import android.util.Log;
 
-import com.attilapalfi.exceptional.rest.BackendServiceImpl;
+import com.attilapalfi.exceptional.rest.BackendService;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
@@ -42,9 +42,8 @@ public class MyApplication extends Application {
         FriendsManager.getInstance().initialize(applicationContext);
         String androidId = Settings.Secure.getString(applicationContext
                 .getContentResolver(), Settings.Secure.ANDROID_ID);
-        BackendServiceImpl.init(applicationContext);
-        FriendsManager.getInstance().addBackendService(BackendServiceImpl.getInstance().setAndroidId(androidId));
-        FacebookManager.getInstance().registerFriendListListener(FriendsManager.getInstance());
+        BackendService.init(applicationContext);
+        BackendService.getInstance().setAndroidId(androidId);
     }
 
     @Override

@@ -5,13 +5,11 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.model.*;
-import com.attilapalfi.exceptional.interfaces.BackendServiceUser;
-import com.attilapalfi.exceptional.rest.BackendService;
-import com.attilapalfi.exceptional.services.facebook.FacebookEventListener;
 import com.attilapalfi.exceptional.interfaces.FriendChangeListener;
 
 import java.io.IOException;
@@ -29,9 +27,8 @@ import java.util.Set;
  * Responsible for storing friends in the device's preferences
  * Created by Attila on 2015-06-12.
  */
-public class FriendsManager implements FacebookEventListener, BackendServiceUser, Wipeable {
+public class FriendsManager implements Wipeable {
 
-    private BackendService backendService;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private final List<Friend> storedFriends = new LinkedList<>();
@@ -43,8 +40,19 @@ public class FriendsManager implements FacebookEventListener, BackendServiceUser
         if (instance == null) {
             instance = new FriendsManager();
         }
-
         return instance;
+    }
+
+    public void setFriendChangeListener(FriendChangeListener listener) {
+        friendChangeListener = listener;
+    }
+
+    public List<Friend> getStoredFriends() {
+        return storedFriends;
+    }
+
+    public Friend getYourself() {
+        return yourself;
     }
 
     private FriendsManager() {
@@ -58,17 +66,10 @@ public class FriendsManager implements FacebookEventListener, BackendServiceUser
     public void initialize(Context context) {
         String PREFS_NAME = context.getString(R.string.friends_preferences);
         sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-
         editor = sharedPreferences.edit();
-        editor.apply();
-
         Map<String, ?> store = sharedPreferences.getAll();
         Set<String> keys = store.keySet();
-
-        String[] keyArray = new String[keys.size()];
-        keys.toArray(keyArray);
-
-        for (String s : keyArray) {
+        for (String s : keys) {
             String friendJson = (String) store.get(s);
             Friend f = Friend.fromString(friendJson);
             if ("yourself".equals(s)) {
@@ -77,63 +78,30 @@ public class FriendsManager implements FacebookEventListener, BackendServiceUser
                 storedFriends.add(f);
             }
         }
+        editor.apply();
     }
 
-
-
-    public boolean isItYourself(Friend friend) {
-        return friend.getId().equals(yourself.getId());
-    }
-
-
-
-    @Override
-    public void onFirstAppStart(List<Friend> friendList, Friend yourself) {
+    public void saveFriendsAndYourself(List<Friend> friendList, Friend yourself) {
         saveFriends(friendList);
         saveOrUpdateYourself(yourself);
-        backendService.onFirstAppStart(friendList);
     }
 
-
-
-    @Override
-    public void onRegularAppStart(List<Friend> friendList, Friend yourself) {
+    public void updateFriendsAndYourself(List<Friend> friendList, Friend yourself) {
         saveOrUpdateYourself(yourself);
-
-        List<Friend> knownCurrentFriends = new ArrayList<>(friendList.size());
-        knownCurrentFriends.addAll(friendList);
-
-        // checking for changes at old friends
-        for (Friend f1 : knownCurrentFriends) {
-            for (Friend f2 : storedFriends) {
-                checkFriendChange(f1, f2);
-            }
-        }
-
-        // deleted friends
-        List<Friend> deletedFriends = new ArrayList<>();
-        deletedFriends.addAll(storedFriends);
-        deletedFriends.removeAll(friendList);
-
-        // new friends
-        friendList.removeAll(storedFriends);
-
-        // handling new friends
-        for (Friend f : friendList) {
-            new UpdateFriendsImageTask(f).execute();
-        }
-
-        // deleting friends
-        deleteFriends(deletedFriends);
-
-        editor.apply();
-        backendService.onRegularAppStart(knownCurrentFriends);
+        updateOldFriends(friendList);
+        removeDeletedFriends(friendList);
+        saveNewFriends(friendList);
     }
 
+    public void updateFriendsPoints(Map<BigInteger, Integer> points) {
+        for (BigInteger facebookId : points.keySet()) {
+            Friend friend = findFriendById(facebookId);
+            friend.setPoints(points.get(facebookId));
+            updateFriend(friend);
+        }
+    }
 
-
-
-    public synchronized void saveOrUpdateYourself(Friend yourself) {
+    public void saveOrUpdateYourself(Friend yourself) {
         if (yourself != null) {
             if (this.yourself == null) {
                 this.yourself = yourself;
@@ -147,43 +115,6 @@ public class FriendsManager implements FacebookEventListener, BackendServiceUser
         }
     }
 
-
-
-
-    private void checkFriendChange(Friend newFriendState, Friend oldFriendState) {
-        // if they are the same
-        if (newFriendState.getId().equals(oldFriendState.getId())) {
-            // if his image is changed
-            if (!newFriendState.getImageUrl().equals(oldFriendState.getImageUrl())) {
-                new UpdateFriendsImageTask(newFriendState).execute();
-            }
-
-            // if his name is changed
-            if (!newFriendState.getFirstName().equals(oldFriendState.getFirstName())) {
-                updateFriendOrYourself(newFriendState);
-            }
-        }
-    }
-
-
-    public void updateFriendOrYourself(Friend friend) {
-        if (!friend.getId().equals(yourself.getId())) {
-            Friend previous = findFriendById(friend.getId());
-            storedFriends.remove(previous);
-            storedFriends.add(friend);
-            editor.putString(friend.getId().toString(), friend.toString());
-            editor.apply();
-            if (friendChangeListener != null) {
-                friendChangeListener.onFriendsChanged();
-            }
-
-        } else {
-            yourself = friend;
-            editor.putString("yourself", yourself.toString());
-            editor.apply();
-        }
-    }
-
     @Override
     public void wipe() {
         storedFriends.clear();
@@ -194,6 +125,114 @@ public class FriendsManager implements FacebookEventListener, BackendServiceUser
         }
     }
 
+    public boolean isItYourself(Friend friend) {
+        return areTheyTheSamePerson(friend, yourself);
+    }
+
+    public Friend findFriendById(BigInteger friendId) {
+        Friend friend = tryFindFriendInStore(friendId);
+        if (friend != null)
+            return friend;
+        else {
+            if (yourself != null) {
+                if (friendId.equals(yourself.getId())) {
+                    return yourself;
+                }
+            }
+        }
+        return new Friend(new BigInteger("0"), "", "", "");
+    }
+
+    private void saveFriends(List<Friend> toBeSaved) {
+        for (Friend f : toBeSaved) {
+            editor.putString(f.getId().toString(), f.toString());
+            storedFriends.add(f);
+            new UpdateFriendsImageTask(f).execute();
+        }
+        editor.apply();
+    }
+
+    private void updateOldFriends(List<Friend> friendList) {
+        List<Friend> knownCurrentFriends = new ArrayList<>(friendList.size());
+        knownCurrentFriends.addAll(friendList);
+        // checking for changes at old friends
+        for (Friend f1 : knownCurrentFriends) {
+            for (Friend f2 : storedFriends) {
+                checkFriendChange(f1, f2);
+            }
+        }
+    }
+
+    private void removeDeletedFriends(List<Friend> friendList) {
+        List<Friend> deletedFriends = new ArrayList<>();
+        deletedFriends.addAll(storedFriends);
+        deletedFriends.removeAll(friendList);
+        deleteFriends(deletedFriends);
+    }
+
+    private void saveNewFriends(List<Friend> friendList) {
+        friendList.removeAll(storedFriends);
+        for (Friend f : friendList) {
+            new UpdateFriendsImageTask(f).execute();
+        }
+    }
+
+    private void checkFriendChange(Friend newFriendState, Friend oldFriendState) {
+        if (areTheyTheSamePerson(newFriendState, oldFriendState)) {
+            if (isImageChanged(newFriendState, oldFriendState)) {
+                new UpdateFriendsImageTask(newFriendState).execute();
+            }
+            if (isNameChanged(newFriendState, oldFriendState)) {
+                updateFriendOrYourself(newFriendState);
+            }
+        }
+    }
+
+    private boolean areTheyTheSamePerson(Friend newFriendState, Friend oldFriendState) {
+        return newFriendState.getId().equals(oldFriendState.getId());
+    }
+
+    private boolean isImageChanged(Friend newFriendState, Friend oldFriendState) {
+        return !newFriendState.getImageUrl().equals(oldFriendState.getImageUrl());
+    }
+
+    private boolean isNameChanged(Friend newFriendState, Friend oldFriendState) {
+        return (!newFriendState.getFirstName().equals(oldFriendState.getFirstName()) ||
+                !newFriendState.getLastName().equals(oldFriendState.getLastName()));
+    }
+
+    private void updateFriendOrYourself(Friend someone) {
+        if (!areTheyTheSamePerson(someone, yourself)) {
+            updateFriend(someone);
+            if (friendChangeListener != null)
+                friendChangeListener.onFriendsChanged();
+        } else {
+            updateYourself(someone);
+        }
+    }
+
+    private Friend tryFindFriendInStore(BigInteger friendId) {
+        for (Friend friend : storedFriends) {
+            if (friend.getId().equals(friendId)) {
+                return friend;
+            }
+        }
+        return null;
+    }
+
+    private void updateFriend(Friend someone) {
+        Friend previous = findFriendById(someone.getId());
+        storedFriends.remove(previous);
+        storedFriends.add(someone);
+        editor.putString(someone.getId().toString(), someone.toString());
+        editor.apply();
+    }
+
+    private void updateYourself(Friend someone) {
+        yourself = someone;
+        editor.putString("yourself", yourself.toString());
+        editor.apply();
+    }
 
     // TODO: if download failed because of poor internet connection, retry later
     private static class UpdateFriendsImageTask extends AsyncTask<Void, Void, Bitmap> {
@@ -209,21 +248,25 @@ public class FriendsManager implements FacebookEventListener, BackendServiceUser
             Bitmap friendPicture = null;
             try {
                 friendPicture = ImageCache.getInstance().getImage(friend);
-
                 if (friendPicture == null) {
-                    URL url = new URL(downloadUrl);
-                    URLConnection connection = url.openConnection();
-                    connection.setUseCaches(true);
+                    URLConnection connection = createUrlConnection(downloadUrl);
                     InputStream inputStream = (InputStream) connection.getContent();
                     friendPicture = BitmapFactory.decodeStream(inputStream);
                     ImageCache.getInstance().addImage(friend, friendPicture);
                 }
-
             } catch (IOException e) {
                 Log.e("Error", e.getMessage());
                 e.printStackTrace();
             }
             return friendPicture;
+        }
+
+        @NonNull
+        private URLConnection createUrlConnection(String downloadUrl) throws IOException {
+            URL url = new URL(downloadUrl);
+            URLConnection connection = url.openConnection();
+            connection.setUseCaches(true);
+            return connection;
         }
 
         @Override
@@ -233,74 +276,11 @@ public class FriendsManager implements FacebookEventListener, BackendServiceUser
         }
     }
 
-
-
-
-
-    public Friend findFriendById(BigInteger friendId) {
-        Friend returnFriend = null;
-        for (Friend friend : storedFriends) {
-            if (friend.getId().equals(friendId)) {
-                returnFriend = friend;
-                break;
-            }
-        }
-
-        if (returnFriend == null) {
-            if (yourself != null) {
-                if (friendId.equals(yourself.getId())) {
-                    returnFriend = yourself;
-                }
-            } else {
-                return new Friend(new BigInteger("0"), "", "", "");
-            }
-        }
-
-        return returnFriend;
-    }
-
-
-
-
-
-    private void saveFriends(List<Friend> toBeSaved) {
-        for (Friend f : toBeSaved) {
-            editor.putString(f.getId().toString(), f.toString());
-            storedFriends.add(f);
-            new UpdateFriendsImageTask(f).execute();
-        }
-        editor.apply();
-    }
-
-
-    @Override
-    public void onNoInternetStart() {
-    }
-
-
     private void deleteFriends(List<Friend> toBeDeleted) {
         for (Friend f : toBeDeleted) {
             editor.remove((f.getId().toString()));
         }
         editor.apply();
         storedFriends.removeAll(toBeDeleted);
-    }
-
-    public void setFriendChangeListener(FriendChangeListener listener) {
-        friendChangeListener = listener;
-    }
-
-
-    @Override
-    public void addBackendService(BackendService service) {
-        backendService = service;
-    }
-
-    public List<Friend> getStoredFriends() {
-        return storedFriends;
-    }
-
-    public Friend getYourself() {
-        return yourself;
     }
 }

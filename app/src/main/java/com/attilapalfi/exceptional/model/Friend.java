@@ -19,6 +19,7 @@ public class Friend {
     private String firstName;
     private String lastName;
     private String imageUrl;
+    private int points = 100;
     private transient WeakReference<Bitmap> imageWeakReference;
 
     private static Gson gson = new Gson();
@@ -96,6 +97,14 @@ public class Friend {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public int getPoints() {
+        return points;
+    }
+
+    public void setPoints(int points) {
+        this.points = points;
     }
 
     public void setImageToView(final ImageView view) {

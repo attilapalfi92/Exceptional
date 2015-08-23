@@ -10,29 +10,68 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.attilapalfi.exceptional.R;
+import com.attilapalfi.exceptional.interfaces.FirstStartFinishedListener;
+import com.attilapalfi.exceptional.model.Friend;
 import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
-
-import org.w3c.dom.Text;
+import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
 
 /**
  */
-public class MainFragment extends Fragment {
+public class MainFragment extends Fragment implements FirstStartFinishedListener {
+    private View view;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        //return inflater.inflate(R.layout.fragment_main, container, false);
-        return inflater.inflate(R.layout.fragment_main, null);
+        MetadataStore.getInstance().addFirstStartFinishedListener(this);
+        view = inflater.inflate(R.layout.fragment_main, container, false);
+        if (MetadataStore.getInstance().isFirstStartFinished()) {
+            setViews();
+        }
+        return view;
+    }
+
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        MetadataStore.getInstance().removeFirstStartFinishedListener(this);
+    }
+
+    private void setViews() {
+        if (FriendsManager.getInstance().getYourself() != null) {
+            setImageView();
+            setNameView();
+            setPointView();
+        }
+    }
+
+    private void setImageView() {
+        ImageView imageView = (ImageView) view.findViewById(R.id.myMainImageView);
+        FriendsManager.getInstance().getYourself().setImageToView(imageView);
+    }
+
+    private void setNameView() {
+        TextView nameView = (TextView) view.findViewById(R.id.mainNameTextView);
+        String nameText = getResources().getString(R.string.main_welcome_before_name)
+                + " " + FriendsManager.getInstance().getYourself().getFirstName().trim()
+                + "!";
+        nameView.setText(nameText);
+    }
+
+    private void setPointView() {
+        TextView pointView = (TextView) view.findViewById(R.id.mainPointTextView);
+        String pointText = getString(R.string.main_point_view_pre) + " "
+                + MetadataStore.getInstance().getPoints()
+                + " " + getString(R.string.main_point_view_post);
+        pointView.setText(pointText);
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        ImageView imageView = (ImageView) getView().findViewById(R.id.myMainImageView);
-        FriendsManager.getInstance().getYourself().setImageToView(imageView);
-        TextView nameTextView = (TextView) getView().findViewById(R.id.mainNameTextView);
-        R.string.welcome_before_name
+    public void onFirstStartFinished(boolean state) {
+        if (state) {
+            setViews();
+        }
     }
 }

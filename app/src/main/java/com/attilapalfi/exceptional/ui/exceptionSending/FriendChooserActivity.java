@@ -17,7 +17,7 @@ import android.widget.TextView;
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.model.*;
 import com.attilapalfi.exceptional.model.Exception;
-import com.attilapalfi.exceptional.rest.BackendServiceImpl;
+import com.attilapalfi.exceptional.rest.BackendService;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
 import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
 import com.attilapalfi.exceptional.services.GpsService;
@@ -51,7 +51,7 @@ public class FriendChooserActivity extends AppCompatActivity implements AdapterV
             Location location = GpsService.getInstance().getLocation();
             exception.setLongitude(location.getLongitude());
             exception.setLatitude(location.getLatitude());
-            BackendServiceImpl.getInstance().throwException(exception);
+            BackendService.getInstance().throwException(exception);
             finish();
         }
     }

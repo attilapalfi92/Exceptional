@@ -5,7 +5,10 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,17 +17,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.attilapalfi.exceptional.R;
-import com.attilapalfi.exceptional.model.*;
-import com.attilapalfi.exceptional.rest.BackendService;
 import com.attilapalfi.exceptional.interfaces.FriendChangeListener;
+import com.attilapalfi.exceptional.model.Friend;
+import com.attilapalfi.exceptional.rest.BackendService;
 import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
 
 import java.util.List;
 
 /**
+ * Created by palfi on 2015-08-23.
  */
-public class FriendsFragment extends ListFragment implements FriendChangeListener {
-    private FriendAdapter adapter;
+public class FriendsFragment2 extends Fragment implements FriendChangeListener {
+    private RecyclerView recyclerView;
+    private FriendAdapter friendAdapter;
 
     @Override
     public void onAttach(Activity activity) {
@@ -36,23 +41,25 @@ public class FriendsFragment extends ListFragment implements FriendChangeListene
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        if (!FriendsManager.getInstance().isInitialized()) {
-            FriendsManager.getInstance().initialize(getActivity().getApplicationContext());
-        }
-        List<Friend> values = FriendsManager.getInstance().getStoredFriends();
-        adapter = new FriendAdapter(getActivity().getApplicationContext(), values);
-        onFriendsChanged();
-        setListAdapter(adapter);
     }
-
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_friends, null);
-    }
+        if (!FriendsManager.getInstance().isInitialized()) {
+            FriendsManager.getInstance().initialize(getActivity().getApplicationContext());
+        }
+        List<Friend> values = FriendsManager.getInstance().getStoredFriends();
+        friendAdapter = new FriendAdapter(getActivity().getApplicationContext(), values);
 
+        View fragmentView = inflater.inflate(R.layout.fragment_friends_2, container, false);
+        recyclerView = (RecyclerView) fragmentView.findViewById(R.id.friend_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setAdapter(friendAdapter);
+
+        onFriendsChanged();
+        return fragmentView;
+    }
 
     @Override
     public void onDetach() {
@@ -60,57 +67,50 @@ public class FriendsFragment extends ListFragment implements FriendChangeListene
         super.onDetach();
     }
 
-
-
     @Override
     public void onFriendsChanged() {
-        adapter.notifyDataSetChanged();
+        friendAdapter.notifyDataSetChanged();
     }
 
-    private static class FriendAdapter extends ArrayAdapter<Friend> {
+    private static class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.RowViewHolder>{
         Context context;
         List<Friend> values;
 
         public FriendAdapter(Context context, List<Friend> values) {
-            super(context, R.layout.friend_row_layout, values);
             this.context = context;
             this.values = values;
         }
 
+        @Override
+        public RowViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+//            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_friends_2, null);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.friend_row_layout_2, parent, false);
+            return new RowViewHolder(view);
+        }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            RowViewHolder viewHolder;
+        public void onBindViewHolder(RowViewHolder holder, int position) {
+            holder.bindRow(values.get(position));
+        }
 
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            if (convertView == null) {
-                convertView = inflater.inflate(R.layout.friend_row_layout, parent, false);
-                viewHolder = new RowViewHolder(convertView);
-                convertView.setTag(viewHolder);
-
-            } else {
-                viewHolder = (RowViewHolder)convertView.getTag();
-            }
-
-            viewHolder.bindRow(values.get(position));
-
-            return convertView;
+        @Override
+        public int getItemCount() {
+            return values != null ? values.size() : 0;
         }
 
 
-        private static class RowViewHolder {
+        public static class RowViewHolder extends RecyclerView.ViewHolder {
             private TextView nameView;
             private TextView pointsView;
             private ImageView imageView;
 
             public RowViewHolder(View rowView) {
+                super(rowView);
                 nameView = (TextView) rowView.findViewById(R.id.friendNameView);
                 pointsView = (TextView) rowView.findViewById(R.id.friendPointsView);
                 imageView = (ImageView) rowView.findViewById(R.id.friendImageView);
-
                 nameView.setTextSize(20);
                 pointsView.setTextSize(15);
-
                 nameView.setTextColor(Color.BLACK);
                 pointsView.setTextColor(Color.BLACK);
             }

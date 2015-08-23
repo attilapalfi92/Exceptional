@@ -2,8 +2,11 @@ package com.attilapalfi.exceptional.rest.messages;
 
 import com.attilapalfi.exceptional.model.ExceptionType;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Attila on 2015-06-11.
@@ -12,14 +15,15 @@ public class AppStartResponseBody {
     private List<ExceptionInstanceWrapper> myExceptions;
     private List<ExceptionType> exceptionTypes;
     private List<ExceptionType> beingVotedTypes;
+    private Map<BigInteger, Integer> friendsPoints;
     private int points;
     private int exceptionVersion;
 
     public AppStartResponseBody() {
         myExceptions = new ArrayList<>();
-        myExceptions = new ArrayList<>();
         exceptionTypes = new ArrayList<>();
         beingVotedTypes = new ArrayList<>();
+        friendsPoints = new HashMap<>();
     }
 
     public List<ExceptionInstanceWrapper> getMyExceptions() {
@@ -60,5 +64,13 @@ public class AppStartResponseBody {
 
     public void setExceptionVersion(int exceptionVersion) {
         this.exceptionVersion = exceptionVersion;
+    }
+
+    public Map<BigInteger, Integer> getFriendsPoints() {
+        return friendsPoints;
+    }
+
+    public void setFriendsPoints(Map<BigInteger, Integer> friendsPoints) {
+        this.friendsPoints = friendsPoints;
     }
 }

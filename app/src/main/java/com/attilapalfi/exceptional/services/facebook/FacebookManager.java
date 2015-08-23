@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.attilapalfi.exceptional.model.Friend;
+import com.attilapalfi.exceptional.rest.BackendService;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
 import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
@@ -47,7 +48,6 @@ public class FacebookManager {
     private Friend yourself;
     private CallbackManager callbackManager;
     private FacebookCallback<LoginResult> facebookCallback;
-    private FacebookEventListener startupListener;
     private FacebookLoginSuccessHandler loginSuccessHandler;
 
     public static FacebookManager getInstance() {
@@ -137,7 +137,7 @@ public class FacebookManager {
 
                 } else {
                     if (MetadataStore.getInstance().isLoggedIn()) {
-                        startupListener.onNoInternetStart();
+                        // some network error
                     }
                 }
             }
@@ -177,10 +177,12 @@ public class FacebookManager {
         if (MetadataStore.getInstance().isLoggedIn()) {
             if (!MetadataStore.getInstance().isFirstStartFinished()) {
                 initYourself();
-                startupListener.onFirstAppStart(friends, yourself);
+                FriendsManager.getInstance().saveFriendsAndYourself(friends, yourself);
+                BackendService.getInstance().onFirstAppStart(friends);
             } else {
                 initYourself();
-                startupListener.onRegularAppStart(friends, yourself);
+                FriendsManager.getInstance().updateFriendsAndYourself(friends, yourself);
+                BackendService.getInstance().onRegularAppStart(friends);
             }
         }
     }
@@ -210,7 +212,7 @@ public class FacebookManager {
         String id = user.getString("id");
         JSONObject imageData = user.getJSONObject("picture").getJSONObject("data");
         String imageUrl = imageData.getString("url");
-        return new Friend(new BigInteger(id), names[0], names[1], imageUrl, null);
+        return new Friend(new BigInteger(id), names[0].trim(), names[1].trim(), imageUrl, null);
     }
 
     private String[] parseFirstAndLastName(String name) {
@@ -259,9 +261,5 @@ public class FacebookManager {
 
     public void registerLoginSuccessHandler(FacebookLoginSuccessHandler handler) {
         loginSuccessHandler = handler;
-    }
-
-    public void registerFriendListListener(FacebookEventListener listener) {
-        startupListener = listener;
     }
 }

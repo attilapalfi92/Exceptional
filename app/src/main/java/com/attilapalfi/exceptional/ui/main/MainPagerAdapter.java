@@ -21,7 +21,7 @@ public class MainPagerAdapter extends FragmentPagerAdapter {
             case 1:
                 return new ExceptionsFragment();
             case 2:
-                return new FriendsFragment();
+                return new FriendsFragment2();
             default:
                 return new MainFragment();
         }

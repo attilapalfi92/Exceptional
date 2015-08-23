@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools" 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.attilapalfi.exceptional.ui.main.MainFragment">
+    tools:context="com.attilapalfi.exceptional.ui.main.MainFragment"
+    android:id="@+id/main_fragment_view">
 
     <!-- TODO: Update blank fragment layout -->
 
@@ -22,8 +23,8 @@
         android:layout_height="100dp"
         android:id="@+id/myMainImageView"
         android:layout_below="@+id/mainText"
-        android:layout_marginStart="10dp"
-        android:layout_marginLeft="10dp"
+        android:layout_marginStart="0dp"
+        android:layout_marginLeft="0dp"
         android:layout_marginTop="5dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
@@ -32,9 +33,12 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Large Text"
+        android:text=""
+        android:textSize="20sp"
         android:id="@+id/mainNameTextView"
         android:layout_alignTop="@+id/myMainImageView"
+        android:layout_marginStart="5dp"
+        android:layout_marginLeft="5dp"
         android:layout_toRightOf="@+id/myMainImageView"
         android:layout_toEndOf="@+id/myMainImageView" />
 
@@ -42,42 +46,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Large Text"
+        android:text=""
+        android:textSize="20sp"
         android:id="@+id/mainPointTextView"
         android:layout_below="@+id/mainNameTextView"
-        android:layout_toRightOf="@+id/myMainImageView"
-        android:layout_toEndOf="@+id/myMainImageView" />
-
-
-    <Button
-        android:layout_width="200dp"
-        android:layout_height="80dp"
-        android:text="@string/throw_exc_button"
-        android:id="@+id/throwExcBtn"
-        android:layout_above="@+id/button3"
-        android:layout_centerHorizontal="true"
-        android:onClick="throwExceptionClicked" />
+        android:layout_alignLeft="@+id/mainNameTextView"
+        android:layout_alignStart="@+id/mainNameTextView" />
 
     <Button
-        android:layout_width="200dp"
-        android:layout_height="80dp"
-        android:text="@string/give_exc_button"
-        android:id="@+id/button3"
-        android:layout_gravity="center_horizontal|bottom"
-        android:layout_above="@+id/button4"
-        android:layout_alignLeft="@+id/throwExcBtn"
-        android:layout_alignStart="@+id/throwExcBtn"
-        android:onClick="giveMeExcClicked" />
-
-    <Button
-        android:layout_width="200dp"
-        android:layout_height="80dp"
-        android:text="@string/set_exc_button"
-        android:id="@+id/button4"
-        android:layout_alignParentBottom="true"
-        android:layout_alignLeft="@+id/button3"
-        android:layout_alignStart="@+id/button3"
-        android:layout_marginBottom="61dp" />
+        android:layout_width="300dp"
+        android:layout_height="60dp"
+        android:text="@string/fragment_main_exception_history"
+        android:id="@+id/exceptionHistory"
+        android:layout_below="@+id/myMainImageView"
+        android:layout_centerHorizontal="true" />
 
 
 </RelativeLayout>
