@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools" 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.attilapalf.exceptional.ui.main.MainFragment">
+    tools:context="com.attilapalfi.exceptional.ui.main.MainFragment">
 
     <!-- TODO: Update blank fragment layout -->
 
@@ -15,16 +15,39 @@
         android:id="@+id/mainText"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="30dp" />
+        android:layout_marginTop="10dp" />
 
-    <!--<Button
-        android:layout_width="200dp"
-        android:layout_height="80dp"
-        android:text="Test Event Handling"
-        android:id="@+id/asyncTestBtn"
-        android:layout_above="@+id/throwExcBtn"
-        android:layout_centerHorizontal="true"
-        android:onClick="asyncTestBtnClicked" />-->
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:id="@+id/myMainImageView"
+        android:layout_below="@+id/mainText"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="5dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Large Text"
+        android:id="@+id/mainNameTextView"
+        android:layout_alignTop="@+id/myMainImageView"
+        android:layout_toRightOf="@+id/myMainImageView"
+        android:layout_toEndOf="@+id/myMainImageView" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Large Text"
+        android:id="@+id/mainPointTextView"
+        android:layout_below="@+id/mainNameTextView"
+        android:layout_toRightOf="@+id/myMainImageView"
+        android:layout_toEndOf="@+id/myMainImageView" />
+
 
     <Button
         android:layout_width="200dp"
