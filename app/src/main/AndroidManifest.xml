@@ -80,6 +80,10 @@
             android:name=".ui.OptionsActivity"
             android:label="@string/title_activity_options" >
         </activity>
+        <activity
+            android:name=".ui.main.friendspage.FriendDetailsActivity"
+            android:label="@string/title_activity_friend_details" >
+        </activity>
     </application>
 
 </manifest>

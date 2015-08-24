@@ -1,20 +1,24 @@
-package com.attilapalfi.exceptional.ui.main;
+package com.attilapalfi.exceptional.ui.main.friendspage;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.interfaces.FriendChangeListener;
@@ -46,17 +50,8 @@ public class FriendsFragment2 extends Fragment implements FriendChangeListener {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if (!FriendsManager.getInstance().isInitialized()) {
-            FriendsManager.getInstance().initialize(getActivity().getApplicationContext());
-        }
-        List<Friend> values = FriendsManager.getInstance().getStoredFriends();
-        friendAdapter = new FriendAdapter(getActivity().getApplicationContext(), values);
-
-        View fragmentView = inflater.inflate(R.layout.fragment_friends_2, container, false);
-        recyclerView = (RecyclerView) fragmentView.findViewById(R.id.friend_recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.setAdapter(friendAdapter);
-
+        initFriendAdapter();
+        View fragmentView = initRecyclerView(inflater, container);
         onFriendsChanged();
         return fragmentView;
     }
@@ -67,14 +62,43 @@ public class FriendsFragment2 extends Fragment implements FriendChangeListener {
         super.onDetach();
     }
 
+    private void initFriendAdapter() {
+        if (!FriendsManager.getInstance().isInitialized()) {
+            FriendsManager.getInstance().initialize(getActivity().getApplicationContext());
+        }
+        List<Friend> values = FriendsManager.getInstance().getStoredFriends();
+        friendAdapter = new FriendAdapter(getActivity(), values);
+    }
+
+    @NonNull
+    private View initRecyclerView(LayoutInflater inflater, ViewGroup container) {
+        View fragmentView = inflater.inflate(R.layout.fragment_friends_2, container, false);
+        recyclerView = (RecyclerView) fragmentView.findViewById(R.id.friend_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setAdapter(friendAdapter);
+        friendAdapter.setRecyclerView(recyclerView);
+        return fragmentView;
+    }
+
     @Override
     public void onFriendsChanged() {
         friendAdapter.notifyDataSetChanged();
     }
 
     private static class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.RowViewHolder>{
-        Context context;
-        List<Friend> values;
+        private Context context;
+        private List<Friend> values;
+        private RecyclerView recyclerView;
+
+        private final View.OnClickListener onClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int itemPosition = recyclerView.getChildPosition(view);
+                Friend friend = values.get(itemPosition);
+                Intent intent = new Intent(context, FriendDetailsActivity.class);
+                context.startActivity(intent);
+            }
+        };
 
         public FriendAdapter(Context context, List<Friend> values) {
             this.context = context;
@@ -83,8 +107,8 @@ public class FriendsFragment2 extends Fragment implements FriendChangeListener {
 
         @Override
         public RowViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-//            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_friends_2, null);
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.friend_row_layout_2, parent, false);
+            view.setOnClickListener(onClickListener);
             return new RowViewHolder(view);
         }
 
@@ -96,6 +120,10 @@ public class FriendsFragment2 extends Fragment implements FriendChangeListener {
         @Override
         public int getItemCount() {
             return values != null ? values.size() : 0;
+        }
+
+        public void setRecyclerView(RecyclerView recyclerView) {
+            this.recyclerView = recyclerView;
         }
 
 

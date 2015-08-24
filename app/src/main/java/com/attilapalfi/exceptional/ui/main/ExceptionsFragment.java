@@ -38,11 +38,6 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        if (getActivity() instanceof MainActivity) {
-            //((ExceptionSource)getActivity()).addExceptionChangeListener(this);
-        }
-
-//        BackendService.getInstance().addExceptionChangeListener(this);
         ExceptionInstanceManager.getInstance().addExceptionChangeListener(this);
     }
 
@@ -83,13 +78,7 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
 
     @Override
     public void onDetach() {
-        if (getActivity() instanceof MainActivity) {
-            //((ExceptionSource)getActivity()).removeExceptionChangeListener(this);
-        }
-
-//        BackendService.getInstance().removeExceptionChangeListener(this);
         ExceptionInstanceManager.getInstance().removeExceptionChangeListener(this);
-
         super.onDetach();
     }
 
@@ -123,7 +112,7 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
         private List<Exception> values;
 
         public ExceptionAdapter(Context context, List<Exception> values) {
-            super(context, R.layout.exc_row_layout, values);
+            super(context, R.layout.exception_row_layout, values);
             this.context = context;
             this.values = values;
         }
@@ -136,7 +125,7 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
 
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             if (convertView == null) {
-                convertView = inflater.inflate(R.layout.exc_row_layout, parent, false);
+                convertView = inflater.inflate(R.layout.exception_row_layout, parent, false);
                 viewHolder = new RowViewHolder(convertView);
                 convertView.setTag(viewHolder);
 

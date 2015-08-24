@@ -4,6 +4,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
+import com.attilapalfi.exceptional.ui.main.friendspage.FriendsFragment2;
+
 /**
  * Created by Attila on 2015-06-07.
  */
@@ -19,7 +21,7 @@ public class MainPagerAdapter extends FragmentPagerAdapter {
             case 0:
                 return new MainFragment();
             case 1:
-                return new ExceptionsFragment();
+                return new ExceptionsFragment2();
             case 2:
                 return new FriendsFragment2();
             default:
