@@ -4,7 +4,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
-import com.attilapalfi.exceptional.ui.main.friendspage.FriendsFragment2;
+import com.attilapalfi.exceptional.ui.main.friends_page.FriendsFragment2;
 
 /**
  * Created by Attila on 2015-06-07.

@@ -20,7 +20,7 @@ import com.attilapalfi.exceptional.interfaces.ServerResponseListener;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
 import com.attilapalfi.exceptional.ui.LoginActivity;
 import com.attilapalfi.exceptional.ui.OptionsActivity;
-import com.attilapalfi.exceptional.ui.exceptionSending.SendExceptionListActivity;
+import com.attilapalfi.exceptional.ui.exception_sending.SendExceptionListActivity;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
 import com.attilapalfi.exceptional.services.facebook.FacebookManager;
 import com.attilapalfi.exceptional.services.GpsService;
@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
 
         GpsService.getInstance().initialize(getApplicationContext());
         gpsService = GpsService.getInstance();
-        BackendService.getInstance().addConnectionListener(this);
+        BackendService.getInstance().addResponseListener(this);
         androidId = Settings.Secure.getString(getApplicationContext()
                 .getContentResolver(), Settings.Secure.ANDROID_ID);
 

@@ -1,4 +1,4 @@
-package com.attilapalfi.exceptional.ui.main.friendspage;
+package com.attilapalfi.exceptional.ui.main.friends_page;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;

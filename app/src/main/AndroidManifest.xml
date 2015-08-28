@@ -9,9 +9,6 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="ANDROID.PERMISSION.READ_EXTERNAL_STORAGE" />
-
-    <!-- <permission android:name="com.attilapalfi.exceptional.permission.C2D_MESSAGE" /> -->
-
     <uses-permission android:name="com.attilapalfi.exceptional.permission.C2D_MESSAGE" />
 
     <application
@@ -62,11 +59,11 @@
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".ui.exceptionSending.SendExceptionListActivity"
+            android:name=".ui.exception_sending.SendExceptionListActivity"
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".ui.exceptionSending.FriendChooserActivity"
+            android:name=".ui.exception_sending.FriendChooserActivity"
             android:label="@string/app_name" >
         </activity>
         <activity
@@ -81,7 +78,7 @@
             android:label="@string/title_activity_options" >
         </activity>
         <activity
-            android:name=".ui.main.friendspage.FriendDetailsActivity"
+            android:name=".ui.main.friends_page.FriendDetailsActivity"
             android:label="@string/title_activity_friend_details" >
         </activity>
     </application>

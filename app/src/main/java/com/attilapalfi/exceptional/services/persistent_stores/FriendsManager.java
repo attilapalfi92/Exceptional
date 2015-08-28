@@ -171,8 +171,9 @@ public class FriendsManager implements Wipeable {
     }
 
     private void saveNewFriends(List<Friend> friendList) {
-        friendList.removeAll(storedFriends);
-        for (Friend f : friendList) {
+        List<Friend> workList = new ArrayList<>(friendList);
+        workList.removeAll(storedFriends);
+        for (Friend f : workList) {
             new UpdateFriendsImageTask(f).execute();
         }
     }

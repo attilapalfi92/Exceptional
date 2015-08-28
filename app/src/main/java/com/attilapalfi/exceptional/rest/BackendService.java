@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.List;
 
 import retrofit.Callback;
+import retrofit.Endpoint;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -256,7 +257,7 @@ public class BackendService implements FriendSource, ServerResponseSource {
     }
 
     @Override
-    public boolean addConnectionListener(ServerResponseListener listener) {
+    public boolean addResponseListener(ServerResponseListener listener) {
         return responseListeners.add(listener);
     }
 

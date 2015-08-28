@@ -2,7 +2,6 @@ package com.attilapalfi.exceptional.services.facebook;
 
 import android.app.Application;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -66,7 +65,9 @@ public class FacebookManager {
         tokenTracker.startTracking();
         profileTracker.startTracking();
         accessToken = AccessToken.getCurrentAccessToken();
-        refreshFriends();
+        if (accessToken != null) {
+            refreshFriends();
+        }
     }
 
     private void initSubComponents(Application application) {
@@ -92,10 +93,12 @@ public class FacebookManager {
         tokenTracker = new AccessTokenTracker() {
             @Override
             protected void onCurrentAccessTokenChanged(AccessToken oldToken, AccessToken newToken) {
+                accessToken = newToken;
                 if (newToken == null) {
                     setUserLoggedOut();
+                } else {
+                    refreshFriends();
                 }
-                accessToken = newToken;
             }
         };
     }
@@ -116,7 +119,7 @@ public class FacebookManager {
                 loginSuccessHandler.onLoginSuccess(loginResult);
                 initYourself();
                 MetadataStore.getInstance().setLoggedIn(true);
-                refreshFriends();
+                //refreshFriends();
             }
             @Override
             public void onCancel() {}
@@ -132,17 +135,15 @@ public class FacebookManager {
             public void onCompleted(JSONArray jsonArray, GraphResponse graphResponse) {
                 if (graphResponse.getError() == null) {
                     List<Friend> friends = parseFriendsJson(jsonArray);
-                    updateProfileInBackground();
                     continueAppStart(friends);
-
                 } else {
                     if (MetadataStore.getInstance().isLoggedIn()) {
-                        // some network error
+                        Log.e("FacebookManager: ", "GraphRequest error: " + graphResponse.getError());
                     }
                 }
             }
         });
-        initGraphRequest(request);
+        executeGraphRequest(request);
     }
 
     @NonNull
@@ -160,20 +161,8 @@ public class FacebookManager {
         return friends;
     }
 
-    private void updateProfileInBackground() {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                initYourself();
-                if (profile != null) {
-                    FriendsManager.getInstance().saveOrUpdateYourself(yourself);
-                }
-                return null;
-            }
-        }.execute();
-    }
-
     private void continueAppStart(List<Friend> friends) {
+        Log.i("FacebookManager: ", "continueAppStart called.");
         if (MetadataStore.getInstance().isLoggedIn()) {
             if (!MetadataStore.getInstance().isFirstStartFinished()) {
                 initYourself();
@@ -187,7 +176,7 @@ public class FacebookManager {
         }
     }
 
-    private void initGraphRequest(GraphRequest request) {
+    private void executeGraphRequest(GraphRequest request) {
         Bundle parameters = new Bundle();
         parameters.putString("fields", "id,name,picture");
         request.setParameters(parameters);

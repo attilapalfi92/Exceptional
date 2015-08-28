@@ -1,4 +1,4 @@
-package com.attilapalfi.exceptional.ui.exceptionSending;
+package com.attilapalfi.exceptional.ui.exception_sending;
 
 import android.content.Context;
 import android.graphics.Color;
