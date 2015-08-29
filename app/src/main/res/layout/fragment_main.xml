@@ -16,7 +16,7 @@
         android:id="@+id/mainText"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp" />
+        android:layout_marginTop="1dp" />
 
     <ImageView
         android:layout_width="100dp"
@@ -56,10 +56,20 @@
     <Button
         android:layout_width="300dp"
         android:layout_height="60dp"
+        android:onClick="exceptionHistoryClicked"
         android:text="@string/fragment_main_exception_history"
         android:id="@+id/exceptionHistory"
         android:layout_below="@+id/myMainImageView"
         android:layout_centerHorizontal="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="GiveMeException"
+        android:id="@+id/button"
+        android:layout_below="@+id/exceptionHistory"
+        android:layout_centerHorizontal="true"
+        android:onClick="giveMeExcClicked" />
 
 
 </RelativeLayout>

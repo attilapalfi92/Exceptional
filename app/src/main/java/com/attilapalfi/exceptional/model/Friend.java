@@ -44,7 +44,7 @@ public class Friend {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        return ((Friend)o).id == id;
+        return ((Friend)o).id.equals(id);
     }
 
     public Friend() {
@@ -53,8 +53,8 @@ public class Friend {
 
     public Friend(BigInteger id, String firstName, String lastName, String imageUrl) {
         this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.firstName = firstName.trim();
+        this.lastName = lastName.trim();
         this.imageUrl = imageUrl;
         this.imageWeakReference = new WeakReference<>(null);
     }
@@ -89,6 +89,10 @@ public class Friend {
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;
+    }
+
+    public String getName() {
+        return firstName + " " + lastName;
     }
 
     public String getImageUrl() {

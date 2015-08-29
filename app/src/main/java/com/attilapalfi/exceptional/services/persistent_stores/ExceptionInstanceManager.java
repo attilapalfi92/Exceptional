@@ -2,6 +2,7 @@ package com.attilapalfi.exceptional.services.persistent_stores;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.location.Geocoder;
 import android.os.AsyncTask;
 
 import com.attilapalfi.exceptional.R;
@@ -10,11 +11,13 @@ import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper;
 import com.attilapalfi.exceptional.interfaces.ExceptionChangeListener;
 import com.attilapalfi.exceptional.interfaces.ExceptionSource;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,14 +26,17 @@ import java.util.Set;
  * Created by Attila on 2015-06-08.
  */
 public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
+    private static ExceptionInstanceManager instance;
 
     public final int STORE_SIZE = Integer.MAX_VALUE;
+
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private String PREFS_NAME;
     private Set<ExceptionChangeListener> exceptionChangeListeners = new HashSet<>();
-    private List<Exception> storedExceptions = new LinkedList<>();
-    private static ExceptionInstanceManager instance;
+    private List<Exception> storedExceptions = Collections.synchronizedList(new LinkedList<Exception>());
+    private Geocoder geocoder;
+    private List<BigInteger> knownIdsOnStart = new LinkedList<>();
 
     public static ExceptionInstanceManager getInstance () {
         if (instance == null) {
@@ -50,7 +56,13 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
         sharedPreferences = context.getSharedPreferences(instance.PREFS_NAME, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
         editor.apply();
-        new AsyncExceptionLoader(storedExceptions, sharedPreferences).execute();
+        geocoder = new Geocoder(context, Locale.getDefault());
+        Map<String, ?> store = sharedPreferences.getAll();
+        Set<String> instanceIds = store.keySet();
+        for (String id : instanceIds) {
+            knownIdsOnStart.add(new BigInteger(id));
+        }
+        new AsyncExceptionLoader(storedExceptions, store).execute();
     }
 
     @Override
@@ -71,8 +83,6 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
         return storedExceptions.size();
     }
 
-
-
     public BigInteger getLastKnownId() {
         if (storedExceptions.isEmpty()) {
             return new BigInteger("0");
@@ -81,21 +91,46 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
         return storedExceptions.get(0).getInstanceId();
     }
 
+    public void addException(final Exception e, final boolean notifyNeeded) {
+        if (!storedExceptions.contains(e)) {
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    setCityForException();
+                    addToMemoryStore();
+                    editor.putString(e.getInstanceId().toString(), e.toString());
+                    editor.apply();
+                    return null;
+                }
 
+                @Override
+                protected void onPostExecute(Void aVoid) {
+                    notifyListeners();
+                }
 
-    public void addException(Exception e, boolean notifyNeeded) {
-        if (storedExceptions.size() >= STORE_SIZE) {
-            removeLast();
-        }
-        //storedExceptions.addFirst(e);
-        storedExceptions.add(0, e);
-        editor.putString(e.getInstanceId().toString(), e.toString());
-        editor.apply();
+                private void setCityForException() {
+                    try {
+                        e.setCity(geocoder.getFromLocation(e.getLatitude(), e.getLongitude(), 1).get(0).getLocality());
+                    } catch (IOException ioe) {
+                        ioe.printStackTrace();
+                    }
+                }
 
-        if (notifyNeeded) {
-            for(ExceptionChangeListener listener : exceptionChangeListeners) {
-                listener.onExceptionsChanged();
-            }
+                private void addToMemoryStore() {
+                    if (storedExceptions.size() >= STORE_SIZE) {
+                        removeLast();
+                    }
+                    storedExceptions.add(0, e);
+                }
+
+                private void notifyListeners() {
+                    if (notifyNeeded) {
+                        for(ExceptionChangeListener listener : exceptionChangeListeners) {
+                            listener.onExceptionsChanged();
+                        }
+                    }
+                }
+            }.execute();
         }
     }
 
@@ -113,7 +148,6 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
 
 
     private void removeLast() {
-        //Exception removed = storedExceptions.removeLast();
         Exception removed = storedExceptions.remove(storedExceptions.size() - 1);
         editor.remove(removed.getInstanceId().toString());
     }
@@ -146,42 +180,36 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
         return exceptionChangeListeners.remove(listener);
     }
 
+    public List<BigInteger> getKnownIds() {
+        return knownIdsOnStart;
+    }
+
     private static class AsyncExceptionLoader extends AsyncTask<Void, Void, Void> {
-
         private List<Exception> resultList;
-        private List<Exception> temporaryList;
-        private SharedPreferences sharedPreferences;
+        private Map<String, ?> store;
 
-        public AsyncExceptionLoader(List<Exception> resultList, SharedPreferences sharedPreferences) {
+        public AsyncExceptionLoader(List<Exception> resultList, Map<String, ?> store) {
             this.resultList = resultList;
-            this.sharedPreferences = sharedPreferences;
-            temporaryList = new LinkedList<>();
+            this.store = store;
         }
 
         @Override
         protected Void doInBackground(Void... params) {
-            Map<String, ?> store = sharedPreferences.getAll();
-            Set<String> keys = store.keySet();
-            for (String s : keys) {
+            Set<String> instanceIds = store.keySet();
+            for (String s : instanceIds) {
                 parseExceptionToTemporaryList(store, s);
             }
-            Collections.sort(temporaryList, new Exception.DateComparator());
+            Collections.sort(resultList, new Exception.DateComparator());
             return null;
         }
 
-        private void parseExceptionToTemporaryList(Map<String, ?> store, String exceptionString) {
-            String excJson = (String) store.get(exceptionString);
+        private void parseExceptionToTemporaryList(Map<String, ?> store, String instanceId) {
+            String excJson = (String) store.get(instanceId);
             Exception e = Exception.fromString(excJson);
             e.setExceptionType(ExceptionTypeManager.getInstance().findById(e.getExceptionTypeId()));
-            temporaryList.add(temporaryList.size(), e);
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            for (Exception e : temporaryList) {
-                resultList.add(e);
+            if (!resultList.contains(e)) {
+                resultList.add(resultList.size(), e);
             }
-            temporaryList = null;
         }
     }
 }

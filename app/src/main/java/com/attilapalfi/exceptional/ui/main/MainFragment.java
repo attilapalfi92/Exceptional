@@ -20,6 +20,11 @@ import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
 public class MainFragment extends Fragment implements FirstStartFinishedListener {
     private View view;
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -32,6 +37,10 @@ public class MainFragment extends Fragment implements FirstStartFinishedListener
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
 
     @Override
     public void onDestroyView() {

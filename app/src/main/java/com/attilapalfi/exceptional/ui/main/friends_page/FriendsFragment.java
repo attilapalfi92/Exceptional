@@ -27,15 +27,22 @@ import java.util.List;
 /**
  * Created by palfi on 2015-08-23.
  */
-public class FriendsFragment2 extends Fragment implements FriendChangeListener {
+public class FriendsFragment extends Fragment implements FriendChangeListener {
+    public static final String FRIEND_ID = "friendId";
+
     private RecyclerView recyclerView;
     private FriendAdapter friendAdapter;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         BackendService.getInstance().addFriendChangeListener(this);
-        FriendsManager.getInstance().setFriendChangeListener(this);
+        FriendsManager.getInstance().addFriendChangeListener(this);
     }
 
     @Override
@@ -53,8 +60,14 @@ public class FriendsFragment2 extends Fragment implements FriendChangeListener {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
     public void onDetach() {
         BackendService.getInstance().removeFriendChangeListener(this);
+        FriendsManager.getInstance().removeFriendChangeListener(this);
         super.onDetach();
     }
 
@@ -68,7 +81,7 @@ public class FriendsFragment2 extends Fragment implements FriendChangeListener {
 
     @NonNull
     private View initRecyclerView(LayoutInflater inflater, ViewGroup container) {
-        View fragmentView = inflater.inflate(R.layout.fragment_friends_2, container, false);
+        View fragmentView = inflater.inflate(R.layout.fragment_friends, container, false);
         recyclerView = (RecyclerView) fragmentView.findViewById(R.id.friend_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(friendAdapter);
@@ -81,7 +94,7 @@ public class FriendsFragment2 extends Fragment implements FriendChangeListener {
         friendAdapter.notifyDataSetChanged();
     }
 
-    private static class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.RowViewHolder>{
+    private static class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.RowViewHolder> {
         private Context context;
         private List<Friend> values;
         private RecyclerView recyclerView;
@@ -92,18 +105,20 @@ public class FriendsFragment2 extends Fragment implements FriendChangeListener {
                 int itemPosition = recyclerView.getChildPosition(view);
                 Friend friend = values.get(itemPosition);
                 Intent intent = new Intent(context, FriendDetailsActivity.class);
+                intent.putExtra(FRIEND_ID, friend.getId().toString());
                 context.startActivity(intent);
             }
         };
 
         public FriendAdapter(Context context, List<Friend> values) {
             this.context = context;
+//            this.values = new ArrayList<>(values);
             this.values = values;
         }
 
         @Override
         public RowViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.friend_row_layout_2, parent, false);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.friend_row_layout, parent, false);
             view.setOnClickListener(onClickListener);
             return new RowViewHolder(view);
         }

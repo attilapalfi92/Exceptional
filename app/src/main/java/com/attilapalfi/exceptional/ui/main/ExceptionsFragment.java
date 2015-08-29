@@ -3,36 +3,49 @@ package com.attilapalfi.exceptional.ui.main;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.location.Geocoder;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ListFragment;
-
+import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.attilapalfi.exceptional.R;
+import com.attilapalfi.exceptional.interfaces.ExceptionChangeListener;
+import com.attilapalfi.exceptional.interfaces.ExceptionRefreshListener;
 import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.model.Friend;
 import com.attilapalfi.exceptional.rest.BackendService;
-import com.attilapalfi.exceptional.interfaces.ExceptionChangeListener;
-import com.attilapalfi.exceptional.interfaces.ExceptionRefreshListener;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
 import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
+import com.attilapalfi.exceptional.ui.main.friends_page.FriendDetailsActivity;
+import com.attilapalfi.exceptional.ui.main.friends_page.FriendsFragment;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
+ * Created by palfi on 2015-08-24.
  */
-public class ExceptionsFragment extends ListFragment implements ExceptionRefreshListener,
+public class ExceptionsFragment extends Fragment implements ExceptionRefreshListener,
         ExceptionChangeListener, SwipeRefreshLayout.OnRefreshListener {
 
-    private ExceptionAdapter adapter;
+    private Friend friend;
+    private RecyclerView recyclerView;
+    private ExceptionAdapter exceptionAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
@@ -41,26 +54,23 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
         ExceptionInstanceManager.getInstance().addExceptionChangeListener(this);
     }
 
-
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        List<Exception> values = ExceptionInstanceManager.getInstance().getExceptionList();
-        adapter = new ExceptionAdapter(getActivity().getApplicationContext(), values);
-        onExceptionsChanged();
-        setListAdapter(adapter);
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        FriendDetailsActivity activity;
+        if (getActivity() instanceof FriendDetailsActivity) {
+            activity = (FriendDetailsActivity) getActivity();
+            friend = activity.getFriend();
+        }
     }
-
-
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_exceptions, null);
+        initExceptionAdapter();
+        View view = initRecyclerView(inflater, container);
 
-        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.exception_swipe_container);
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setSize(SwipeRefreshLayout.LARGE);
         swipeRefreshLayout.setColorSchemeResources(
@@ -73,8 +83,11 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
         return view;
     }
 
-
-
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        onExceptionsChanged();
+    }
 
     @Override
     public void onDetach() {
@@ -82,14 +95,10 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
         super.onDetach();
     }
 
-
-
     @Override
     public void onExceptionsChanged() {
-        adapter.notifyDataSetChanged();
+        exceptionAdapter.notifyDataSetChanged();
     }
-
-
 
     @Override
     public void onRefresh() {
@@ -106,101 +115,144 @@ public class ExceptionsFragment extends ListFragment implements ExceptionRefresh
         swipeRefreshLayout.setRefreshing(false);
     }
 
+    private void initExceptionAdapter() {
+        if (!ExceptionInstanceManager.getInstance().isInitialized()) {
+            ExceptionInstanceManager.getInstance().initialize(getActivity().getApplicationContext());
+        }
+        List<Exception> values = generateValues(ExceptionInstanceManager.getInstance().getExceptionList());
+        exceptionAdapter = new ExceptionAdapter(getActivity(), values);
+        onExceptionsChanged();
+    }
 
-    private static class ExceptionAdapter extends ArrayAdapter<Exception> {
+    private List<Exception> generateValues(List<Exception> allValues) {
+        if (friend != null) {
+            List<Exception> filteredValues = new ArrayList<>();
+            for (Exception exception : allValues) {
+                if (exception.getFromWho().equals(friend.getId()) || exception.getToWho().equals(friend.getId())) {
+                    filteredValues.add(exception);
+                }
+            }
+            return filteredValues;
+        } else {
+            return allValues;
+        }
+    }
+
+    @NonNull
+    private View initRecyclerView(LayoutInflater inflater, ViewGroup container) {
+        View fragmentView = inflater.inflate(R.layout.fragment_exceptions, container, false);
+        recyclerView = (RecyclerView) fragmentView.findViewById(R.id.exception_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setAdapter(exceptionAdapter);
+        exceptionAdapter.setRecyclerView(recyclerView);
+        return fragmentView;
+    }
+
+
+    private static class ExceptionAdapter extends RecyclerView.Adapter<ExceptionAdapter.RowViewHolder>{
         private Context context;
         private List<Exception> values;
+        private RecyclerView recyclerView;
+
+        private final View.OnClickListener onClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int itemPosition = recyclerView.getChildPosition(view);
+                Exception exception = values.get(itemPosition);
+                Toast.makeText(context, exception.toString(), Toast.LENGTH_SHORT).show();
+            }
+        };
 
         public ExceptionAdapter(Context context, List<Exception> values) {
-            super(context, R.layout.exception_row_layout, values);
             this.context = context;
             this.values = values;
         }
 
-
+        @Override
+        public RowViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.exception_row_layout, parent, false);
+            view.setOnClickListener(onClickListener);
+            return new RowViewHolder(view, context);
+        }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            RowViewHolder viewHolder;
+        public void onBindViewHolder(RowViewHolder holder, int position) {
+            holder.bindRow(values.get(position));
+        }
 
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            if (convertView == null) {
-                convertView = inflater.inflate(R.layout.exception_row_layout, parent, false);
-                viewHolder = new RowViewHolder(convertView);
-                convertView.setTag(viewHolder);
+        @Override
+        public int getItemCount() {
+            return values != null ? values.size() : 0;
+        }
 
-            } else {
-                viewHolder = (RowViewHolder)convertView.getTag();
-            }
-
-            viewHolder.bindRow(values.get(position));
-
-            return convertView;
+        public void setRecyclerView(RecyclerView recyclerView) {
+            this.recyclerView = recyclerView;
         }
 
 
-        private static class RowViewHolder {
-            private TextView nameView;
-            private TextView descView;
+        public static class RowViewHolder extends RecyclerView.ViewHolder {
+            private ImageView friendImage;
+            private TextView exceptionNameView;
+            private TextView descriptionView;
+            private TextView friendNameAndCityView;
+            private TextView toNameView;
             private TextView dateView;
-            private TextView fromWhoView;
-            private static int yourselfCounter = 0;
-            private static boolean toastShown = false;
 
-            public RowViewHolder(View rowView) {
-                nameView = (TextView) rowView.findViewById(R.id.excName);
-                descView = (TextView) rowView.findViewById(R.id.excDesc);
-                fromWhoView = (TextView) rowView.findViewById(R.id.excFromWho);
-                dateView = (TextView) rowView.findViewById(R.id.excDate);
-
-
-                nameView.setTextSize(20);
-                descView.setTextSize(15);
-                fromWhoView.setTextSize(15);
-                dateView.setTextSize(15);
-
-                nameView.setTextColor(Color.BLACK);
-                descView.setTextColor(Color.BLACK);
-                fromWhoView.setTextColor(Color.BLACK);
-                dateView.setTextColor(Color.BLACK);
+            public RowViewHolder(View rowView, Context context) {
+                super(rowView);
+                friendImage = (ImageView) rowView.findViewById(R.id.exc_row_image);
+                exceptionNameView = (TextView) rowView.findViewById(R.id.exc_row_name);
+                exceptionNameView.setTextSize(20);
+                exceptionNameView.setTextColor(Color.BLACK);
+                descriptionView = (TextView) rowView.findViewById(R.id.exc_row_description);
+                descriptionView.setTextSize(15);
+                descriptionView.setTextColor(Color.BLACK);
+                friendNameAndCityView = (TextView) rowView.findViewById(R.id.exc_row_city_and_friend);
+                toNameView = (TextView) rowView.findViewById(R.id.exc_row_to_person);
+                dateView = (TextView) rowView.findViewById(R.id.exc_row_date);
             }
 
             public void bindRow(Exception model) {
-                nameView.setText(model.getPrefix() + "\n" + model.getShortName());
-                descView.setText(model.getDescription());
-
-                Friend fromWho = FriendsManager.getInstance().findFriendById(model.getFromWho());
-
-                if (fromWho != null) {
-
-                    if (fromWho.getFirstName().equals("yourself")) {
-                        fromWhoView.setText("From: yourself");
-
-                        if (++yourselfCounter == 7) {
-                            yourselfCounter = 0;
-
-                            if (!toastShown) {
-                                Toast.makeText(fromWhoView.getContext(), "You lonely motherfucker", Toast.LENGTH_SHORT).show();
-                                toastShown = true;
-                            }
-                        }
-
-                    } else {
-                        fromWhoView.setText("From: " + fromWho.getFirstName());
-                        yourselfCounter = 0;
+                Friend fromWho = bindImage(model);
+                exceptionNameView.setText(model.getShortName());
+                descriptionView.setText(model.getDescription());
+                String city = model.getCity();
+                String nameAndCity = "";
+                if (fromWho.getId().longValue() != 0) {
+                    nameAndCity = fromWho.getName();
+                    if (!city.equals("")) {
+                        nameAndCity += (", " + city);
                     }
-
-                } else {
-                    fromWhoView.setText("From: unknown :(");
-                    yourselfCounter = 0;
                 }
+                friendNameAndCityView.setText(nameAndCity);
+                toNameView.setText(FriendsManager.getInstance().findFriendById(model.getToWho()).getName());
+                dateView.setText(DateFormat.format("yyyy-MM-dd HH:mm:ss", model.getDate().getTime()));
+            }
 
-
-                String date = model.getDate().toString();
-
-                dateView.setText(date);
+            private Friend bindImage(Exception model) {
+                Friend fromWho = FriendsManager.getInstance().findFriendById(model.getFromWho());
+                Friend toWho = FriendsManager.getInstance().findFriendById(model.getToWho());
+                Friend yourself = FriendsManager.getInstance().getYourself();
+                if (yourself.equals(fromWho)) {
+                    if (yourself.equals(toWho)) {
+                        yourself.setImageToView(friendImage);
+                        return yourself;
+                    } else {
+                        if (toWho.getId().longValue() != 0) {
+                            toWho.setImageToView(friendImage);
+                            return toWho;
+                        }
+                        return new Friend(new BigInteger("0"), "", "", "");
+                    }
+                } else {
+                    if (fromWho.getId().longValue() != 0) {
+                        fromWho.setImageToView(friendImage);
+                        return fromWho;
+                    }
+                    return new Friend(new BigInteger("0"), "", "", "");
+                }
             }
         }
-    }
 
+    }
 }

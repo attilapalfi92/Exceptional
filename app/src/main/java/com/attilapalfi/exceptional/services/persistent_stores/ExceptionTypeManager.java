@@ -154,11 +154,11 @@ public class ExceptionTypeManager implements Wipeable {
         return exceptionTypeStore != null;
     }
 
-    public List<ExceptionType> getExceptionTypesByName() {
-        if (exceptionTypeStore.get("JAVA") == null) {
-            return new ArrayList<>();
+    public List<ExceptionType> getExceptionTypesByName(String typeName) {
+        if (exceptionTypeStore.containsKey(typeName)) {
+            return new ArrayList<>(exceptionTypeStore.get(typeName));
         }
-        return exceptionTypeStore.get("JAVA");
+        return new ArrayList<>();
     }
 
     @Override

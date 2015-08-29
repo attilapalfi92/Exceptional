@@ -1,36 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<android.support.v7.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:clickable="true"
+    android:longClickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:layout_marginTop="2dp"
+    android:layout_marginBottom="3dp" >
 
-    <TextView
-        android:id="@+id/excName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@+id/label" >
-    </TextView>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/excDesc"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@+id/label" >
-    </TextView>
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:id="@+id/exc_row_image"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
 
-    <TextView
-        android:id="@+id/excFromWho"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@+id/label" >
-    </TextView>
+        <TextView
+            android:id="@+id/exc_row_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="8dp"
+            android:paddingTop="2dp"
+            android:textColor="#222"
+            android:textSize="20sp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_toRightOf="@+id/exc_row_image"
+            android:layout_toEndOf="@+id/exc_row_image"
+            android:layout_above="@+id/exc_row_description"
+            android:layout_alignParentTop="true"
+            android:gravity="center_vertical" />
 
-    <TextView
-        android:id="@+id/excDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@+id/label" >
-    </TextView>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/exc_row_description"
+            android:paddingLeft="8dp"
+            android:paddingTop="3dp"
+            android:textSize="15sp"
+            android:textColor="#222"
+            android:layout_below="@+id/exc_row_image"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
 
-</LinearLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/exc_history_row_from_city_prefix"
+            android:id="@+id/from_text"
+            android:layout_below="@+id/exc_row_description"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Budapest"
+            android:id="@+id/exc_row_city_and_friend"
+            android:layout_below="@+id/exc_row_description"
+            android:layout_toRightOf="@+id/from_text"
+            android:layout_toEndOf="@+id/from_text"
+            android:layout_marginStart="3dp"
+            android:layout_marginLeft="3dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/exc_history_row_to_city_prefix"
+            android:id="@+id/to_text"
+            android:layout_below="@+id/from_text"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Kis Puli"
+            android:id="@+id/exc_row_to_person"
+            android:layout_below="@+id/from_text"
+            android:layout_toRightOf="@+id/from_text"
+            android:layout_toEndOf="@+id/from_text"
+            android:layout_marginLeft="3dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2015-03-14 18:49:23.732"
+            android:id="@+id/exc_row_date"
+            android:layout_below="@+id/to_text"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
+
+        <ImageView
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:id="@+id/exc_row_outgoing_image"
+            android:src="@drawable/outgoing"
+            android:layout_alignBottom="@+id/exc_row_date"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
+
+        <ImageView
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:id="@+id/exc_row_incoming_image"
+            android:src="@drawable/incoming"
+            android:layout_alignBottom="@+id/exc_row_date"
+            android:layout_toLeftOf="@+id/exc_row_outgoing_image"
+            android:layout_toStartOf="@+id/exc_row_outgoing_image" />
+
+    </RelativeLayout>
+</android.support.v7.widget.CardView>

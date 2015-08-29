@@ -18,18 +18,20 @@ import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.rest.BackendService;
 import com.attilapalfi.exceptional.interfaces.ServerResponseListener;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
+import com.attilapalfi.exceptional.ui.ExceptionHistoryActivity;
 import com.attilapalfi.exceptional.ui.LoginActivity;
 import com.attilapalfi.exceptional.ui.OptionsActivity;
-import com.attilapalfi.exceptional.ui.exception_sending.SendExceptionListActivity;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
 import com.attilapalfi.exceptional.services.facebook.FacebookManager;
 import com.attilapalfi.exceptional.services.GpsService;
+import com.attilapalfi.exceptional.ui.main.page_transformers.DepthPageTransformer;
+import com.attilapalfi.exceptional.ui.main.page_transformers.ZoomOutPageTransformer;
 
 public class MainActivity extends AppCompatActivity implements ServerResponseListener {
-
     private Location mLocation;
     private String androidId;
     private MainPagerAdapter adapter;
+    private ViewPager viewPager;
 
     GpsService gpsService;
 
@@ -39,21 +41,25 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        setTitle("Your profile");
+
         GpsService.getInstance().initialize(getApplicationContext());
         gpsService = GpsService.getInstance();
         BackendService.getInstance().addResponseListener(this);
         androidId = Settings.Secure.getString(getApplicationContext()
                 .getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        adapter = new MainPagerAdapter(getSupportFragmentManager());
-        ViewPager pager = (ViewPager) findViewById(R.id.pager);
-        pager.setAdapter(adapter);
+        adapter = new MainPagerAdapter(getSupportFragmentManager(), this);
+        viewPager = (ViewPager) findViewById(R.id.main_pager);
+        viewPager.setAdapter(adapter);
+        viewPager.addOnPageChangeListener(adapter);
+        viewPager.setPageTransformer(true, new DepthPageTransformer());
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
             int startPage = bundle.getInt("startPage");
             if (startPage != 0) {
-                pager.setCurrentItem(startPage);
+                viewPager.setCurrentItem(startPage);
             }
         }
     }
@@ -75,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
     protected void onDestroy() {
         super.onDestroy();
         BackendService.getInstance().removeConnectionListener(this);
+        viewPager.removeOnPageChangeListener(adapter);
     }
 
     @Override
@@ -104,44 +111,22 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
         startActivity(intent);
     }
 
-    public void throwExceptionClicked(View view) {
-        if (MetadataStore.getInstance().isLoggedIn()) {
-            Intent intent = new Intent(this, SendExceptionListActivity.class);
-            startActivity(intent);
-        } else {
-            Toast.makeText(this, "You have to login first!", Toast.LENGTH_SHORT).show();
-        }
-    }
-
     public void giveMeExcClicked(View view) {
         if (MetadataStore.getInstance().isLoggedIn()) {
             if (!gpsService.canGetLocation() && mLocation == null) {
-                //Toast.makeText(this, "Can't get device's location.\nPlease enable location services.", Toast.LENGTH_SHORT).show();
-
+                Toast.makeText(this, "Can't get device's location.\nPlease enable location services.", Toast.LENGTH_LONG).show();
             } else {
-
                 mLocation = gpsService.getLocation();
-                // TODO: giving exception to myself: not setting the instance ID, and not saving the exception here.
-                // TODO: save the exception when in arrives from the backend
                 Exception e = ExceptionTypeManager.getInstance().createRandomException(FacebookManager.getInstance().getProfileId(),
                         FacebookManager.getInstance().getProfileId());
-
                 e.setLongitude(mLocation.getLongitude());
                 e.setLatitude(mLocation.getLatitude());
-                //ExceptionInstanceManager.addException(e);
-
-//            for (ExceptionChangeListener listener : exceptionChangeListeners) {
-//                listener.onExceptionsChanged();
-//            }
-
                 BackendService.getInstance().throwException(e);
-
                 String data =
                         "Description: " + e.getDescription() + "\n\n" +
                                 "From: " + e.getFromWho() + "\n\n" +
                                 "Where: " + e.getLongitude() + ", " +
                                 e.getLatitude();
-
                 new MaterialDialog.Builder(this)
                         .title(e.getPrefix() + "\n" + e.getShortName())
                         .content(data)
@@ -149,15 +134,16 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
                         .negativeText("OK")
                         .show();
             }
-
-
         } else {
             Toast.makeText(this, "You have to login first!", Toast.LENGTH_SHORT).show();
         }
     }
 
 
-
+    public void exceptionHistoryClicked(View view) {
+        Intent intent = new Intent(this, ExceptionHistoryActivity.class);
+        startActivity(intent);
+    }
 
     @Override
     public void onConnectionFailed(String what, String why) {
@@ -168,5 +154,4 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
     public void onSuccess(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
-
 }

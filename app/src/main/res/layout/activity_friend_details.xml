@@ -6,22 +6,59 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.attilapalfi.exceptional.ui.main.friends_page.FriendDetailsActivity">
 
-    <TextView android:text="@string/hello_world"
-        android:id="@+id/best_text_view"
-        android:textSize="50sp"
+    <ImageView
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:id="@+id/friend_details_image"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView android:text="Balázs Guzsván Master Lord"
+        android:id="@+id/friend_details_name"
+        android:textSize="20sp"
+        android:singleLine="true"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="30dp"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/friend_details_image"
+        android:layout_alignRight="@+id/friend_details_exceptions"
+        android:layout_alignEnd="@+id/friend_details_exceptions"
+        android:gravity="center_vertical|center_horizontal" />
 
+    <TextView
+        android:text="Points: 1000"
+        android:id="@+id/friend_details_points"
+        android:textSize="20sp"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:gravity="center_vertical|center_horizontal"
+        android:layout_above="@+id/throw_exc_to_friend"
+        android:layout_toRightOf="@+id/friend_details_image"
+        android:layout_alignRight="@+id/friend_details_exceptions"
+        android:layout_alignEnd="@+id/friend_details_exceptions" />
 
-
-    <fragment
-        android:name="com.attilapalfi.exceptional.ui.main.ExceptionsFragment2"
-        android:id="@+id/friend_details_exceptions"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:layout="@layout/fragment_exceptions"
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="THROW AN EXCEPTION!!!"
+        android:id="@+id/throw_exc_to_friend"
+        android:layout_below="@+id/friend_details_image"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/best_text_view" />
+        android:layout_alignRight="@+id/friend_details_exceptions"
+        android:layout_alignEnd="@+id/friend_details_exceptions"
+        android:onClick="throwExceptionClicked" />
+
+    <fragment
+        android:name="com.attilapalfi.exceptional.ui.main.ExceptionsFragment"
+        android:id="@+id/friend_details_exceptions"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        tools:layout="@layout/fragment_exceptions"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/throw_exc_to_friend" />
 
 </RelativeLayout>

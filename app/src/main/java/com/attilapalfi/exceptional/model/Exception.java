@@ -23,6 +23,7 @@ public class Exception {
     private Timestamp date;
     private BigInteger fromWho;
     private BigInteger toWho;
+    private String city = "";
 
     public Exception(ExceptionInstanceWrapper wrapper) {
         exceptionTypeId = wrapper.getExceptionTypeId();
@@ -59,7 +60,6 @@ public class Exception {
     public Exception clone() {
         Exception e = new Exception();
         e.setExceptionType(exceptionType);
-
         return e;
     }
 
@@ -148,5 +148,32 @@ public class Exception {
 
     public void setExceptionTypeId(int exceptionTypeId) {
         this.exceptionTypeId = exceptionTypeId;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Exception exception = (Exception) o;
+
+        if (instanceId != null ? !instanceId.equals(exception.instanceId) : exception.instanceId != null)
+            return false;
+        return !(date != null ? !date.equals(exception.date) : exception.date != null);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = instanceId != null ? instanceId.hashCode() : 0;
+        result = 31 * result + (date != null ? date.hashCode() : 0);
+        return result;
     }
 }

@@ -1,39 +1,44 @@
 package com.attilapalfi.exceptional.ui.main.friends_page;
 
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.attilapalfi.exceptional.R;
+import com.attilapalfi.exceptional.model.Friend;
+import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
+
+import java.math.BigInteger;
 
 public class FriendDetailsActivity extends AppCompatActivity {
+    private Friend friend;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friend_details);
+
+        getFriend();
+        ImageView imageView = (ImageView) findViewById(R.id.friend_details_image);
+        friend.setImageToView(imageView);
+        TextView nameView = (TextView) findViewById(R.id.friend_details_name);
+        nameView.setText(friend.getName());
+        TextView pointsView = (TextView) findViewById(R.id.friend_details_points);
+        pointsView.setText("Points: " + friend.getPoints());
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_friend_details, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+    public Friend getFriend() {
+        if (friend == null) {
+            BigInteger friendId = new BigInteger(getIntent().getStringExtra(FriendsFragment.FRIEND_ID));
+            friend = FriendsManager.getInstance().findFriendById(friendId);
         }
+        return friend;
+    }
 
-        return super.onOptionsItemSelected(item);
+    public void throwExceptionClicked(View view) {
+
     }
 }

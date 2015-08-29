@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -18,6 +19,7 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +35,7 @@ public class FriendsManager implements Wipeable {
     private SharedPreferences.Editor editor;
     private final List<Friend> storedFriends = new LinkedList<>();
     private Friend yourself;
-    private FriendChangeListener friendChangeListener;
+    private Set<FriendChangeListener> friendChangeListeners = new HashSet<>();
     private static FriendsManager instance;
 
     public static FriendsManager getInstance() {
@@ -43,8 +45,12 @@ public class FriendsManager implements Wipeable {
         return instance;
     }
 
-    public void setFriendChangeListener(FriendChangeListener listener) {
-        friendChangeListener = listener;
+    public void addFriendChangeListener(FriendChangeListener listener) {
+        friendChangeListeners.add(listener);
+    }
+
+    public void removeFriendChangeListener(FriendChangeListener listener) {
+        friendChangeListeners.remove(listener);
     }
 
     public List<Friend> getStoredFriends() {
@@ -79,6 +85,7 @@ public class FriendsManager implements Wipeable {
             }
         }
         editor.apply();
+        notifyChangeListeners();
     }
 
     public void saveFriendsAndYourself(List<Friend> friendList, Friend yourself) {
@@ -96,8 +103,10 @@ public class FriendsManager implements Wipeable {
     public void updateFriendsPoints(Map<BigInteger, Integer> points) {
         for (BigInteger facebookId : points.keySet()) {
             Friend friend = findFriendById(facebookId);
-            friend.setPoints(points.get(facebookId));
-            updateFriend(friend);
+            if (friend.getPoints() != points.get(facebookId)) {
+                friend.setPoints(points.get(facebookId));
+                updateFriend(friend);
+            }
         }
     }
 
@@ -120,9 +129,7 @@ public class FriendsManager implements Wipeable {
         storedFriends.clear();
         editor.clear();
         editor.apply();
-        if (friendChangeListener != null) {
-            friendChangeListener.onFriendsChanged();
-        }
+        notifyChangeListeners();
     }
 
     public boolean isItYourself(Friend friend) {
@@ -150,6 +157,7 @@ public class FriendsManager implements Wipeable {
             new UpdateFriendsImageTask(f).execute();
         }
         editor.apply();
+        notifyChangeListeners();
     }
 
     private void updateOldFriends(List<Friend> friendList) {
@@ -205,8 +213,6 @@ public class FriendsManager implements Wipeable {
     private void updateFriendOrYourself(Friend someone) {
         if (!areTheyTheSamePerson(someone, yourself)) {
             updateFriend(someone);
-            if (friendChangeListener != null)
-                friendChangeListener.onFriendsChanged();
         } else {
             updateYourself(someone);
         }
@@ -227,18 +233,20 @@ public class FriendsManager implements Wipeable {
         storedFriends.add(someone);
         editor.putString(someone.getId().toString(), someone.toString());
         editor.apply();
+        notifyChangeListeners();
     }
 
     private void updateYourself(Friend someone) {
         yourself = someone;
         editor.putString("yourself", yourself.toString());
         editor.apply();
+        notifyChangeListeners();
     }
 
     // TODO: if download failed because of poor internet connection, retry later
     private static class UpdateFriendsImageTask extends AsyncTask<Void, Void, Bitmap> {
-        Friend friend;
 
+        Friend friend;
         public UpdateFriendsImageTask(Friend friend) {
             this.friend = friend;
         }
@@ -275,13 +283,22 @@ public class FriendsManager implements Wipeable {
             friend.setImage(bitmap);
             FriendsManager.getInstance().updateFriendOrYourself(friend);
         }
-    }
 
+    }
     private void deleteFriends(List<Friend> toBeDeleted) {
         for (Friend f : toBeDeleted) {
             editor.remove((f.getId().toString()));
         }
         editor.apply();
         storedFriends.removeAll(toBeDeleted);
+        notifyChangeListeners();
+    }
+
+    private void notifyChangeListeners() {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            for (FriendChangeListener listener : friendChangeListeners) {
+                listener.onFriendsChanged();
+            }
+        }
     }
 }

@@ -81,6 +81,14 @@
             android:name=".ui.main.friends_page.FriendDetailsActivity"
             android:label="@string/title_activity_friend_details" >
         </activity>
+        <activity
+            android:name=".ui.ExceptionHistoryActivity"
+            android:label="@string/title_activity_exception_history" >
+        </activity>
+        <activity
+            android:name=".ui.main.friends_page.exception_throwing.ExceptionTypeChooserActivity"
+            android:label="@string/title_activity_exception_instance_chooser" >
+        </activity>
     </application>
 
 </manifest>
