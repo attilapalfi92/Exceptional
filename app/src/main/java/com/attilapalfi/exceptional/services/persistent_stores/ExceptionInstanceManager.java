@@ -7,7 +7,7 @@ import android.os.AsyncTask;
 
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.model.Exception;
-import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper;
+import com.attilapalfi.exceptional.services.rest.messages.ExceptionInstanceWrapper;
 import com.attilapalfi.exceptional.interfaces.ExceptionChangeListener;
 import com.attilapalfi.exceptional.interfaces.ExceptionSource;
 
@@ -197,13 +197,13 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
         protected Void doInBackground(Void... params) {
             Set<String> instanceIds = store.keySet();
             for (String s : instanceIds) {
-                parseExceptionToTemporaryList(store, s);
+                parseExceptionToMemoryList(store, s);
             }
             Collections.sort(resultList, new Exception.DateComparator());
             return null;
         }
 
-        private void parseExceptionToTemporaryList(Map<String, ?> store, String instanceId) {
+        private void parseExceptionToMemoryList(Map<String, ?> store, String instanceId) {
             String excJson = (String) store.get(instanceId);
             Exception e = Exception.fromString(excJson);
             e.setExceptionType(ExceptionTypeManager.getInstance().findById(e.getExceptionTypeId()));

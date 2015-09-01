@@ -1,5 +1,8 @@
 package com.attilapalfi.exceptional.model;
 
+import android.annotation.TargetApi;
+import android.os.Build;
+
 import com.google.gson.Gson;
 
 import java.util.Comparator;
@@ -22,7 +25,11 @@ public class ExceptionType {
     public static class VoteComparator implements Comparator<ExceptionType> {
         @Override
         public int compare(ExceptionType lhs, ExceptionType rhs) {
-            return Integer.compare(lhs.getVoteCount(), rhs.getVoteCount());
+            return lhs.getVoteCount() < rhs.getVoteCount() ?
+                    -1 :
+                    (lhs.getVoteCount() == rhs.getVoteCount() ?
+                            0 :
+                            1);
         }
     }
 
@@ -123,6 +130,10 @@ public class ExceptionType {
 
     public void setVoteCount(int voteCount) {
         this.voteCount = voteCount;
+    }
+
+    public String fullName() {
+        return prefix + shortName;
     }
 
     public class Submitter {

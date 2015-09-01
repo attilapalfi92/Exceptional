@@ -7,7 +7,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.attilapalfi.exceptional.model.Friend;
-import com.attilapalfi.exceptional.rest.BackendService;
+import com.attilapalfi.exceptional.services.rest.BackendService;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
 import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;

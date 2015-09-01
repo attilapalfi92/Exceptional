@@ -31,15 +31,15 @@ public class MainFragment extends Fragment implements FirstStartFinishedListener
                              Bundle savedInstanceState) {
         MetadataStore.getInstance().addFirstStartFinishedListener(this);
         view = inflater.inflate(R.layout.fragment_main, container, false);
-        if (MetadataStore.getInstance().isFirstStartFinished()) {
-            setViews();
-        }
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        if (MetadataStore.getInstance().isFirstStartFinished()) {
+            setViews();
+        }
     }
 
     @Override

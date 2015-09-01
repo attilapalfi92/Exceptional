@@ -2,8 +2,6 @@ package com.attilapalfi.exceptional.ui.main;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
-import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -24,18 +22,14 @@ import com.attilapalfi.exceptional.interfaces.ExceptionChangeListener;
 import com.attilapalfi.exceptional.interfaces.ExceptionRefreshListener;
 import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.model.Friend;
-import com.attilapalfi.exceptional.rest.BackendService;
+import com.attilapalfi.exceptional.services.rest.BackendService;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
 import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
 import com.attilapalfi.exceptional.ui.main.friends_page.FriendDetailsActivity;
-import com.attilapalfi.exceptional.ui.main.friends_page.FriendsFragment;
 
-import java.io.IOException;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Created by palfi on 2015-08-24.
@@ -191,65 +185,92 @@ public class ExceptionsFragment extends Fragment implements ExceptionRefreshList
 
 
         public static class RowViewHolder extends RecyclerView.ViewHolder {
+            private Context context;
             private ImageView friendImage;
             private TextView exceptionNameView;
             private TextView descriptionView;
             private TextView friendNameAndCityView;
             private TextView toNameView;
             private TextView dateView;
+            private ImageView outgoingImage;
+            private ImageView incomingImage;
+
+            private Friend fromWho;
+            private Friend toWho;
+            private Friend yourself;
 
             public RowViewHolder(View rowView, Context context) {
                 super(rowView);
+                this.context = context;
                 friendImage = (ImageView) rowView.findViewById(R.id.exc_row_image);
                 exceptionNameView = (TextView) rowView.findViewById(R.id.exc_row_name);
-                exceptionNameView.setTextSize(20);
-                exceptionNameView.setTextColor(Color.BLACK);
                 descriptionView = (TextView) rowView.findViewById(R.id.exc_row_description);
-                descriptionView.setTextSize(15);
-                descriptionView.setTextColor(Color.BLACK);
                 friendNameAndCityView = (TextView) rowView.findViewById(R.id.exc_row_city_and_friend);
                 toNameView = (TextView) rowView.findViewById(R.id.exc_row_to_person);
                 dateView = (TextView) rowView.findViewById(R.id.exc_row_date);
+                outgoingImage = (ImageView) rowView.findViewById(R.id.exc_row_outgoing_image);
+                incomingImage = (ImageView) rowView.findViewById(R.id.exc_row_incoming_image);
             }
 
             public void bindRow(Exception model) {
-                Friend fromWho = bindImage(model);
-                exceptionNameView.setText(model.getShortName());
-                descriptionView.setText(model.getDescription());
-                String city = model.getCity();
-                String nameAndCity = "";
-                if (fromWho.getId().longValue() != 0) {
-                    nameAndCity = fromWho.getName();
-                    if (!city.equals("")) {
-                        nameAndCity += (", " + city);
-                    }
-                }
-                friendNameAndCityView.setText(nameAndCity);
-                toNameView.setText(FriendsManager.getInstance().findFriendById(model.getToWho()).getName());
-                dateView.setText(DateFormat.format("yyyy-MM-dd HH:mm:ss", model.getDate().getTime()));
+                fromWho = FriendsManager.getInstance().findFriendById(model.getFromWho());
+                toWho = FriendsManager.getInstance().findFriendById(model.getToWho());
+                yourself = FriendsManager.getInstance().getYourself();
+                bindUserInfo(model);
+                bindExceptionInfo(model);
+                setDirectionImages();
             }
 
-            private Friend bindImage(Exception model) {
-                Friend fromWho = FriendsManager.getInstance().findFriendById(model.getFromWho());
-                Friend toWho = FriendsManager.getInstance().findFriendById(model.getToWho());
-                Friend yourself = FriendsManager.getInstance().getYourself();
+            private void bindUserInfo(Exception model) {
+                toNameView.setText(toWho.getName());
+                bindImage();
+                setFromWhoNameAndCity(model);
+            }
+
+            private void bindImage() {
                 if (yourself.equals(fromWho)) {
                     if (yourself.equals(toWho)) {
                         yourself.setImageToView(friendImage);
-                        return yourself;
                     } else {
                         if (toWho.getId().longValue() != 0) {
                             toWho.setImageToView(friendImage);
-                            return toWho;
                         }
-                        return new Friend(new BigInteger("0"), "", "", "");
                     }
                 } else {
                     if (fromWho.getId().longValue() != 0) {
                         fromWho.setImageToView(friendImage);
-                        return fromWho;
                     }
-                    return new Friend(new BigInteger("0"), "", "", "");
+                }
+            }
+
+            private void setFromWhoNameAndCity(Exception model) {
+                String city = model.getCity();
+                String nameAndCity = "";
+                if (fromWho.getId().longValue() != 0) {
+                    nameAndCity = fromWho.getName();
+                    if (!"".equals(city)) {
+                        nameAndCity += (", " + city);
+                    }
+                }
+                friendNameAndCityView.setText(nameAndCity);
+            }
+
+            private void bindExceptionInfo(Exception model) {
+                exceptionNameView.setText(model.getShortName());
+                descriptionView.setText(model.getDescription());
+                dateView.setText(DateFormat.format("yyyy-MM-dd HH:mm:ss", model.getDate().getTime()));
+            }
+
+            private void setDirectionImages() {
+                if (!fromWho.equals(yourself)) {
+                    outgoingImage.setImageBitmap(null);
+                } else {
+                    outgoingImage.setImageDrawable(context.getResources().getDrawable(R.drawable.outgoing));
+                }
+                if (!toWho.equals(yourself)) {
+                    incomingImage.setImageBitmap(null);
+                } else {
+                    incomingImage.setImageDrawable(context.getResources().getDrawable(R.drawable.incoming));
                 }
             }
         }

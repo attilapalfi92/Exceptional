@@ -1,4 +1,4 @@
-package com.attilapalfi.exceptional.rest;
+package com.attilapalfi.exceptional.services.rest;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -9,12 +9,12 @@ import com.attilapalfi.exceptional.interfaces.ServerResponseListener;
 import com.attilapalfi.exceptional.interfaces.ServerResponseSource;
 import com.attilapalfi.exceptional.model.*;
 import com.attilapalfi.exceptional.model.Exception;
-import com.attilapalfi.exceptional.rest.messages.AppStartRequestBody;
-import com.attilapalfi.exceptional.rest.messages.AppStartResponseBody;
-import com.attilapalfi.exceptional.rest.messages.BaseExceptionRequestBody;
-import com.attilapalfi.exceptional.rest.messages.ExceptionRefreshResponse;
-import com.attilapalfi.exceptional.rest.messages.ExceptionSentResponse;
-import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper;
+import com.attilapalfi.exceptional.services.rest.messages.AppStartRequestBody;
+import com.attilapalfi.exceptional.services.rest.messages.AppStartResponseBody;
+import com.attilapalfi.exceptional.services.rest.messages.BaseExceptionRequestBody;
+import com.attilapalfi.exceptional.services.rest.messages.ExceptionRefreshResponse;
+import com.attilapalfi.exceptional.services.rest.messages.ExceptionSentResponse;
+import com.attilapalfi.exceptional.services.rest.messages.ExceptionInstanceWrapper;
 import com.attilapalfi.exceptional.interfaces.ExceptionRefreshListener;
 import com.attilapalfi.exceptional.interfaces.FriendChangeListener;
 import com.attilapalfi.exceptional.interfaces.FriendSource;
@@ -28,14 +28,11 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
-import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.List;
 
 import retrofit.Callback;
-import retrofit.Endpoint;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -113,14 +110,18 @@ public class BackendService implements FriendSource, ServerResponseSource {
         }
     }
 
-    public void throwException(Exception e) {
-        ExceptionInstanceWrapper exceptionInstanceWrapper = new ExceptionInstanceWrapper(e);
+    public void throwException(Exception exception) {
+        ExceptionInstanceWrapper exceptionInstanceWrapper = new ExceptionInstanceWrapper(exception);
         try{
             restInterface.sendException(exceptionInstanceWrapper, new Callback<ExceptionSentResponse>() {
                 @Override
                 public void success(ExceptionSentResponse e, Response response) {
+                    Friend toWho = FriendsManager.getInstance().findFriendById(e.getInstanceWrapper().getToWho());
+                    MetadataStore.getInstance().setPoints(e.getYourPoints());
+                    FriendsManager.getInstance().updateFriendPoints(e.getInstanceWrapper().getToWho(), e.getFriendsPoints());
+                    ExceptionInstanceManager.getInstance().addException(new Exception(e.getInstanceWrapper()), true);
                     for (ServerResponseListener l : responseListeners) {
-                        l.onSuccess(e.getShortName() + " successfully sent to " + e.getToWho());
+                        l.onSuccess(e.getExceptionShortName() + " successfully sent to " + toWho.getName());
                     }
                 }
 
@@ -132,9 +133,9 @@ public class BackendService implements FriendSource, ServerResponseSource {
                 }
             });
 
-        } catch (java.lang.Exception exception) {
+        } catch (java.lang.Exception e) {
             for (ServerResponseListener l : responseListeners) {
-                l.onConnectionFailed("Failed to throw the exception to the server.", exception.getMessage());
+                l.onConnectionFailed("Failed to throw the exception to the server.", e.getMessage());
             }
         }
     }
@@ -265,7 +266,7 @@ public class BackendService implements FriendSource, ServerResponseSource {
     }
 
     @Override
-    public boolean removeConnectionListener(ServerResponseListener listener) {
+    public boolean removeResponseListener(ServerResponseListener listener) {
         return responseListeners.remove(listener);
     }
 

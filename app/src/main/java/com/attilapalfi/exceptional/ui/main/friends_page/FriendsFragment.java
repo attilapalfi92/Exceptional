@@ -1,9 +1,7 @@
 package com.attilapalfi.exceptional.ui.main.friends_page;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -19,8 +17,9 @@ import android.widget.TextView;
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.interfaces.FriendChangeListener;
 import com.attilapalfi.exceptional.model.Friend;
-import com.attilapalfi.exceptional.rest.BackendService;
+import com.attilapalfi.exceptional.services.rest.BackendService;
 import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
+import com.attilapalfi.exceptional.ui.main.Constants;
 
 import java.util.List;
 
@@ -28,8 +27,6 @@ import java.util.List;
  * Created by palfi on 2015-08-23.
  */
 public class FriendsFragment extends Fragment implements FriendChangeListener {
-    public static final String FRIEND_ID = "friendId";
-
     private RecyclerView recyclerView;
     private FriendAdapter friendAdapter;
 
@@ -95,24 +92,22 @@ public class FriendsFragment extends Fragment implements FriendChangeListener {
     }
 
     private static class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.RowViewHolder> {
-        private Context context;
+        private Activity activity;
         private List<Friend> values;
         private RecyclerView recyclerView;
-
         private final View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 int itemPosition = recyclerView.getChildPosition(view);
                 Friend friend = values.get(itemPosition);
-                Intent intent = new Intent(context, FriendDetailsActivity.class);
-                intent.putExtra(FRIEND_ID, friend.getId().toString());
-                context.startActivity(intent);
+                Intent intent = new Intent(activity, FriendDetailsActivity.class);
+                intent.putExtra(Constants.FRIEND_ID, friend.getId().toString());
+                activity.startActivity(intent);
             }
         };
 
-        public FriendAdapter(Context context, List<Friend> values) {
-            this.context = context;
-//            this.values = new ArrayList<>(values);
+        public FriendAdapter(Activity activity, List<Friend> values) {
+            this.activity = activity;
             this.values = values;
         }
 
@@ -148,10 +143,6 @@ public class FriendsFragment extends Fragment implements FriendChangeListener {
                 nameView = (TextView) rowView.findViewById(R.id.friendNameView);
                 pointsView = (TextView) rowView.findViewById(R.id.friendPointsView);
                 imageView = (ImageView) rowView.findViewById(R.id.friendImageView);
-                nameView.setTextSize(20);
-                pointsView.setTextSize(15);
-                nameView.setTextColor(Color.BLACK);
-                pointsView.setTextColor(Color.BLACK);
             }
 
             public void bindRow(Friend model) {

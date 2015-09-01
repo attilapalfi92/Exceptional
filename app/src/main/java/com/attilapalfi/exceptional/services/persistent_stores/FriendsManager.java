@@ -100,6 +100,14 @@ public class FriendsManager implements Wipeable {
         saveNewFriends(friendList);
     }
 
+    public void updateFriendPoints(BigInteger id, int points) {
+        Friend friend = findFriendById(id);
+        if (friend.getPoints() != points) {
+            friend.setPoints(points);
+            updateFriend(friend);
+        }
+    }
+
     public void updateFriendsPoints(Map<BigInteger, Integer> points) {
         for (BigInteger facebookId : points.keySet()) {
             Friend friend = findFriendById(facebookId);

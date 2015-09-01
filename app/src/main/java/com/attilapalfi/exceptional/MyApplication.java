@@ -9,7 +9,7 @@ import android.provider.Settings;
 import android.util.Base64;
 import android.util.Log;
 
-import com.attilapalfi.exceptional.rest.BackendService;
+import com.attilapalfi.exceptional.services.rest.BackendService;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;

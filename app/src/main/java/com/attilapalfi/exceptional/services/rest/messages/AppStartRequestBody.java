@@ -1,4 +1,4 @@
-package com.attilapalfi.exceptional.rest.messages;
+package com.attilapalfi.exceptional.services.rest.messages;
 
 import java.math.BigInteger;
 import java.util.Collection;

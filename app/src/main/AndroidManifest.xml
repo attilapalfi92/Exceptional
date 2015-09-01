@@ -45,7 +45,6 @@
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -59,14 +58,6 @@
             android:label="@string/app_name" >
         </activity>
         <activity
-            android:name=".ui.exception_sending.SendExceptionListActivity"
-            android:label="@string/app_name" >
-        </activity>
-        <activity
-            android:name=".ui.exception_sending.FriendChooserActivity"
-            android:label="@string/app_name" >
-        </activity>
-        <activity
             android:name=".ui.ShowNotificationActivity"
             android:excludeFromRecents="true"
             android:label="@string/app_name"
@@ -76,18 +67,30 @@
         <activity
             android:name=".ui.OptionsActivity"
             android:label="@string/title_activity_options" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.main.MainActivity" />
         </activity>
         <activity
             android:name=".ui.main.friends_page.FriendDetailsActivity"
             android:label="@string/title_activity_friend_details" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.main.MainActivity" />
         </activity>
         <activity
             android:name=".ui.ExceptionHistoryActivity"
             android:label="@string/title_activity_exception_history" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.main.MainActivity" />
         </activity>
         <activity
             android:name=".ui.main.friends_page.exception_throwing.ExceptionTypeChooserActivity"
-            android:label="@string/title_activity_exception_instance_chooser" >
+            android:label="@string/title_activity_exception_type_chooser" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.main.friends_page.FriendDetailsActivity" />
         </activity>
     </application>
 

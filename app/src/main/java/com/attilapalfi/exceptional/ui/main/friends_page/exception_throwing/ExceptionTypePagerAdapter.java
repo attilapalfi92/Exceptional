@@ -1,39 +1,53 @@
 package com.attilapalfi.exceptional.ui.main.friends_page.exception_throwing;
 
+import android.app.Activity;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 
-import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by palfi on 2015-08-30.
  */
-public class ExceptionTypePagerAdapter extends FragmentPagerAdapter {
-    private List<String> exceptionTypes;
+public class ExceptionTypePagerAdapter extends FragmentPagerAdapter implements ViewPager.OnPageChangeListener {
+    private List<String> exceptionTypes = new ArrayList<>();
+    private Activity activity;
 
-    public ExceptionTypePagerAdapter(FragmentManager fm) {
+    public ExceptionTypePagerAdapter(FragmentManager fm, Activity activity) {
         super(fm);
+        this.activity = activity;
         exceptionTypes.addAll(ExceptionTypeManager.getInstance().getExceptionTypes());
     }
 
     @Override
     public Fragment getItem(int position) {
-        if (position < exceptionTypes.size()) {
-            ExceptionTypeFragment fragment = new ExceptionTypeFragment();
-            fragment.setExceptionTypes(ExceptionTypeManager.getInstance().getExceptionTypesByName(exceptionTypes.get(position)));
-            return fragment;
-        }
-        return null;
+        return new ExceptionTypeFragment();
     }
 
     @Override
     public int getCount() {
-        return 0;
+        return exceptionTypes.size();
+    }
+
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+    }
+
+    @Override
+    public void onPageSelected(int position) {
+        if (position < exceptionTypes.size()) {
+            activity.setTitle(exceptionTypes.get(position));
+        }
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int state) {
+
     }
 }

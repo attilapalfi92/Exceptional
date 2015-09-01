@@ -1,6 +1,6 @@
 package com.attilapalfi.exceptional.model;
 
-import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper;
+import com.attilapalfi.exceptional.services.rest.messages.ExceptionInstanceWrapper;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
 import com.google.gson.Gson;
 

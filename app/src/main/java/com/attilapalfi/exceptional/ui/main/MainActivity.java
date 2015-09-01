@@ -12,19 +12,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.attilapalfi.exceptional.R;
-import com.attilapalfi.exceptional.model.Exception;
-import com.attilapalfi.exceptional.rest.BackendService;
+import com.attilapalfi.exceptional.services.rest.BackendService;
 import com.attilapalfi.exceptional.interfaces.ServerResponseListener;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
 import com.attilapalfi.exceptional.ui.ExceptionHistoryActivity;
 import com.attilapalfi.exceptional.ui.LoginActivity;
 import com.attilapalfi.exceptional.ui.OptionsActivity;
-import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
-import com.attilapalfi.exceptional.services.facebook.FacebookManager;
 import com.attilapalfi.exceptional.services.GpsService;
-import com.attilapalfi.exceptional.ui.main.page_transformers.DepthPageTransformer;
 import com.attilapalfi.exceptional.ui.main.page_transformers.ZoomOutPageTransformer;
 
 public class MainActivity extends AppCompatActivity implements ServerResponseListener {
@@ -53,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
         viewPager = (ViewPager) findViewById(R.id.main_pager);
         viewPager.setAdapter(adapter);
         viewPager.addOnPageChangeListener(adapter);
-        viewPager.setPageTransformer(true, new DepthPageTransformer());
+        viewPager.setPageTransformer(true, new ZoomOutPageTransformer());
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -80,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        BackendService.getInstance().removeConnectionListener(this);
+        BackendService.getInstance().removeResponseListener(this);
         viewPager.removeOnPageChangeListener(adapter);
     }
 
@@ -113,27 +108,27 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
 
     public void giveMeExcClicked(View view) {
         if (MetadataStore.getInstance().isLoggedIn()) {
-            if (!gpsService.canGetLocation() && mLocation == null) {
-                Toast.makeText(this, "Can't get device's location.\nPlease enable location services.", Toast.LENGTH_LONG).show();
-            } else {
-                mLocation = gpsService.getLocation();
-                Exception e = ExceptionTypeManager.getInstance().createRandomException(FacebookManager.getInstance().getProfileId(),
-                        FacebookManager.getInstance().getProfileId());
-                e.setLongitude(mLocation.getLongitude());
-                e.setLatitude(mLocation.getLatitude());
-                BackendService.getInstance().throwException(e);
-                String data =
-                        "Description: " + e.getDescription() + "\n\n" +
-                                "From: " + e.getFromWho() + "\n\n" +
-                                "Where: " + e.getLongitude() + ", " +
-                                e.getLatitude();
-                new MaterialDialog.Builder(this)
-                        .title(e.getPrefix() + "\n" + e.getShortName())
-                        .content(data)
-                        .positiveText("LOL")
-                        .negativeText("OK")
-                        .show();
-            }
+//            if (!gpsService.canGetLocation() && mLocation == null) {
+//                Toast.makeText(this, "Can't get device's location.\nPlease enable location services.", Toast.LENGTH_LONG).show();
+//            } else {
+//                mLocation = gpsService.getLocation();
+//                Exception e = ExceptionTypeManager.getInstance().createRandomException(FacebookManager.getInstance().getProfileId(),
+//                        FacebookManager.getInstance().getProfileId());
+//                e.setLongitude(mLocation.getLongitude());
+//                e.setLatitude(mLocation.getLatitude());
+//                BackendService.getInstance().throwException(e);
+//                String data =
+//                        "Description: " + e.getDescription() + "\n\n" +
+//                                "From: " + e.getFromWho() + "\n\n" +
+//                                "Where: " + e.getLongitude() + ", " +
+//                                e.getLatitude();
+//                new MaterialDialog.Builder(this)
+//                        .title(e.getPrefix() + "\n" + e.getShortName())
+//                        .content(data)
+//                        .positiveText("LOL")
+//                        .negativeText("OK")
+//                        .show();
+//            }
         } else {
             Toast.makeText(this, "You have to login first!", Toast.LENGTH_SHORT).show();
         }

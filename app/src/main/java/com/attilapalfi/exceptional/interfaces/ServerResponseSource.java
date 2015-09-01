@@ -5,5 +5,5 @@ package com.attilapalfi.exceptional.interfaces;
  */
 public interface ServerResponseSource {
     boolean addResponseListener(ServerResponseListener listener);
-    boolean removeConnectionListener(ServerResponseListener listener);
+    boolean removeResponseListener(ServerResponseListener listener);
 }

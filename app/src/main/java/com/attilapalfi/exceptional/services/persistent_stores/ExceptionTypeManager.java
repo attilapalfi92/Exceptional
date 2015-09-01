@@ -58,17 +58,14 @@ public class ExceptionTypeManager implements Wipeable {
 
     private void loadExceptionTypeStore(List<ExceptionType> exceptionTypes) {
         int maxId = 0;
-        int minId = Integer.MAX_VALUE;
         for (ExceptionType exception : exceptionTypes) {
             if (!exceptionTypeStore.containsKey(exception.getType())) {
                 exceptionTypeStore.put(exception.getType(), new ArrayList<ExceptionType>());
             }
             exceptionTypeStore.get(exception.getType()).add(exception);
             editor.putString(Integer.toString(exception.getId()), exception.toString());
-            minId = exception.getId() < minId ? exception.getId() : minId;
             maxId = exception.getId() > maxId ? exception.getId() : maxId;
         }
-        editor.putInt(MIN_ID, minId);
         editor.putInt(MAX_ID, maxId);
         editor.apply();
         sortExceptionStore();
@@ -86,7 +83,7 @@ public class ExceptionTypeManager implements Wipeable {
     }
 
     private void initExceptionTypeStore() {
-        int minId = sharedPreferences.getInt(MIN_ID, 0);
+        int minId = sharedPreferences.getInt(MIN_ID, 1);
         int maxId = sharedPreferences.getInt(MAX_ID, 0);
         for (int i = minId; i <= maxId; i++) {
             ExceptionType exceptionType = ExceptionType.fromString(sharedPreferences.getString(Integer.toString(i), ""));
@@ -105,34 +102,6 @@ public class ExceptionTypeManager implements Wipeable {
 
     private void sortVotedExceptionStore() {
         Collections.sort(votedExceptionTypeStore, new ExceptionType.VoteComparator());
-    }
-
-
-    public Exception createException(int typeId, BigInteger fromWho, BigInteger toWho) {
-        ExceptionType type = findById(typeId);
-        return createInstanceWithType(fromWho, toWho, type);
-    }
-
-    public Exception createRandomException(BigInteger fromWho, BigInteger toWho) {
-        ExceptionType exceptionType = new ExceptionType();
-        int random = (int)(Math.random() * exceptionTypeStore.keySet().size());
-        int counter = 0;
-        for (String type : exceptionTypeStore.keySet()) {
-            if (random == counter++) {
-                random = (int)(Math.random() * exceptionTypeStore.get(type).size());
-                exceptionType = exceptionTypeStore.get(type).get(random);
-            }
-        }
-        return createInstanceWithType(fromWho, toWho, exceptionType);
-    }
-
-    private Exception createInstanceWithType(BigInteger fromWho, BigInteger toWho, ExceptionType type) {
-        Exception exception = new Exception();
-        exception.setFromWho(fromWho);
-        exception.setToWho(toWho);
-        exception.setDate(new Timestamp(Calendar.getInstance().getTimeInMillis()));
-        exception.setExceptionType(type);
-        return exception;
     }
 
     public ExceptionType findById(int id) {

@@ -38,7 +38,7 @@ public class MainPagerAdapter extends FragmentPagerAdapter implements ViewPager.
 
     @Override
     public CharSequence getPageTitle(int position) {
-        return "          ";
+        return super.getPageTitle(position);
     }
 
     @Override

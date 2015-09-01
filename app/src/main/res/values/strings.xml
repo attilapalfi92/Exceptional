@@ -35,12 +35,13 @@
     <string name="main_point_view_pre">You have incredible</string>
     <string name="main_point_view_post">points!</string>
     <string name="fragment_main_exception_history">Exception history</string>
-    <string name="title_activity_friend_details">FriendDetailsActivity</string>
+    <string name="title_activity_friend_details">Friend Details</string>
     <string name="exc_history_row_from_city_prefix">From:</string>
     <string name="title_activity_exception_history">Exception history</string>
-    <string name="title_activity_exception_instance_chooser">ExceptionInstanceChooserActivity</string>
+    <string name="title_activity_exception_type_chooser">ExceptionTypeChooserActivity</string>
     <string name="exc_history_row_to_city_prefix">To:</string>
 
 <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="can_throw_location_pls">Can\'t throw the Exception, please enable location services.</string>
 </resources>
