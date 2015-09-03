@@ -2,8 +2,10 @@ package com.attilapalfi.exceptional.services.persistent_stores;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Looper;
 
 import com.attilapalfi.exceptional.interfaces.FirstStartFinishedListener;
+import com.attilapalfi.exceptional.interfaces.PointChangeListener;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -30,6 +32,7 @@ public class MetadataStore implements Wipeable {
     private boolean loggedIn = false;
     private boolean firstStartFinished = false;
     private Set<FirstStartFinishedListener> firstStartFinishedListeners = new HashSet<>();
+    private Set<PointChangeListener> pointChangeListeners = new HashSet<>();
 
     private MetadataStore() {
     }
@@ -64,6 +67,11 @@ public class MetadataStore implements Wipeable {
         if (this.points != points) {
             this.points = points;
             storeInt(POINTS, points);
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                for (PointChangeListener listener : pointChangeListeners) {
+                    listener.onPointsChanged();
+                }
+            }
         }
     }
 
@@ -132,5 +140,13 @@ public class MetadataStore implements Wipeable {
 
     public boolean removeFirstStartFinishedListener(FirstStartFinishedListener listener) {
         return firstStartFinishedListeners.remove(listener);
+    }
+
+    public boolean addPointChangeListener(PointChangeListener listener) {
+        return pointChangeListeners.add(listener);
+    }
+
+    public boolean removePointChangeListener(PointChangeListener listener) {
+        return pointChangeListeners.remove(listener);
     }
 }

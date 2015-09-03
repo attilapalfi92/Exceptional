@@ -22,7 +22,7 @@ public interface RestInterface {
     void regularAppStart(@Body AppStartRequestBody requestBody, Callback<AppStartResponseBody> cb);
 
     @POST("/exception")
-    void sendException(@Body ExceptionInstanceWrapper exceptionInstanceWrapper, Callback<ExceptionSentResponse> cb);
+    void throwException(@Body ExceptionInstanceWrapper exceptionInstanceWrapper, Callback<ExceptionSentResponse> cb);
 
     @POST("/exception/refresh")
     void refreshExceptions(@Body BaseExceptionRequestBody requestBody, Callback<ExceptionRefreshResponse> cb);

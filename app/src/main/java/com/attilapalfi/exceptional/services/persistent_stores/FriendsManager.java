@@ -19,6 +19,7 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,7 +34,7 @@ public class FriendsManager implements Wipeable {
 
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
-    private final List<Friend> storedFriends = new LinkedList<>();
+    private final List<Friend> storedFriends = Collections.synchronizedList(new LinkedList<Friend>());
     private Friend yourself;
     private Set<FriendChangeListener> friendChangeListeners = new HashSet<>();
     private static FriendsManager instance;
@@ -85,6 +86,7 @@ public class FriendsManager implements Wipeable {
             }
         }
         editor.apply();
+        new AsyncFriendOrganizer().execute();
         notifyChangeListeners();
     }
 
@@ -241,6 +243,7 @@ public class FriendsManager implements Wipeable {
         storedFriends.add(someone);
         editor.putString(someone.getId().toString(), someone.toString());
         editor.apply();
+        new AsyncFriendOrganizer().execute();
         notifyChangeListeners();
     }
 
@@ -253,7 +256,6 @@ public class FriendsManager implements Wipeable {
 
     // TODO: if download failed because of poor internet connection, retry later
     private static class UpdateFriendsImageTask extends AsyncTask<Void, Void, Bitmap> {
-
         Friend friend;
         public UpdateFriendsImageTask(Friend friend) {
             this.friend = friend;
@@ -307,6 +309,19 @@ public class FriendsManager implements Wipeable {
             for (FriendChangeListener listener : friendChangeListeners) {
                 listener.onFriendsChanged();
             }
+        }
+    }
+
+    private class AsyncFriendOrganizer extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... params) {
+            Collections.sort(storedFriends, new Friend.PointComparator());
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            notifyChangeListeners();
         }
     }
 }

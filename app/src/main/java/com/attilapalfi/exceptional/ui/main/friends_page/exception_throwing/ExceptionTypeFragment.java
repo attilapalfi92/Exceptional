@@ -6,6 +6,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.NavUtils;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -98,7 +99,11 @@ public class ExceptionTypeFragment extends Fragment {
                     Exception exception = createException(view);
                     BackendService.getInstance().throwException(exception);
                     Intent intent = new Intent(activity, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    //Activity friendDetailsActivity = activity.getParent();
+                    //activity.finishActivity(1);
                     activity.startActivity(intent);
+                    activity.finish();
                 } else {
                     Toast.makeText(activity.getApplicationContext(), R.string.can_throw_location_pls,
                             Toast.LENGTH_LONG).show();

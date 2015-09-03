@@ -80,8 +80,7 @@ public class GcmMessageHandler extends IntentService {
 
     private void handleExceptionNotification(Bundle extras) {
         parseNotificationToException(extras);
-        savePoints(extras);
-        saveExceptionToStore();
+        saveDataOnMainThread(extras);
         Bundle bundle = createBundle();
         showExceptionNotification("New exception caught!", "You have caught a(n) " + exception.getShortName(), bundle);
     }
@@ -105,14 +104,6 @@ public class GcmMessageHandler extends IntentService {
         exception = new Exception();
     }
 
-    private void savePoints(Bundle extras) {
-        int points = Integer.parseInt(extras.getString("points"));
-        if (!MetadataStore.getInstance().isInitialized()) {
-            MetadataStore.getInstance().initialize(getApplicationContext());
-        }
-        MetadataStore.getInstance().setPoints(points);
-    }
-
     @NonNull
     private Bundle createBundle() {
         Bundle bundle = new Bundle();
@@ -124,18 +115,40 @@ public class GcmMessageHandler extends IntentService {
         return bundle;
     }
 
-    private void saveExceptionToStore() {
-        if (!ExceptionInstanceManager.getInstance().isInitialized()) {
-            ExceptionInstanceManager.getInstance().initialize(getApplicationContext());
-        }
+    private void saveDataOnMainThread(final Bundle extras) {
+        initServices();
         handler.post(new Runnable() {
             @Override
             public void run() {
-                ExceptionInstanceManager.getInstance().addException(exception, true);
+                ExceptionInstanceManager.getInstance().addException(exception);
+                savePoints(extras);
             }
         });
     }
 
+    private void initServices() {
+        if (!ExceptionInstanceManager.getInstance().isInitialized()) {
+            ExceptionInstanceManager.getInstance().initialize(getApplicationContext());
+        }
+        if (!MetadataStore.getInstance().isInitialized()) {
+            MetadataStore.getInstance().initialize(getApplicationContext());
+        }
+        if (!FriendsManager.getInstance().isInitialized()) {
+            FriendsManager.getInstance().initialize(getApplicationContext());
+        }
+    }
+
+    private void savePoints(Bundle extras) {
+        String yourPointsString = extras.getString("yourPoints");
+        if (yourPointsString != null) {
+            MetadataStore.getInstance().setPoints(Integer.parseInt(yourPointsString));
+        }
+        String friendPointsString = extras.getString("friendPoints");
+        if (friendPointsString != null) {
+            FriendsManager.getInstance().updateFriendPoints(exception.getFromWho(), Integer.parseInt(friendPointsString));
+        }
+
+    }
 
     private void showFriendNotification(String title, String text) {
         Bundle bundle = new Bundle();

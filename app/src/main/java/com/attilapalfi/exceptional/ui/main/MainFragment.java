@@ -11,13 +11,14 @@ import android.widget.TextView;
 
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.interfaces.FirstStartFinishedListener;
+import com.attilapalfi.exceptional.interfaces.PointChangeListener;
 import com.attilapalfi.exceptional.model.Friend;
 import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
 
 /**
  */
-public class MainFragment extends Fragment implements FirstStartFinishedListener {
+public class MainFragment extends Fragment implements FirstStartFinishedListener, PointChangeListener {
     private View view;
 
     @Override
@@ -30,6 +31,7 @@ public class MainFragment extends Fragment implements FirstStartFinishedListener
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         MetadataStore.getInstance().addFirstStartFinishedListener(this);
+        MetadataStore.getInstance().addPointChangeListener(this);
         view = inflater.inflate(R.layout.fragment_main, container, false);
         return view;
     }
@@ -46,6 +48,7 @@ public class MainFragment extends Fragment implements FirstStartFinishedListener
     public void onDestroyView() {
         super.onDestroyView();
         MetadataStore.getInstance().removeFirstStartFinishedListener(this);
+        MetadataStore.getInstance().removePointChangeListener(this);
     }
 
     private void setViews() {
@@ -82,5 +85,10 @@ public class MainFragment extends Fragment implements FirstStartFinishedListener
         if (state) {
             setViews();
         }
+    }
+
+    @Override
+    public void onPointsChanged() {
+        setPointView();
     }
 }

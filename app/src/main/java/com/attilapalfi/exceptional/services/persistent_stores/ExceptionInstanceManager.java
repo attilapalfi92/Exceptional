@@ -4,8 +4,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Geocoder;
 import android.os.AsyncTask;
+import android.os.Looper;
 
 import com.attilapalfi.exceptional.R;
+import com.attilapalfi.exceptional.interfaces.FriendChangeListener;
 import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.services.rest.messages.ExceptionInstanceWrapper;
 import com.attilapalfi.exceptional.interfaces.ExceptionChangeListener;
@@ -91,7 +93,7 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
         return storedExceptions.get(0).getInstanceId();
     }
 
-    public void addException(final Exception e, final boolean notifyNeeded) {
+    public void addException(final Exception e) {
         if (!storedExceptions.contains(e)) {
             new AsyncTask<Void, Void, Void>() {
                 @Override
@@ -124,8 +126,8 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
                 }
 
                 private void notifyListeners() {
-                    if (notifyNeeded) {
-                        for(ExceptionChangeListener listener : exceptionChangeListeners) {
+                    if (Looper.myLooper() == Looper.getMainLooper()) {
+                        for (ExceptionChangeListener listener : exceptionChangeListeners) {
                             listener.onExceptionsChanged();
                         }
                     }
@@ -138,7 +140,7 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
     public void saveExceptions(List<ExceptionInstanceWrapper> wrapperList) {
         for (ExceptionInstanceWrapper wrapper : wrapperList) {
             Exception e = new Exception(wrapper);
-            addException(e, false);
+            addException(e);
         }
 
         for(ExceptionChangeListener listener : exceptionChangeListeners) {

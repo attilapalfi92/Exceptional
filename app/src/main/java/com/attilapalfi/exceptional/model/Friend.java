@@ -31,6 +31,13 @@ public class Friend {
         }
     }
 
+    public static class PointComparator implements Comparator<Friend> {
+        @Override
+        public int compare(Friend lhs, Friend rhs) {
+            return lhs.points < rhs.points ? 1 : (lhs.points == rhs.points ? 0 : -1);
+        }
+    }
+
     @Override
     public String toString() {
         return gson.toJson(this);

@@ -113,15 +113,15 @@ public class BackendService implements FriendSource, ServerResponseSource {
     public void throwException(Exception exception) {
         ExceptionInstanceWrapper exceptionInstanceWrapper = new ExceptionInstanceWrapper(exception);
         try{
-            restInterface.sendException(exceptionInstanceWrapper, new Callback<ExceptionSentResponse>() {
+            restInterface.throwException(exceptionInstanceWrapper, new Callback<ExceptionSentResponse>() {
                 @Override
                 public void success(ExceptionSentResponse e, Response response) {
                     Friend toWho = FriendsManager.getInstance().findFriendById(e.getInstanceWrapper().getToWho());
                     MetadataStore.getInstance().setPoints(e.getYourPoints());
                     FriendsManager.getInstance().updateFriendPoints(e.getInstanceWrapper().getToWho(), e.getFriendsPoints());
-                    ExceptionInstanceManager.getInstance().addException(new Exception(e.getInstanceWrapper()), true);
+                    ExceptionInstanceManager.getInstance().addException(new Exception(e.getInstanceWrapper()));
                     for (ServerResponseListener l : responseListeners) {
-                        l.onSuccess(e.getExceptionShortName() + " successfully sent to " + toWho.getName());
+                        l.onSuccess(e.getExceptionShortName() + " successfully thrown to " + toWho.getName());
                     }
                 }
 

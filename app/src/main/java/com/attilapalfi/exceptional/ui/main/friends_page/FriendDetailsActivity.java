@@ -20,6 +20,11 @@ public class FriendDetailsActivity extends AppCompatActivity {
     private Friend friend;
 
     @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friend_details);
