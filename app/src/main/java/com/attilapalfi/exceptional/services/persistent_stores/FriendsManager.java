@@ -254,7 +254,6 @@ public class FriendsManager implements Wipeable {
         notifyChangeListeners();
     }
 
-    // TODO: if download failed because of poor internet connection, retry later
     private static class UpdateFriendsImageTask extends AsyncTask<Void, Void, Bitmap> {
         Friend friend;
         public UpdateFriendsImageTask(Friend friend) {
@@ -266,17 +265,22 @@ public class FriendsManager implements Wipeable {
             String downloadUrl = friend.getImageUrl();
             Bitmap friendPicture = null;
             try {
-                friendPicture = ImageCache.getInstance().getImage(friend);
+                friendPicture = ImageCache.getInstance().getImageForFriend(friend);
                 if (friendPicture == null) {
-                    URLConnection connection = createUrlConnection(downloadUrl);
-                    InputStream inputStream = (InputStream) connection.getContent();
-                    friendPicture = BitmapFactory.decodeStream(inputStream);
+                    friendPicture = downloadAndDecodeBitmap(downloadUrl, friendPicture);
                     ImageCache.getInstance().addImage(friend, friendPicture);
                 }
             } catch (IOException e) {
                 Log.e("Error", e.getMessage());
                 e.printStackTrace();
             }
+            return friendPicture;
+        }
+
+        private Bitmap downloadAndDecodeBitmap(String downloadUrl, Bitmap friendPicture) throws IOException {
+            URLConnection connection = createUrlConnection(downloadUrl);
+            InputStream inputStream = (InputStream) connection.getContent();
+            friendPicture = BitmapFactory.decodeStream(inputStream);
             return friendPicture;
         }
 

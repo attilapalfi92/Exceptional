@@ -53,7 +53,7 @@ public class BackendService implements FriendSource, ServerResponseSource {
     private RestInterface restInterface;
     private Set<ServerResponseListener> responseListeners = new HashSet<>();
     private Set<FriendChangeListener> friendChangeListeners = new HashSet<>();
-    private AppStartRequestBody requestBody = new AppStartRequestBody();;
+    private AppStartRequestBody requestBody = new AppStartRequestBody();
 
     public static void init(Context context) {
         instance = new BackendService(context);
@@ -145,17 +145,14 @@ public class BackendService implements FriendSource, ServerResponseSource {
                 FacebookManager.getInstance().getProfileId(),
                 ExceptionInstanceManager.getInstance().getExceptionList()
         );
-
         restInterface.refreshExceptions(requestBody, new Callback<ExceptionRefreshResponse>() {
+
             @Override
             public void success(ExceptionRefreshResponse exceptionRefreshResponse, Response response) {
+                ExceptionInstanceManager.getInstance().saveExceptions(exceptionRefreshResponse.getExceptionList());
                 for (ServerResponseListener l : responseListeners) {
                     l.onSuccess("Exceptions are synchronized!");
                 }
-                //ExceptionInstanceManager.getInstance().saveExceptions(exceptionRefreshResponse.getNeededExceptions());
-                //for (ServerResponseListener l : responseListeners) {
-                //    l.onSuccess("Exceptions are synchronized!");
-                //}
                 refreshListener.onExceptionRefreshFinished();
             }
 

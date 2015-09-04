@@ -54,11 +54,19 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
         if (!ExceptionTypeManager.getInstance().isInitialized()) {
             ExceptionTypeManager.getInstance().initialize(context);
         }
+        initPreferences(context);
+        geocoder = new Geocoder(context, Locale.getDefault());
+        loadExceptionInstances();
+    }
+
+    private void initPreferences(Context context) {
         PREFS_NAME = context.getString(R.string.exception_preferences);
         sharedPreferences = context.getSharedPreferences(instance.PREFS_NAME, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
         editor.apply();
-        geocoder = new Geocoder(context, Locale.getDefault());
+    }
+
+    private void loadExceptionInstances() {
         Map<String, ?> store = sharedPreferences.getAll();
         Set<String> instanceIds = store.keySet();
         for (String id : instanceIds) {
@@ -138,13 +146,14 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
 
 
     public void saveExceptions(List<ExceptionInstanceWrapper> wrapperList) {
-        for (ExceptionInstanceWrapper wrapper : wrapperList) {
-            Exception e = new Exception(wrapper);
-            addException(e);
-        }
-
-        for(ExceptionChangeListener listener : exceptionChangeListeners) {
-            listener.onExceptionsChanged();
+        if (!wrapperList.isEmpty()) {
+            for (ExceptionInstanceWrapper wrapper : wrapperList) {
+                Exception e = new Exception(wrapper);
+                addException(e);
+            }
+            for(ExceptionChangeListener listener : exceptionChangeListeners) {
+                listener.onExceptionsChanged();
+            }
         }
     }
 

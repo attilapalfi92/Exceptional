@@ -4,4 +4,9 @@
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
     </style>
 
+    <color name="exceptional_blue">#0000ee</color>
+    <color name="exceptional_purple">#ca00ae</color>
+    <color name="exceptional_red">#c60600</color>
+    <color name="exceptional_green">#00ff00</color>
+
 </resources>

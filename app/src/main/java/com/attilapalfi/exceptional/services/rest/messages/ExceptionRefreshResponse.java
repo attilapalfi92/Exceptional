@@ -6,20 +6,20 @@ import java.util.List;
  * Created by 212461305 on 2015.07.04..
  */
 public class ExceptionRefreshResponse {
-    List<ExceptionInstanceWrapper> neededExceptions;
+    List<ExceptionInstanceWrapper> exceptionList;
 
     public ExceptionRefreshResponse() {
     }
 
-    public ExceptionRefreshResponse(List<ExceptionInstanceWrapper> neededExceptions) {
-        this.neededExceptions = neededExceptions;
+    public ExceptionRefreshResponse(List<ExceptionInstanceWrapper> exceptionList) {
+        this.exceptionList = exceptionList;
     }
 
-    public List<ExceptionInstanceWrapper> getNeededExceptions() {
-        return neededExceptions;
+    public List<ExceptionInstanceWrapper> getExceptionList() {
+        return exceptionList;
     }
 
-    public void setNeededExceptions(List<ExceptionInstanceWrapper> neededExceptions) {
-        this.neededExceptions = neededExceptions;
+    public void setExceptionList(List<ExceptionInstanceWrapper> exceptionList) {
+        this.exceptionList = exceptionList;
     }
 }

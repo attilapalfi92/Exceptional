@@ -104,8 +104,8 @@ public class FacebookManager {
     }
 
     private void setUserLoggedOut() {
-        FriendsManager.getInstance().wipe();
         ImageCache.getInstance().wipe();
+        FriendsManager.getInstance().wipe();
         ExceptionInstanceManager.getInstance().wipe();
         ExceptionTypeManager.getInstance().wipe();
         MetadataStore.getInstance().wipe();
@@ -119,7 +119,6 @@ public class FacebookManager {
                 loginSuccessHandler.onLoginSuccess(loginResult);
                 initYourself();
                 MetadataStore.getInstance().setLoggedIn(true);
-                //refreshFriends();
             }
             @Override
             public void onCancel() {}

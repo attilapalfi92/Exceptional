@@ -37,6 +37,8 @@ import java.util.List;
 public class ExceptionsFragment extends Fragment implements ExceptionRefreshListener,
         ExceptionChangeListener, SwipeRefreshLayout.OnRefreshListener {
 
+    private static long lastSyncTime = 0;
+
     private Friend friend;
     private RecyclerView recyclerView;
     private ExceptionAdapter exceptionAdapter;
@@ -67,11 +69,11 @@ public class ExceptionsFragment extends Fragment implements ExceptionRefreshList
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.exception_swipe_container);
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setSize(SwipeRefreshLayout.LARGE);
-        swipeRefreshLayout.setColorSchemeResources(
-                android.R.color.holo_blue_dark,
-                android.R.color.holo_purple,
-                android.R.color.holo_green_dark,
-                android.R.color.holo_red_dark
+        swipeRefreshLayout.setColorSchemeColors(
+                getResources().getColor(R.color.exceptional_blue),
+                getResources().getColor(R.color.exceptional_green),
+                getResources().getColor(R.color.exceptional_red),
+                getResources().getColor(R.color.exceptional_purple)
         );
 
         return view;
@@ -96,6 +98,14 @@ public class ExceptionsFragment extends Fragment implements ExceptionRefreshList
 
     @Override
     public void onRefresh() {
+        long currentTime = System.currentTimeMillis();
+        if (currentTime > lastSyncTime + 10000){
+            lastSyncTime = currentTime;
+        }
+        actualRefresh();
+    }
+
+    private void actualRefresh() {
         if (MetadataStore.getInstance().isLoggedIn()) {
             BackendService.getInstance().refreshExceptions(this);
         } else {

@@ -5,9 +5,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.support.annotation.Nullable;
 import android.support.v4.util.LruCache;
 import android.util.Log;
 
+import com.annimon.stream.Stream;
 import com.attilapalfi.exceptional.model.Friend;
 
 import java.io.File;
@@ -40,13 +42,10 @@ public class ImageCache implements Wipeable {
     private ImageCache() {
         final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
         final int cacheSize = maxMemory / 8;
-
         imageWarehouse = new LruCache<BigInteger, Bitmap>(cacheSize) {
             @Override
             protected int sizeOf(BigInteger key, Bitmap value) {
-                // The cache size will be measured in kilobytes rather than number of items.
-                int bitmapByteCount = value.getRowBytes() * value.getHeight();
-
+                int bitmapByteCount = value.getRowBytes() * value.getHeight(); // The cache size will be measured in kilobytes rather than number of items.
                 return bitmapByteCount / 1024;
             }
         };
@@ -55,7 +54,6 @@ public class ImageCache implements Wipeable {
 
     public void initialize(Context context) {
         applicationContext = context;
-
         try {
             filePath =
                     Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ||
@@ -74,63 +72,65 @@ public class ImageCache implements Wipeable {
      * @param image the picture that is added
      */
     public void addImage(final Friend friend, final Bitmap image) {
-        if (imageWarehouse != null && imageWarehouse.get(friend.getId()) == null) {
+        if (isNotInMemory(friend)) {
             imageWarehouse.put(friend.getId(), image);
-            // TODO: add to the disk storage
             new AsyncTask<Void, Void, Void>() {
+
                 @Override
                 protected Void doInBackground(Void... params) {
                     String pictureFilePath = getFriendsImageFilePath(friend);
                     if (pictureFilePath != null) {
-                        File pictureFile = new File(pictureFilePath);
-                        try {
-                            FileOutputStream fos = new FileOutputStream(pictureFile);
-                            image.compress(Bitmap.CompressFormat.JPEG, 95, fos);
-                            fos.close();
-
-                        } catch (IOException ioe) {
-                            Log.d("IOException", ioe.getMessage());
-                        }
+                        saveImageToFile(pictureFilePath);
                     }
-
                     return null;
+                }
+
+                private void saveImageToFile(String pictureFilePath) {
+                    File pictureFile = new File(pictureFilePath);
+                    try {
+                        FileOutputStream fos = new FileOutputStream(pictureFile);
+                        image.compress(Bitmap.CompressFormat.JPEG, 95, fos);
+                        fos.close();
+                    } catch (IOException ioe) {
+                        Log.d("IOException", ioe.getMessage());
+                    }
                 }
             }.execute();
         }
+    }
+
+    private boolean isNotInMemory(Friend friend) {
+        return imageWarehouse != null && imageWarehouse.get(friend.getId()) == null;
     }
 
 
     private boolean imageFileExists(Friend friend) {
         String filePath = getFriendsImageFilePath(friend);
         File file = new File(filePath);
-
         return file.exists() && !file.isDirectory();
     }
 
-
-    /** Create a File for saving an image or video */
     private String getFriendsImageFilePath(Friend friend){
         try {
-            File mediaStorageDir = new File(filePath);
-
-            // This location works best if you want the created images to be shared
-            // between applications and persist after your app has been uninstalled.
-
-            // Create the storage directory if it does not exist
-            if (!mediaStorageDir.exists()){
-                if (!mediaStorageDir.mkdirs()){
-                    return null;
-                }
-            }
-
+            File mediaStorageDir = makeStorageDirectory();
+            if (mediaStorageDir == null) return null;
             String mImageName = String.valueOf(friend.getId()) + ".jpg";
             return mediaStorageDir.getPath() + File.separator + mImageName;
-
         } catch (NullPointerException e) {
             return null;
         }
     }
 
+    @Nullable
+    private File makeStorageDirectory() {
+        File mediaStorageDir = new File(filePath);
+        if (!mediaStorageDir.exists()){
+            if (!mediaStorageDir.mkdirs()){
+                return null;
+            }
+        }
+        return mediaStorageDir;
+    }
 
 
     /**
@@ -138,32 +138,20 @@ public class ImageCache implements Wipeable {
      * @param friend who's image
      * @return image of friend or null
      */
-    public Bitmap getImage(Friend friend) {
-
-        // getting image from memory cache, if available
-        Bitmap bitmap = imageWarehouse.get(friend.getId());
-
+    public Bitmap getImageForFriend(Friend friend) {
+        Bitmap bitmap = imageWarehouse.get(friend.getId()); // getting image from memory cache, if available
         if (bitmap == null) {
-
-            // getting image from disk cache, if available
             if (imageFileExists(friend)) {
-                bitmap = getFromDisk(friend);
-                if (bitmap != null) {
-                    imageWarehouse.put(friend.getId(), bitmap);
-
-                // getting image from network, in worst case
-                } else {
+                bitmap = getFromDisk(friend); // getting from disk, if available
+                if (bitmap == null) {
                     try {
-                        URL url = new URL(friend.getImageUrl());
-                        URLConnection connection = url.openConnection();
-                        connection.setUseCaches(true);
-                        InputStream inputStream = (InputStream) connection.getContent();
-                        bitmap = BitmapFactory.decodeStream(inputStream);
+                        bitmap = getBitmapFromInternet(friend);
                         addImage(friend, bitmap);
-
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                } else {
+                    imageWarehouse.put(friend.getId(), bitmap);
                 }
             }
         }
@@ -171,6 +159,13 @@ public class ImageCache implements Wipeable {
         return bitmap;
     }
 
+    private Bitmap getBitmapFromInternet(Friend friend) throws IOException {
+        URL url = new URL(friend.getImageUrl());
+        URLConnection connection = url.openConnection();
+        connection.setUseCaches(true);
+        InputStream inputStream = (InputStream) connection.getContent();
+        return BitmapFactory.decodeStream(inputStream);
+    }
 
     private Bitmap getFromDisk(Friend friend) {
         String filePath = getFriendsImageFilePath(friend);
@@ -182,16 +177,26 @@ public class ImageCache implements Wipeable {
         return null;
     }
 
-
-
     public void removeImage(Friend friend) {
         imageWarehouse.remove(friend.getId());
-        // TODO: remove from disk storage
+        deleteFromDisk(friend);
     }
 
     @Override
     public void wipe() {
         imageWarehouse.evictAll();
-        // TODO: remove from disk storage
+        if (!FriendsManager.getInstance().isInitialized()) {
+            FriendsManager.getInstance().initialize(applicationContext);
+        }
+        Stream.of(FriendsManager.getInstance().getStoredFriends())
+                .forEach(this::deleteFromDisk);
+    }
+
+    private void deleteFromDisk(Friend friend) {
+        String filePath = getFriendsImageFilePath(friend);
+        File imageFile = new File(filePath);
+        if (imageFile.exists()) {
+            imageFile.delete();
+        }
     }
 }
