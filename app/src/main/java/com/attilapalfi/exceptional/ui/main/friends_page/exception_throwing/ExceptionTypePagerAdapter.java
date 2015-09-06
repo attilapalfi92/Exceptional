@@ -26,7 +26,7 @@ public class ExceptionTypePagerAdapter extends FragmentPagerAdapter implements V
 
     @Override
     public Fragment getItem(int position) {
-        return new ExceptionTypeFragment();
+        return new ExceptionTypesFragment();
     }
 
     @Override

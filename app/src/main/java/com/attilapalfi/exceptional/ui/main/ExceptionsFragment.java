@@ -163,7 +163,7 @@ public class ExceptionsFragment extends Fragment implements ExceptionRefreshList
             public void onClick(View view) {
                 int itemPosition = recyclerView.getChildPosition(view);
                 Exception exception = values.get(itemPosition);
-                Toast.makeText(context, exception.toString(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context, exception.toString(), Toast.LENGTH_SHORT).show();
             }
         };
 

@@ -23,6 +23,8 @@ public class MetadataStore implements Wipeable {
     private static final String EXCEPTION_VERSION = "exceptionVersion";
     private static final String LOGGED_IN = "loggedIn";
     private static final String FIRST_START_FINISHED = "firstStartFinished";
+    private static final String VOTED_THIS_WEEK = "votedThisWeek";
+    private static final String SUBMITTED_THIS_WEEK = "submittedThisWeek";
 
     private boolean initialized = false;
     private SharedPreferences sharedPreferences;
@@ -31,6 +33,8 @@ public class MetadataStore implements Wipeable {
     private int exceptionVersion = 0;
     private boolean loggedIn = false;
     private boolean firstStartFinished = false;
+    private boolean votedThisWeek = true;
+    private boolean submittedThisWeek = true;
     private Set<FirstStartFinishedListener> firstStartFinishedListeners = new HashSet<>();
     private Set<PointChangeListener> pointChangeListeners = new HashSet<>();
 
@@ -56,6 +60,8 @@ public class MetadataStore implements Wipeable {
         exceptionVersion = sharedPreferences.getInt(EXCEPTION_VERSION, exceptionVersion);
         loggedIn = sharedPreferences.getBoolean(LOGGED_IN, loggedIn);
         firstStartFinished = sharedPreferences.getBoolean(FIRST_START_FINISHED, firstStartFinished);
+        votedThisWeek = sharedPreferences.getBoolean(VOTED_THIS_WEEK, votedThisWeek);
+        submittedThisWeek = sharedPreferences.getBoolean(SUBMITTED_THIS_WEEK, submittedThisWeek);
         editor.apply();
     }
 
@@ -113,6 +119,28 @@ public class MetadataStore implements Wipeable {
 
     public boolean isLoggedIn() {
         return loggedIn;
+    }
+
+    public void setVotedThisWeek(boolean votedThisWeek) {
+        if (this.votedThisWeek != votedThisWeek) {
+            this.votedThisWeek = votedThisWeek;
+            storeBoolean(VOTED_THIS_WEEK, votedThisWeek);
+        }
+    }
+
+    public boolean isVotedThisWeek() {
+        return votedThisWeek;
+    }
+
+    public void setSubmittedThisWeek(boolean submittedThisWeek) {
+        if (this.submittedThisWeek != submittedThisWeek) {
+            this.submittedThisWeek = submittedThisWeek;
+            storeBoolean(SUBMITTED_THIS_WEEK, submittedThisWeek);
+        }
+    }
+
+    public boolean isSubmittedThisWeek() {
+        return submittedThisWeek;
     }
 
     private void storeInt(String key, int value) {

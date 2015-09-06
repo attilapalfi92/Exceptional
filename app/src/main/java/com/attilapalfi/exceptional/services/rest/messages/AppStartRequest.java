@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by Attila on 2015-06-11.
  */
-public class AppStartRequestBody extends BaseExceptionRequestBody {
+public class AppStartRequest extends BaseExceptionRequest {
     private String deviceId;
     private String gcmId;
     private Collection<BigInteger> friendsFacebookIds;
@@ -15,27 +15,27 @@ public class AppStartRequestBody extends BaseExceptionRequestBody {
     private String firstName, lastName;
     private String deviceName;
 
-    public AppStartRequestBody() {
+    public AppStartRequest() {
     }
 
-    public AppStartRequestBody(String deviceId, String gcmId, Collection<BigInteger> friendsFacebookIds) {
+    public AppStartRequest(String deviceId, String gcmId, Collection<BigInteger> friendsFacebookIds) {
         this.deviceId = deviceId;
         this.gcmId = gcmId;
         this.friendsFacebookIds = friendsFacebookIds;
     }
 
-    public AppStartRequestBody(BigInteger userId, List<com.attilapalfi.exceptional.model.Exception> exceptionList,
-                               String deviceId, String gcmId, Collection<BigInteger> friendsFacebookIds,
-                               List<BigInteger> deletedFacebookFriendIds, List<BigInteger> newFacebookFriendIds) {
+    public AppStartRequest(BigInteger userId, List<com.attilapalfi.exceptional.model.Exception> exceptionList,
+                           String deviceId, String gcmId, Collection<BigInteger> friendsFacebookIds,
+                           List<BigInteger> deletedFacebookFriendIds, List<BigInteger> newFacebookFriendIds) {
         super(userId, exceptionList);
         this.deviceId = deviceId;
         this.gcmId = gcmId;
         this.friendsFacebookIds = friendsFacebookIds;
     }
 
-    public AppStartRequestBody(String deviceId, BigInteger userId,
-                               List<BigInteger> friendsFacebookIds, List<BigInteger> exceptionIds,
-                               List<BigInteger> deletedFacebookFriendIds, List<BigInteger> newFacebookFriendIds) {
+    public AppStartRequest(String deviceId, BigInteger userId,
+                           List<BigInteger> friendsFacebookIds, List<BigInteger> exceptionIds,
+                           List<BigInteger> deletedFacebookFriendIds, List<BigInteger> newFacebookFriendIds) {
         this.deviceId = deviceId;
         this.userFacebookId = userId;
         this.friendsFacebookIds = friendsFacebookIds;

@@ -7,7 +7,6 @@ import android.os.AsyncTask;
 import android.os.Looper;
 
 import com.attilapalfi.exceptional.R;
-import com.attilapalfi.exceptional.interfaces.FriendChangeListener;
 import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.services.rest.messages.ExceptionInstanceWrapper;
 import com.attilapalfi.exceptional.interfaces.ExceptionChangeListener;
@@ -23,6 +22,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import static com.annimon.stream.Stream.of;
 
 /**
  * Created by Attila on 2015-06-08.
@@ -79,9 +79,7 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
     public void wipe() {
         storedExceptions.clear();
         editor.clear().apply();
-        for (ExceptionChangeListener listener : exceptionChangeListeners) {
-            listener.onExceptionsChanged();
-        }
+        of(exceptionChangeListeners).forEach(ExceptionChangeListener::onExceptionsChanged);
     }
 
     public boolean isInitialized() {
@@ -135,9 +133,7 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
 
                 private void notifyListeners() {
                     if (Looper.myLooper() == Looper.getMainLooper()) {
-                        for (ExceptionChangeListener listener : exceptionChangeListeners) {
-                            listener.onExceptionsChanged();
-                        }
+                        of(exceptionChangeListeners).forEach(ExceptionChangeListener::onExceptionsChanged);
                     }
                 }
             }.execute();
@@ -147,13 +143,8 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
 
     public void saveExceptions(List<ExceptionInstanceWrapper> wrapperList) {
         if (!wrapperList.isEmpty()) {
-            for (ExceptionInstanceWrapper wrapper : wrapperList) {
-                Exception e = new Exception(wrapper);
-                addException(e);
-            }
-            for(ExceptionChangeListener listener : exceptionChangeListeners) {
-                listener.onExceptionsChanged();
-            }
+            of(wrapperList).forEach(wrapper -> addException(new Exception(wrapper)));
+            of(exceptionChangeListeners).forEach(ExceptionChangeListener::onExceptionsChanged);
         }
     }
 

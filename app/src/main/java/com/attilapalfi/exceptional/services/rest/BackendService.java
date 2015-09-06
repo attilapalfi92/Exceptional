@@ -3,27 +3,28 @@ package com.attilapalfi.exceptional.services.rest;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.widget.Toast;
 
 import com.attilapalfi.exceptional.R;
-import com.attilapalfi.exceptional.interfaces.ServerResponseListener;
-import com.attilapalfi.exceptional.interfaces.ServerResponseSource;
 import com.attilapalfi.exceptional.model.*;
 import com.attilapalfi.exceptional.model.Exception;
-import com.attilapalfi.exceptional.services.rest.messages.AppStartRequestBody;
-import com.attilapalfi.exceptional.services.rest.messages.AppStartResponseBody;
-import com.attilapalfi.exceptional.services.rest.messages.BaseExceptionRequestBody;
+import com.attilapalfi.exceptional.services.rest.messages.AppStartRequest;
+import com.attilapalfi.exceptional.services.rest.messages.AppStartResponse;
+import com.attilapalfi.exceptional.services.rest.messages.BaseExceptionRequest;
 import com.attilapalfi.exceptional.services.rest.messages.ExceptionRefreshResponse;
 import com.attilapalfi.exceptional.services.rest.messages.ExceptionSentResponse;
 import com.attilapalfi.exceptional.services.rest.messages.ExceptionInstanceWrapper;
 import com.attilapalfi.exceptional.interfaces.ExceptionRefreshListener;
-import com.attilapalfi.exceptional.interfaces.FriendChangeListener;
-import com.attilapalfi.exceptional.interfaces.FriendSource;
 import com.attilapalfi.exceptional.services.Converter;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
 import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
 import com.attilapalfi.exceptional.services.facebook.FacebookManager;
+import com.attilapalfi.exceptional.services.rest.messages.SubmitRequest;
+import com.attilapalfi.exceptional.services.rest.messages.SubmitResponse;
+import com.attilapalfi.exceptional.services.rest.messages.VoteRequest;
+import com.attilapalfi.exceptional.services.rest.messages.VoteResponse;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.gson.GsonBuilder;
 
@@ -41,7 +42,7 @@ import retrofit.converter.GsonConverter;
 /**
  * Created by Attila on 2015-06-13.
  */
-public class BackendService implements FriendSource, ServerResponseSource {
+public class BackendService {
 
     private static BackendService instance;
     private final Context context;
@@ -51,9 +52,7 @@ public class BackendService implements FriendSource, ServerResponseSource {
     private String registrationId;
     private String androidId;
     private RestInterface restInterface;
-    private Set<ServerResponseListener> responseListeners = new HashSet<>();
-    private Set<FriendChangeListener> friendChangeListeners = new HashSet<>();
-    private AppStartRequestBody requestBody = new AppStartRequestBody();
+    private AppStartRequest requestBody = new AppStartRequest();
 
     public static void init(Context context) {
         instance = new BackendService(context);
@@ -88,20 +87,16 @@ public class BackendService implements FriendSource, ServerResponseSource {
         initRequestBody(friendList);
         requestBody.setExceptionVersion(MetadataStore.getInstance().getExceptionVersion());
         try {
-            restInterface.regularAppStart(requestBody, new Callback<AppStartResponseBody>() {
+            restInterface.regularAppStart(requestBody, new Callback<AppStartResponse>() {
                 @Override
-                public void success(AppStartResponseBody responseBody, Response response) {
-                    saveExceptionInstancesToStore(responseBody);
-                    saveExceptionTypesToStore(responseBody);
-                    savePointsToStore(responseBody);
-                    FriendsManager.getInstance().updateFriendsPoints(responseBody.getFriendsPoints());
+                public void success(AppStartResponse responseBody, Response response) {
+                    saveCommonData(responseBody);
                 }
 
                 @Override
                 public void failure(RetrofitError error) {
-                    for (ServerResponseListener l : responseListeners) {
-                        l.onConnectionFailed("Connection to server failed.\n", error.getMessage());
-                    }
+                    Toast.makeText(context, context.getString(R.string.failed_to_connect) + error.getMessage(),
+                            Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -120,28 +115,26 @@ public class BackendService implements FriendSource, ServerResponseSource {
                     MetadataStore.getInstance().setPoints(e.getYourPoints());
                     FriendsManager.getInstance().updateFriendPoints(e.getInstanceWrapper().getToWho(), e.getFriendsPoints());
                     ExceptionInstanceManager.getInstance().addException(new Exception(e.getInstanceWrapper()));
-                    for (ServerResponseListener l : responseListeners) {
-                        l.onSuccess(e.getExceptionShortName() + " successfully thrown to " + toWho.getName());
-                    }
+                    Toast.makeText(context, e.getExceptionShortName() + " "
+                                    + context.getString(R.string.successfully_thrown)
+                                    + " " + toWho.getName(),
+                            Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
                 public void failure(RetrofitError error) {
-                    for (ServerResponseListener l : responseListeners) {
-                        l.onConnectionFailed("Failed to throw the exception to the server.", error.getMessage());
-                    }
+                    Toast.makeText(context, context.getString(R.string.failed_to_throw_1) + error.getMessage(),
+                            Toast.LENGTH_SHORT).show();
                 }
             });
 
         } catch (java.lang.Exception e) {
-            for (ServerResponseListener l : responseListeners) {
-                l.onConnectionFailed("Failed to throw the exception to the server.", e.getMessage());
-            }
+            Toast.makeText(context, context.getString(R.string.failed_to_throw_2) + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
     public void refreshExceptions(final ExceptionRefreshListener refreshListener) {
-        BaseExceptionRequestBody requestBody = new BaseExceptionRequestBody(
+        BaseExceptionRequest requestBody = new BaseExceptionRequest(
                 FacebookManager.getInstance().getProfileId(),
                 ExceptionInstanceManager.getInstance().getExceptionList()
         );
@@ -150,40 +143,52 @@ public class BackendService implements FriendSource, ServerResponseSource {
             @Override
             public void success(ExceptionRefreshResponse exceptionRefreshResponse, Response response) {
                 ExceptionInstanceManager.getInstance().saveExceptions(exceptionRefreshResponse.getExceptionList());
-                for (ServerResponseListener l : responseListeners) {
-                    l.onSuccess("Exceptions are synchronized!");
-                }
+                Toast.makeText(context, R.string.exceptions_syncd, Toast.LENGTH_SHORT).show();
                 refreshListener.onExceptionRefreshFinished();
             }
 
             @Override
             public void failure(RetrofitError error) {
-                for (ServerResponseListener l : responseListeners) {
-                    l.onConnectionFailed("Failed to synchronize exceptions.\n", error.getMessage());
-                }
+                Toast.makeText(context, context.getString(R.string.failed_to_sync) + error.getMessage(), Toast.LENGTH_SHORT).show();
                 refreshListener.onExceptionRefreshFinished();
             }
         });
     }
 
-    private void saveExceptionInstancesToStore(AppStartResponseBody responseBody) {
-        ExceptionTypeManager.getInstance().setVotedExceptionTypes(responseBody.getBeingVotedTypes());
-        if (responseBody.getMyExceptions().size() > 0) {
-            ExceptionInstanceManager.getInstance().saveExceptions(responseBody.getMyExceptions());
-        }
+    public void voteForType(ExceptionType exceptionType) {
+        VoteRequest voteRequest = new VoteRequest(FriendsManager.getInstance().getYourself().getId(), exceptionType.getId());
+        restInterface.voteForType(voteRequest, new Callback<VoteResponse>() {
+            @Override
+            public void success(VoteResponse voteResponse, Response response) {
+                if (voteResponse.isVotedForThisWeek()) {
+                    MetadataStore.getInstance().setVotedThisWeek(true);
+                    ExceptionTypeManager.getInstance().updateVotedType(voteResponse.getVotedType());
+                }
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Toast.makeText(context, R.string.failed_to_vote, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    private void saveExceptionTypesToStore(AppStartResponseBody responseBody) {
-        if (responseBody.getExceptionVersion() > MetadataStore.getInstance().getExceptionVersion()) {
-            MetadataStore.getInstance().setExceptionVersion(responseBody.getExceptionVersion());
-            ExceptionTypeManager.getInstance().addExceptionTypes(responseBody.getExceptionTypes());
-        }
-    }
+    public void submitType(ExceptionType submittedType) {
+        SubmitRequest submitRequest = new SubmitRequest(FriendsManager.getInstance().getYourself().getId(), submittedType);
+        restInterface.submitTypeForVote(submitRequest, new Callback<SubmitResponse>() {
+            @Override
+            public void success(SubmitResponse submitResponse, Response response) {
+                if (submitResponse.isSubmittedThisWeek()) {
+                    MetadataStore.getInstance().setSubmittedThisWeek(true);
+                    ExceptionTypeManager.getInstance().addVotedType(submitResponse.getSubmittedType());
+                }
+            }
 
-    private void savePointsToStore(AppStartResponseBody responseBody) {
-        if (responseBody.getPoints() != MetadataStore.getInstance().getPoints()) {
-            MetadataStore.getInstance().setPoints(responseBody.getPoints());
-        }
+            @Override
+            public void failure(RetrofitError error) {
+                Toast.makeText(context, R.string.failed_to_submit, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void initRequestBody(List<Friend> friendList) {
@@ -217,9 +222,7 @@ public class BackendService implements FriendSource, ServerResponseSource {
                     requestBody.setGcmId(registrationId);
                     backendFirstAppStart();
                 }
-                for(ServerResponseListener l : responseListeners) {
-                    l.onSuccess(message);
-                }
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             }
 
         }.execute();
@@ -227,21 +230,17 @@ public class BackendService implements FriendSource, ServerResponseSource {
 
     private void backendFirstAppStart() {
         try {
-            restInterface.firstAppStart(requestBody, new Callback<AppStartResponseBody>() {
+            restInterface.firstAppStart(requestBody, new Callback<AppStartResponse>() {
                 @Override
-                public void success(AppStartResponseBody responseBody, Response response) {
-                    saveDataToStores(responseBody);
-                    if (responseBody.getMyExceptions().size() > 0) {
-                        ExceptionInstanceManager.getInstance().saveExceptions(responseBody.getMyExceptions());
-                    }
+                public void success(AppStartResponse responseBody, Response response) {
+                    saveCommonData(responseBody);
                     MetadataStore.getInstance().setFirstStartFinished(true);
                 }
 
                 @Override
                 public void failure(RetrofitError error) {
-                    for (ServerResponseListener l : responseListeners) {
-                        l.onConnectionFailed("Connection to server failed.\n", error.getMessage());
-                    }
+                    Toast.makeText(context, context.getString(R.string.failed_to_connect_3) + error.getMessage(),
+                            Toast.LENGTH_SHORT).show();
                 }
             });
         } catch (java.lang.Exception e) {
@@ -249,32 +248,17 @@ public class BackendService implements FriendSource, ServerResponseSource {
         }
     }
 
-    private void saveDataToStores(AppStartResponseBody responseBody) {
-        ExceptionTypeManager.getInstance().addExceptionTypes(responseBody.getExceptionTypes());
-        ExceptionTypeManager.getInstance().setVotedExceptionTypes(responseBody.getExceptionTypes());
+    private void saveCommonData(AppStartResponse responseBody) {
+        if (responseBody.getExceptionVersion() > MetadataStore.getInstance().getExceptionVersion()) {
+            ExceptionTypeManager.getInstance().addExceptionTypes(responseBody.getExceptionTypes());
+        }
         MetadataStore.getInstance().setExceptionVersion(responseBody.getExceptionVersion());
+        ExceptionInstanceManager.getInstance().saveExceptions(responseBody.getMyExceptions());
+        ExceptionTypeManager.getInstance().setVotedExceptionTypes(responseBody.getBeingVotedTypes());
         MetadataStore.getInstance().setPoints(responseBody.getPoints());
+        MetadataStore.getInstance().setSubmittedThisWeek(responseBody.isSubmittedThisWeek());
+        MetadataStore.getInstance().setVotedThisWeek(responseBody.isVotedThisWeek());
         FriendsManager.getInstance().updateFriendsPoints(responseBody.getFriendsPoints());
-    }
-
-    @Override
-    public boolean addResponseListener(ServerResponseListener listener) {
-        return responseListeners.add(listener);
-    }
-
-    @Override
-    public boolean removeResponseListener(ServerResponseListener listener) {
-        return responseListeners.remove(listener);
-    }
-
-    @Override
-    public boolean addFriendChangeListener(FriendChangeListener listener) {
-        return friendChangeListeners.add(listener);
-    }
-
-    @Override
-    public boolean removeFriendChangeListener(FriendChangeListener listener) {
-        return friendChangeListeners.remove(listener);
     }
 
     public String getDeviceName() {

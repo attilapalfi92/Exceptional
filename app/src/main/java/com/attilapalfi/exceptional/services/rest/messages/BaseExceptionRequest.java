@@ -9,12 +9,12 @@ import java.util.List;
 /**
  * Created by 212461305 on 2015.07.04..
  */
-public class BaseExceptionRequestBody extends BaseRequestBody {
+public class BaseExceptionRequest extends BaseRequest {
     protected List<BigInteger> knownExceptionIds;
 
-    public BaseExceptionRequestBody() {}
+    public BaseExceptionRequest() {}
 
-    public BaseExceptionRequestBody(BigInteger userId, List<Exception> exceptionList) {
+    public BaseExceptionRequest(BigInteger userId, List<Exception> exceptionList) {
         this.userFacebookId = userId;
 
         knownExceptionIds = new ArrayList<>(exceptionList.size());

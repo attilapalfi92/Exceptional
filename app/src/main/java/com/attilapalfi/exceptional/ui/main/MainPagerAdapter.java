@@ -26,6 +26,8 @@ public class MainPagerAdapter extends FragmentPagerAdapter implements ViewPager.
                 return new MainFragment();
             case 1:
                 return new FriendsFragment();
+            case 2:
+                return new VotedExceptionsFragment();
             default:
                 return new MainFragment();
         }
@@ -33,7 +35,7 @@ public class MainPagerAdapter extends FragmentPagerAdapter implements ViewPager.
 
     @Override
     public int getCount() {
-        return 2;
+        return 3;
     }
 
     @Override
@@ -54,6 +56,9 @@ public class MainPagerAdapter extends FragmentPagerAdapter implements ViewPager.
                 break;
             case 1:
                 activity.setTitle("Friends");
+                break;
+            case 2:
+                activity.setTitle("Voting");
                 break;
             default:
                 activity.setTitle("WTF happened");

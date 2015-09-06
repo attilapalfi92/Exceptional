@@ -38,7 +38,6 @@ public class FriendsFragment extends Fragment implements FriendChangeListener {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        BackendService.getInstance().addFriendChangeListener(this);
         FriendsManager.getInstance().addFriendChangeListener(this);
     }
 
@@ -63,7 +62,6 @@ public class FriendsFragment extends Fragment implements FriendChangeListener {
 
     @Override
     public void onDetach() {
-        BackendService.getInstance().removeFriendChangeListener(this);
         FriendsManager.getInstance().removeFriendChangeListener(this);
         super.onDetach();
     }

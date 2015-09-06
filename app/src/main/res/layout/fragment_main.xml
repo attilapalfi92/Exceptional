@@ -62,14 +62,5 @@
         android:layout_below="@+id/myMainImageView"
         android:layout_centerHorizontal="true" />
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="GiveMeException"
-        android:id="@+id/button"
-        android:layout_below="@+id/exceptionHistory"
-        android:layout_centerHorizontal="true"
-        android:onClick="giveMeExcClicked" />
-
 
 </RelativeLayout>

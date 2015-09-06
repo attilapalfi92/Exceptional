@@ -11,6 +11,7 @@
     <uses-permission android:name="ANDROID.PERMISSION.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="com.attilapalfi.exceptional.permission.C2D_MESSAGE" />
 
+    <!-- previously: android:name="android.support.multidex.MultiDexApplication" -->
     <application
         android:name=".MyApplication"
         android:allowBackup="true"

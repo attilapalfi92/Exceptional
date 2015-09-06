@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.annimon.stream.Stream.of;
+
 /**
  * Responsible for storing friends in the device's preferences
  * Created by Attila on 2015-06-12.
@@ -34,7 +36,7 @@ public class FriendsManager implements Wipeable {
 
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
-    private final List<Friend> storedFriends = Collections.synchronizedList(new LinkedList<Friend>());
+    private final List<Friend> storedFriends = Collections.synchronizedList(new LinkedList<>());
     private Friend yourself;
     private Set<FriendChangeListener> friendChangeListeners = new HashSet<>();
     private static FriendsManager instance;
@@ -103,6 +105,24 @@ public class FriendsManager implements Wipeable {
     }
 
     public void updateFriendPoints(BigInteger id, int points) {
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                findAndUpdateFriend(id, points);
+                Collections.sort(storedFriends, new Friend.PointComparator());
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                notifyChangeListeners();
+            }
+
+        }.execute();
+    }
+
+    private void findAndUpdateFriend(BigInteger id, int points) {
         Friend friend = findFriendById(id);
         if (friend.getPoints() != points) {
             friend.setPoints(points);
@@ -111,13 +131,21 @@ public class FriendsManager implements Wipeable {
     }
 
     public void updateFriendsPoints(Map<BigInteger, Integer> points) {
-        for (BigInteger facebookId : points.keySet()) {
-            Friend friend = findFriendById(facebookId);
-            if (friend.getPoints() != points.get(facebookId)) {
-                friend.setPoints(points.get(facebookId));
-                updateFriend(friend);
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... params) {
+                of(points.keySet()).forEach(facebookId -> findAndUpdateFriend(facebookId, points.get(facebookId)));
+                Collections.sort(storedFriends, new Friend.PointComparator());
+                return null;
             }
-        }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                notifyChangeListeners();
+            }
+
+        }.execute();
     }
 
     public void saveOrUpdateYourself(Friend yourself) {
@@ -223,6 +251,8 @@ public class FriendsManager implements Wipeable {
     private void updateFriendOrYourself(Friend someone) {
         if (!areTheyTheSamePerson(someone, yourself)) {
             updateFriend(someone);
+            new AsyncFriendOrganizer().execute();
+            notifyChangeListeners();
         } else {
             updateYourself(someone);
         }
@@ -237,14 +267,12 @@ public class FriendsManager implements Wipeable {
         return null;
     }
 
-    private void updateFriend(Friend someone) {
-        Friend previous = findFriendById(someone.getId());
-        storedFriends.remove(previous);
-        storedFriends.add(someone);
-        editor.putString(someone.getId().toString(), someone.toString());
+    private void updateFriend(Friend newOne) {
+        Friend previousOne = findFriendById(newOne.getId());
+        storedFriends.remove(previousOne);
+        storedFriends.add(newOne);
+        editor.putString(newOne.getId().toString(), newOne.toString());
         editor.apply();
-        new AsyncFriendOrganizer().execute();
-        notifyChangeListeners();
     }
 
     private void updateYourself(Friend someone) {
@@ -310,9 +338,7 @@ public class FriendsManager implements Wipeable {
 
     private void notifyChangeListeners() {
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            for (FriendChangeListener listener : friendChangeListeners) {
-                listener.onFriendsChanged();
-            }
+            of(friendChangeListeners).forEach(FriendChangeListener::onFriendsChanged);
         }
     }
 

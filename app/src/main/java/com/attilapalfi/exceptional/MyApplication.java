@@ -23,7 +23,7 @@ import java.security.NoSuchAlgorithmException;
 /**
  * Created by Attila on 2015-06-05.
  */
-public class MyApplication extends Application {
+public class MyApplication extends android.support.multidex.MultiDexApplication {
 
     @Override
     public void onCreate() {

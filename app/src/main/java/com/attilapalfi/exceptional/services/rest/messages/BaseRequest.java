@@ -5,7 +5,7 @@ import java.math.BigInteger;
 /**
  * Created by 212461305 on 2015.07.11..
  */
-public abstract class BaseRequestBody {
+public abstract class BaseRequest {
     protected BigInteger userFacebookId;
 
     public BigInteger getUserFacebookId() {

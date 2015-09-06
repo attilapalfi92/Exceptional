@@ -10,11 +10,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.attilapalfi.exceptional.R;
+import com.attilapalfi.exceptional.model.ExceptionType;
 import com.attilapalfi.exceptional.services.rest.BackendService;
-import com.attilapalfi.exceptional.interfaces.ServerResponseListener;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
 import com.attilapalfi.exceptional.ui.ExceptionHistoryActivity;
 import com.attilapalfi.exceptional.ui.LoginActivity;
@@ -22,11 +24,15 @@ import com.attilapalfi.exceptional.ui.OptionsActivity;
 import com.attilapalfi.exceptional.services.GpsService;
 import com.attilapalfi.exceptional.ui.main.page_transformers.ZoomOutPageTransformer;
 
-public class MainActivity extends AppCompatActivity implements ServerResponseListener {
+public class MainActivity extends AppCompatActivity {
     private Location mLocation;
     private String androidId;
     private MainPagerAdapter adapter;
     private ViewPager viewPager;
+    private View submitView;
+    private String submitPrefix = "";
+    private String submitShortName = "";
+    private String submitDescription = "";
 
     GpsService gpsService;
 
@@ -40,7 +46,6 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
 
         GpsService.getInstance().initialize(getApplicationContext());
         gpsService = GpsService.getInstance();
-        BackendService.getInstance().addResponseListener(this);
         androidId = Settings.Secure.getString(getApplicationContext()
                 .getContentResolver(), Settings.Secure.ANDROID_ID);
 
@@ -75,7 +80,6 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        BackendService.getInstance().removeResponseListener(this);
         viewPager.removeOnPageChangeListener(adapter);
     }
 
@@ -106,47 +110,93 @@ public class MainActivity extends AppCompatActivity implements ServerResponseLis
         startActivity(intent);
     }
 
-    public void giveMeExcClicked(View view) {
-        if (MetadataStore.getInstance().isLoggedIn()) {
-//            if (!gpsService.canGetLocation() && mLocation == null) {
-//                Toast.makeText(this, "Can't get device's location.\nPlease enable location services.", Toast.LENGTH_LONG).show();
-//            } else {
-//                mLocation = gpsService.getLocation();
-//                Exception e = ExceptionTypeManager.getInstance().createRandomException(FacebookManager.getInstance().getProfileId(),
-//                        FacebookManager.getInstance().getProfileId());
-//                e.setLongitude(mLocation.getLongitude());
-//                e.setLatitude(mLocation.getLatitude());
-//                BackendService.getInstance().throwException(e);
-//                String data =
-//                        "Description: " + e.getDescription() + "\n\n" +
-//                                "From: " + e.getFromWho() + "\n\n" +
-//                                "Where: " + e.getLongitude() + ", " +
-//                                e.getLatitude();
-//                new MaterialDialog.Builder(this)
-//                        .title(e.getPrefix() + "\n" + e.getShortName())
-//                        .content(data)
-//                        .positiveText("LOL")
-//                        .negativeText("OK")
-//                        .show();
-//            }
-        } else {
-            Toast.makeText(this, "You have to login first!", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-
     public void exceptionHistoryClicked(View view) {
         Intent intent = new Intent(this, ExceptionHistoryActivity.class);
         startActivity(intent);
     }
 
-    @Override
-    public void onConnectionFailed(String what, String why) {
-        Toast.makeText(this, what + why, Toast.LENGTH_SHORT).show();
+    public void submitClicked(View view) {
+        if (MetadataStore.getInstance().isSubmittedThisWeek()) {
+            Toast.makeText(this, R.string.already_submitted, Toast.LENGTH_SHORT).show();
+        } else {
+            MaterialDialog materialDialog = new MaterialDialog.Builder(this)
+                    .title(R.string.exception_submitment)
+                    .customView(R.layout.submit_layout, true)
+                    .positiveText("Submit")
+                    .negativeText("Cancel")
+                    .callback(new MaterialDialog.ButtonCallback() {
+                        @Override
+                        public void onPositive(MaterialDialog dialog) {
+                            getSubmitStrings(dialog.getCustomView());
+
+                            if ( prefixIsValid() && shortNameIsValid() && descriptionIsValid() ) {
+                                BackendService.getInstance().submitType(new ExceptionType(
+                                        0,
+                                        submitShortName,
+                                        submitPrefix,
+                                        submitDescription
+                                ));
+                            }
+                        }
+                    })
+                    .build();
+            materialDialog.show();
+            submitView = materialDialog.getCustomView();
+            setSubmitStrings();
+        }
     }
 
-    @Override
-    public void onSuccess(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    private void setSubmitStrings() {
+        ((EditText) submitView.findViewById(R.id.submit_prefix_input)).setText(submitPrefix);
+        ((EditText) submitView.findViewById(R.id.submit_shortname_input)).setText(submitShortName);
+        ((EditText) submitView.findViewById(R.id.submit_description_input)).setText(submitDescription);
+    }
+
+    private void getSubmitStrings(View submitView) {
+        submitPrefix = ((EditText) submitView.findViewById(R.id.submit_prefix_input))
+                .getText().toString().trim();
+        submitShortName = ((EditText) submitView.findViewById(R.id.submit_shortname_input))
+                .getText().toString().trim();
+        submitDescription = ((EditText) submitView.findViewById(R.id.submit_description_input))
+                .getText().toString().trim();
+    }
+
+    private boolean prefixIsValid() {
+        if (!submitPrefix.endsWith(".")) {
+            Toast.makeText(getApplicationContext(), R.string.prefix_end_with_dot_error, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (submitPrefix.length() < 6) {
+            Toast.makeText(getApplicationContext(), R.string.prefix_too_short_error, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (submitPrefix.length() > 500) {
+            Toast.makeText(getApplicationContext(), R.string.prefix_too_long_error, Toast.LENGTH_SHORT).show();
+        }
+        return true;
+    }
+
+    private boolean shortNameIsValid() {
+        if (submitShortName.length() < 6) {
+            Toast.makeText(getApplicationContext(), R.string.short_name_too_short_error, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (submitShortName.length() > 200) {
+            Toast.makeText(getApplicationContext(), R.string.short_name_too_long_error, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
+
+    private boolean descriptionIsValid() {
+        if (submitDescription.length() < 12) {
+            Toast.makeText(getApplicationContext(), R.string.description_too_short_error, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (submitDescription.length() > 3000) {
+            Toast.makeText(getApplicationContext(), R.string.description_too_long_error, Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 }

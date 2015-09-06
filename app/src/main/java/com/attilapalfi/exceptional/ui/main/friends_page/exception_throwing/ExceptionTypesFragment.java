@@ -1,12 +1,12 @@
 package com.attilapalfi.exceptional.ui.main.friends_page.exception_throwing;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.NavUtils;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -30,20 +30,15 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExceptionTypeFragment extends Fragment {
+public class ExceptionTypesFragment extends Fragment {
     private static int instanceCounter = 0;
 
     private List<ExceptionType> exceptionTypes;
     private RecyclerView recyclerView;
     private ExceptionTypeAdapter typeAdapter;
 
-    public ExceptionTypeFragment() {
+    public ExceptionTypesFragment() {
         initExceptionTypes();
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -54,21 +49,11 @@ public class ExceptionTypeFragment extends Fragment {
         return view;
     }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-    }
-
     private void initExceptionTypes() {
         int index = instanceCounter++ % ExceptionTypeManager.getInstance().getExceptionTypes().size();
         List<String> types = new ArrayList<>(ExceptionTypeManager.getInstance().getExceptionTypes());
         String typeOfThis = types.get(index);
-        exceptionTypes = ExceptionTypeManager.getInstance().getExceptionTypesByName(typeOfThis);
+        exceptionTypes = ExceptionTypeManager.getInstance().getExceptionTypeListByName(typeOfThis);
     }
 
     private void initTypeAdapter() {
@@ -80,7 +65,7 @@ public class ExceptionTypeFragment extends Fragment {
 
     @NonNull
     private View initRecyclerView(LayoutInflater inflater, ViewGroup container) {
-        View view = inflater.inflate(R.layout.fragment_exception_type, container, false);
+        View view = inflater.inflate(R.layout.fragment_exception_types, container, false);
         recyclerView = (RecyclerView) view.findViewById(R.id.exception_type_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(typeAdapter);
@@ -98,12 +83,7 @@ public class ExceptionTypeFragment extends Fragment {
                 if (GpsService.getInstance().canGetLocation()) {
                     Exception exception = createException(view);
                     BackendService.getInstance().throwException(exception);
-                    Intent intent = new Intent(activity, MainActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    //Activity friendDetailsActivity = activity.getParent();
-                    //activity.finishActivity(1);
-                    activity.startActivity(intent);
-                    activity.finish();
+                    navigateToMainPage();
                 } else {
                     Toast.makeText(activity.getApplicationContext(), R.string.can_throw_location_pls,
                             Toast.LENGTH_LONG).show();
@@ -122,6 +102,13 @@ public class ExceptionTypeFragment extends Fragment {
                 return exception;
             }
 
+            private void navigateToMainPage() {
+                Intent intent = new Intent(activity, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                activity.startActivity(intent);
+                activity.finish();
+            }
+
             private void setLocationForException(Exception exception) {
                 Location location = GpsService.getInstance().getLocation();
                 exception.setLatitude(location.getLatitude());
@@ -138,7 +125,7 @@ public class ExceptionTypeFragment extends Fragment {
         public RowViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.exception_type_row_layout, parent, false);
             view.setOnClickListener(onClickListener);
-            return new RowViewHolder(view);
+            return new RowViewHolder(view, activity.getApplicationContext());
         }
 
         @Override
@@ -148,7 +135,7 @@ public class ExceptionTypeFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return values != null? values.size() : 0;
+            return values != null ? values.size() : 0;
         }
 
         public void setRecyclerView(RecyclerView recyclerView) {
@@ -156,15 +143,19 @@ public class ExceptionTypeFragment extends Fragment {
         }
 
         public static class RowViewHolder extends RecyclerView.ViewHolder {
+            private Context context;
             private TextView shortNameView;
             private TextView fullNameView;
             private TextView descriptionView;
+            private TextView submitterView;
 
-            public RowViewHolder(View itemView) {
+            public RowViewHolder(View itemView, Context context) {
                 super(itemView);
+                this.context = context;
                 shortNameView = (TextView) itemView.findViewById(R.id.type_short_name_text);
                 fullNameView = (TextView) itemView.findViewById(R.id.type_full_name_text);
                 descriptionView = (TextView) itemView.findViewById(R.id.type_description_text);
+                submitterView = (TextView) itemView.findViewById(R.id.type_submitter_text);
             }
 
             public void bindRow(ExceptionType exceptionType) {
@@ -172,6 +163,18 @@ public class ExceptionTypeFragment extends Fragment {
                 String fullName = getFullName(exceptionType);
                 fullNameView.setText(fullName);
                 descriptionView.setText(exceptionType.getDescription());
+                bindSubmitter(exceptionType);
+            }
+
+            private void bindSubmitter(ExceptionType exceptionType) {
+                ExceptionType.Submitter submitter = exceptionType.getSubmitter();
+                String submitterString = context.getResources().getString(R.string.submitter_text);
+                if (submitter != null) {
+                    submitterString += submitter.getFirstName() + " " + submitter.getLastName();
+                } else {
+                    submitterString += "System";
+                }
+                submitterView.setText(submitterString);
             }
 
             @NonNull

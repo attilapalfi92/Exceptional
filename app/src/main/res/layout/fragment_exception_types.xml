@@ -1,11 +1,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.attilapalfi.exceptional.ui.main.friends_page.exception_throwing.ExceptionTypeFragment">
+    tools:context="com.attilapalfi.exceptional.ui.main.friends_page.exception_throwing.ExceptionTypesFragment">
 
     <view
-        android:id="@+id/exception_type_recycler_view"
         class="android.support.v7.widget.RecyclerView"
+        android:scrollbars="vertical"
+        android:id="@+id/exception_type_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

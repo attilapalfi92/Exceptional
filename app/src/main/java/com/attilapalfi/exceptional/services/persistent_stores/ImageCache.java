@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.util.LruCache;
 import android.util.Log;
 
-import com.annimon.stream.Stream;
 import com.attilapalfi.exceptional.model.Friend;
 
 import java.io.File;
@@ -19,6 +18,8 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLConnection;
+
+import static com.annimon.stream.Stream.of;
 
 /**
  * Created by 212461305 on 2015.07.06..
@@ -188,7 +189,7 @@ public class ImageCache implements Wipeable {
         if (!FriendsManager.getInstance().isInitialized()) {
             FriendsManager.getInstance().initialize(applicationContext);
         }
-        Stream.of(FriendsManager.getInstance().getStoredFriends())
+        of(FriendsManager.getInstance().getStoredFriends())
                 .forEach(this::deleteFromDisk);
     }
 

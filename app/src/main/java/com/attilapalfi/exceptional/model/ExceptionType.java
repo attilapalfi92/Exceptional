@@ -25,11 +25,7 @@ public class ExceptionType {
     public static class VoteComparator implements Comparator<ExceptionType> {
         @Override
         public int compare(ExceptionType lhs, ExceptionType rhs) {
-            return lhs.getVoteCount() < rhs.getVoteCount() ?
-                    -1 :
-                    (lhs.getVoteCount() == rhs.getVoteCount() ?
-                            0 :
-                            1);
+            return lhs.voteCount < rhs.voteCount ? 1 : (lhs.voteCount == rhs.voteCount ? 0 : -1);
         }
     }
 
@@ -66,6 +62,29 @@ public class ExceptionType {
         this.shortName = shortName;
         this.prefix = prefix;
         this.description = description;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ExceptionType that = (ExceptionType) o;
+
+        if (id != that.id) return false;
+        if (shortName != null ? !shortName.equals(that.shortName) : that.shortName != null)
+            return false;
+        if (prefix != null ? !prefix.equals(that.prefix) : that.prefix != null) return false;
+        return !(description != null ? !description.equals(that.description) : that.description != null);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + (shortName != null ? shortName.hashCode() : 0);
+        result = 31 * result + (prefix != null ? prefix.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        return result;
     }
 
     public int getId() {
@@ -154,6 +173,10 @@ public class ExceptionType {
 
         public void setLastName(String lastName) {
             this.lastName = lastName;
+        }
+
+        public String fullName() {
+            return firstName + " " + lastName;
         }
     }
 }
