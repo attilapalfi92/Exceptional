@@ -36,13 +36,13 @@ public class ShowNotificationActivity extends AppCompatActivity {
         TextView senderPosView = (TextView) findViewById(R.id.senderPositionText);
         TextView sendDateView = (TextView) findViewById(R.id.sendDateText);
 
-        ExceptionType exceptionType = ExceptionTypeManager.getInstance().findById(typeId);
+        ExceptionType exceptionType = ExceptionTypeManager.findById(typeId);
         exceptionNameView.setText(exceptionType.getPrefix() + "\n" + exceptionType.getShortName());
         exceptionDescView.setText(exceptionType.getDescription());
-        Friend sender = FriendsManager.getInstance().findFriendById(fromWho);
+        Friend sender = FriendsManager.findFriendById(fromWho);
 
         if (sender != null) {
-            if (FriendsManager.getInstance().isItYourself(sender)) {
+            if (FriendsManager.isItYourself(sender)) {
                 senderNameView.setText("Yourself");
             } else {
                 senderNameView.setText(sender.getFirstName());

@@ -51,7 +51,7 @@ public class FriendDetailsActivity extends AppCompatActivity {
 
     private void initFriend() {
         BigInteger friendId = new BigInteger(getIntent().getStringExtra(Constants.FRIEND_ID));
-        friend = FriendsManager.getInstance().findFriendById(friendId);
+        friend = FriendsManager.findFriendById(friendId);
     }
 
     public void throwExceptionClicked(View view) {

@@ -32,47 +32,37 @@ import static com.annimon.stream.Stream.of;
  * Responsible for storing friends in the device's preferences
  * Created by Attila on 2015-06-12.
  */
-public class FriendsManager implements Wipeable {
+public class FriendsManager {
+    private static SharedPreferences sharedPreferences;
+    private static SharedPreferences.Editor editor;
+    private static final List<Friend> storedFriends = Collections.synchronizedList(new LinkedList<>());
+    private static Friend yourself;
+    private static Set<FriendChangeListener> friendChangeListeners = new HashSet<>();
 
-    private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
-    private final List<Friend> storedFriends = Collections.synchronizedList(new LinkedList<>());
-    private Friend yourself;
-    private Set<FriendChangeListener> friendChangeListeners = new HashSet<>();
-    private static FriendsManager instance;
-
-    public static FriendsManager getInstance() {
-        if (instance == null) {
-            instance = new FriendsManager();
-        }
-        return instance;
-    }
-
-    public void addFriendChangeListener(FriendChangeListener listener) {
+    public static void addFriendChangeListener(FriendChangeListener listener) {
         friendChangeListeners.add(listener);
     }
 
-    public void removeFriendChangeListener(FriendChangeListener listener) {
+    public static void removeFriendChangeListener(FriendChangeListener listener) {
         friendChangeListeners.remove(listener);
     }
 
-    public List<Friend> getStoredFriends() {
+    public static List<Friend> getStoredFriends() {
         return storedFriends;
     }
 
-    public Friend getYourself() {
+    public static Friend getYourself() {
         return yourself;
     }
 
     private FriendsManager() {
-
     }
 
-    public boolean isInitialized() {
+    public static boolean isInitialized() {
         return sharedPreferences != null;
     }
 
-    public void initialize(Context context) {
+    public static void initialize(Context context) {
         String PREFS_NAME = context.getString(R.string.friends_preferences);
         sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
@@ -92,19 +82,19 @@ public class FriendsManager implements Wipeable {
         notifyChangeListeners();
     }
 
-    public void saveFriendsAndYourself(List<Friend> friendList, Friend yourself) {
+    public static void saveFriendsAndYourself(List<Friend> friendList, Friend yourself) {
         saveFriends(friendList);
         saveOrUpdateYourself(yourself);
     }
 
-    public void updateFriendsAndYourself(List<Friend> friendList, Friend yourself) {
+    public static void updateFriendsAndYourself(List<Friend> friendList, Friend yourself) {
         saveOrUpdateYourself(yourself);
         updateOldFriends(friendList);
         removeDeletedFriends(friendList);
         saveNewFriends(friendList);
     }
 
-    public void updateFriendPoints(BigInteger id, int points) {
+    public static void updateFriendPoints(BigInteger id, int points) {
         new AsyncTask<Void, Void, Void>() {
 
             @Override
@@ -122,7 +112,7 @@ public class FriendsManager implements Wipeable {
         }.execute();
     }
 
-    private void findAndUpdateFriend(BigInteger id, int points) {
+    private static void findAndUpdateFriend(BigInteger id, int points) {
         Friend friend = findFriendById(id);
         if (friend.getPoints() != points) {
             friend.setPoints(points);
@@ -130,7 +120,7 @@ public class FriendsManager implements Wipeable {
         }
     }
 
-    public void updateFriendsPoints(Map<BigInteger, Integer> points) {
+    public static void updateFriendsPoints(Map<BigInteger, Integer> points) {
         new AsyncTask<Void, Void, Void>() {
 
             @Override
@@ -148,33 +138,32 @@ public class FriendsManager implements Wipeable {
         }.execute();
     }
 
-    public void saveOrUpdateYourself(Friend yourself) {
+    public static void saveOrUpdateYourself(Friend yourself) {
         if (yourself != null) {
-            if (this.yourself == null) {
-                this.yourself = yourself;
+            if (FriendsManager.yourself == null) {
+                FriendsManager.yourself = yourself;
                 editor.putString("yourself", yourself.toString());
                 editor.apply();
                 new UpdateFriendsImageTask(yourself).execute();
 
             } else {
-                checkFriendChange(yourself, this.yourself);
+                checkFriendChange(yourself, FriendsManager.yourself);
             }
         }
     }
 
-    @Override
-    public void wipe() {
+    public static void wipe() {
         storedFriends.clear();
         editor.clear();
         editor.apply();
         notifyChangeListeners();
     }
 
-    public boolean isItYourself(Friend friend) {
+    public static boolean isItYourself(Friend friend) {
         return areTheyTheSamePerson(friend, yourself);
     }
 
-    public Friend findFriendById(BigInteger friendId) {
+    public static Friend findFriendById(BigInteger friendId) {
         Friend friend = tryFindFriendInStore(friendId);
         if (friend != null)
             return friend;
@@ -188,7 +177,7 @@ public class FriendsManager implements Wipeable {
         return new Friend(new BigInteger("0"), "", "", "");
     }
 
-    private void saveFriends(List<Friend> toBeSaved) {
+    private static void saveFriends(List<Friend> toBeSaved) {
         for (Friend f : toBeSaved) {
             editor.putString(f.getId().toString(), f.toString());
             storedFriends.add(f);
@@ -198,7 +187,7 @@ public class FriendsManager implements Wipeable {
         notifyChangeListeners();
     }
 
-    private void updateOldFriends(List<Friend> friendList) {
+    private static void updateOldFriends(List<Friend> friendList) {
         List<Friend> knownCurrentFriends = new ArrayList<>(friendList.size());
         knownCurrentFriends.addAll(friendList);
         // checking for changes at old friends
@@ -209,14 +198,14 @@ public class FriendsManager implements Wipeable {
         }
     }
 
-    private void removeDeletedFriends(List<Friend> friendList) {
+    private static void removeDeletedFriends(List<Friend> friendList) {
         List<Friend> deletedFriends = new ArrayList<>();
         deletedFriends.addAll(storedFriends);
         deletedFriends.removeAll(friendList);
         deleteFriends(deletedFriends);
     }
 
-    private void saveNewFriends(List<Friend> friendList) {
+    private static void saveNewFriends(List<Friend> friendList) {
         List<Friend> workList = new ArrayList<>(friendList);
         workList.removeAll(storedFriends);
         for (Friend f : workList) {
@@ -224,7 +213,7 @@ public class FriendsManager implements Wipeable {
         }
     }
 
-    private void checkFriendChange(Friend newFriendState, Friend oldFriendState) {
+    private static void checkFriendChange(Friend newFriendState, Friend oldFriendState) {
         if (areTheyTheSamePerson(newFriendState, oldFriendState)) {
             if (isImageChanged(newFriendState, oldFriendState)) {
                 new UpdateFriendsImageTask(newFriendState).execute();
@@ -235,20 +224,20 @@ public class FriendsManager implements Wipeable {
         }
     }
 
-    private boolean areTheyTheSamePerson(Friend newFriendState, Friend oldFriendState) {
+    private static boolean areTheyTheSamePerson(Friend newFriendState, Friend oldFriendState) {
         return newFriendState.getId().equals(oldFriendState.getId());
     }
 
-    private boolean isImageChanged(Friend newFriendState, Friend oldFriendState) {
+    private static boolean isImageChanged(Friend newFriendState, Friend oldFriendState) {
         return !newFriendState.getImageUrl().equals(oldFriendState.getImageUrl());
     }
 
-    private boolean isNameChanged(Friend newFriendState, Friend oldFriendState) {
+    private static boolean isNameChanged(Friend newFriendState, Friend oldFriendState) {
         return (!newFriendState.getFirstName().equals(oldFriendState.getFirstName()) ||
                 !newFriendState.getLastName().equals(oldFriendState.getLastName()));
     }
 
-    private void updateFriendOrYourself(Friend someone) {
+    private static void updateFriendOrYourself(Friend someone) {
         if (!areTheyTheSamePerson(someone, yourself)) {
             updateFriend(someone);
             new AsyncFriendOrganizer().execute();
@@ -258,7 +247,7 @@ public class FriendsManager implements Wipeable {
         }
     }
 
-    private Friend tryFindFriendInStore(BigInteger friendId) {
+    private static Friend tryFindFriendInStore(BigInteger friendId) {
         for (Friend friend : storedFriends) {
             if (friend.getId().equals(friendId)) {
                 return friend;
@@ -267,7 +256,7 @@ public class FriendsManager implements Wipeable {
         return null;
     }
 
-    private void updateFriend(Friend newOne) {
+    private static void updateFriend(Friend newOne) {
         Friend previousOne = findFriendById(newOne.getId());
         storedFriends.remove(previousOne);
         storedFriends.add(newOne);
@@ -275,7 +264,7 @@ public class FriendsManager implements Wipeable {
         editor.apply();
     }
 
-    private void updateYourself(Friend someone) {
+    private static void updateYourself(Friend someone) {
         yourself = someone;
         editor.putString("yourself", yourself.toString());
         editor.apply();
@@ -293,10 +282,10 @@ public class FriendsManager implements Wipeable {
             String downloadUrl = friend.getImageUrl();
             Bitmap friendPicture = null;
             try {
-                friendPicture = ImageCache.getInstance().getImageForFriend(friend);
+                friendPicture = ImageCache.getImageForFriend(friend);
                 if (friendPicture == null) {
                     friendPicture = downloadAndDecodeBitmap(downloadUrl, friendPicture);
-                    ImageCache.getInstance().addImage(friend, friendPicture);
+                    ImageCache.addImage(friend, friendPicture);
                 }
             } catch (IOException e) {
                 Log.e("Error", e.getMessage());
@@ -323,11 +312,11 @@ public class FriendsManager implements Wipeable {
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             friend.setImage(bitmap);
-            FriendsManager.getInstance().updateFriendOrYourself(friend);
+            FriendsManager.updateFriendOrYourself(friend);
         }
 
     }
-    private void deleteFriends(List<Friend> toBeDeleted) {
+    private static void deleteFriends(List<Friend> toBeDeleted) {
         for (Friend f : toBeDeleted) {
             editor.remove((f.getId().toString()));
         }
@@ -336,13 +325,13 @@ public class FriendsManager implements Wipeable {
         notifyChangeListeners();
     }
 
-    private void notifyChangeListeners() {
+    private static void notifyChangeListeners() {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             of(friendChangeListeners).forEach(FriendChangeListener::onFriendsChanged);
         }
     }
 
-    private class AsyncFriendOrganizer extends AsyncTask<Void, Void, Void> {
+    private static class AsyncFriendOrganizer extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... params) {
             Collections.sort(storedFriends, new Friend.PointComparator());

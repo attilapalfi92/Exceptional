@@ -1,46 +1,34 @@
 package com.attilapalfi.exceptional.services;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.util.Log;
 import android.widget.Toast;
 
 /**
  * Created by Attila on 2015-06-20.
  */
 public class GpsService extends Service implements LocationListener {
+    private static GpsService instance;
 
-    private Context mContext;
-
-    // flag for network status
-    boolean isNetworkEnabled = false;
-
-    // flag for GPS status
-    boolean canGetLocation = false;
-
-    Location location; // location
-    double latitude; // latitude
-    double longitude; // longitude
-
-    // The minimum distance to change Updates in meters
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 100; // 100 meters
-
-    // The minimum time between updates in milliseconds
     private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 10; // 10 minute
 
-    // Declaring a Location Manager
-    protected LocationManager locationManager;
-
-    private static GpsService instance;
+    private Context context;
+    private LocationManager locationManager;
+    private Location location; // location
+    private boolean isNetworkEnabled = false;
+    private boolean canGetLocation = false;
 
     public static GpsService getInstance() {
         if (instance == null) {
@@ -50,88 +38,77 @@ public class GpsService extends Service implements LocationListener {
         return instance;
     }
 
-    private GpsService() {}
+    private GpsService() {
+    }
 
     public void initialize(Context context) {
-        this.mContext = context;
+        this.context = context;
         getLocation();
     }
 
     public Location getLocation() {
         try {
-            locationManager = (LocationManager) mContext
-                    .getSystemService(LOCATION_SERVICE);
-
-            // getting network status
-            isNetworkEnabled = locationManager
-                    .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
-            if (!isNetworkEnabled) {
-                // no network provider is enabled
-            } else {
+            getNetworkStatus();
+            if (isNetworkEnabled) {
                 canGetLocation = true;
-                // First get location from Network Provider
-                if (isNetworkEnabled) {
-                    locationManager.requestLocationUpdates(
-                            LocationManager.NETWORK_PROVIDER,
-                            MIN_TIME_BW_UPDATES,
-                            MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
-                    Log.d("Network", "Network");
-                    if (locationManager != null) {
-                        location = locationManager
-                                .getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-                        if (location != null) {
-                            latitude = location.getLatitude();
-                            longitude = location.getLongitude();
-                        }
-                    }
-                }
+                initLocationNetworkProvider();
+                getLastKnownLocation();
+            } else {
+                // no network provider is enabled
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return location;
     }
 
-    /**
-     * Stop using GPS listener
-     * Calling this function will stop using GPS in your app
-     * */
+    private void getNetworkStatus() {
+        locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
+        isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    }
+
+    // before
+    private void initLocationNetworkProvider() {
+        locationManager.requestLocationUpdates(
+                LocationManager.NETWORK_PROVIDER,
+                MIN_TIME_BW_UPDATES,
+                MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+    }
+
+    // before
+    private void getLastKnownLocation() {
+        if (locationManager != null) {
+            location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        }
+    }
+
+    // before
     public void stopUsingGps(){
         if(locationManager != null){
             locationManager.removeUpdates(GpsService.this);
         }
     }
 
-    /**
-     * Function to check GPS/wifi enabled
-     * @return boolean
-     * */
     public boolean canGetLocation() {
         // getting network status
-        isNetworkEnabled = locationManager
-                .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
+        isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
         canGetLocation = isNetworkEnabled;
         if (!canGetLocation) {
-            Toast.makeText(mContext, "Can't get device's location.\nPlease enable location services.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Can't get device's location.\nPlease enable location services.", Toast.LENGTH_SHORT).show();
         }
 
         return canGetLocation;
     }
 
 
-
     public void showSettingsAlert(){
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
 
         // On pressing Settings button
         alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog,int which) {
                 Intent intent = new Intent(Settings.ACTION_NETWORK_OPERATOR_SETTINGS);
-                mContext.startActivity(intent);
+                context.startActivity(intent);
             }
         });
 

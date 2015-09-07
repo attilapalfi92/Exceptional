@@ -20,30 +20,22 @@ import static com.annimon.stream.Stream.of;
 /**
  * Created by Attila on 2015-06-09.
  */
-public class ExceptionTypeManager implements Wipeable {
-    private static ExceptionTypeManager instance;
+public class ExceptionTypeManager {
     private static final String PREFS_NAME = "exception_types";
     private static final String MIN_ID = "minId";
     private static final String MAX_ID = "maxId";
     private static final String HAS_DATA = "hasData";
 
-    private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
+    private static SharedPreferences sharedPreferences;
+    private static SharedPreferences.Editor editor;
 
-    private Map<String, List<ExceptionType>> exceptionTypeStore;
-    private List<ExceptionType> votedExceptionTypeList;
-    private Set<VotedTypeListener> votedTypeListeners = new HashSet<>();
+    private static Map<String, List<ExceptionType>> exceptionTypeStore;
+    private static List<ExceptionType> votedExceptionTypeList;
+    private static Set<VotedTypeListener> votedTypeListeners = new HashSet<>();
 
     private ExceptionTypeManager() {}
 
-    public static ExceptionTypeManager getInstance() {
-        if (instance == null) {
-            instance = new ExceptionTypeManager();
-        }
-        return instance;
-    }
-
-    public void initialize(Context context) {
+    public static void initialize(Context context) {
         initPreferences(context);
         exceptionTypeStore = new HashMap<>();
         if (sharedPreferences.getBoolean(HAS_DATA, false)) {
@@ -52,13 +44,13 @@ public class ExceptionTypeManager implements Wipeable {
         }
     }
 
-    public void addExceptionTypes(List<ExceptionType> exceptionTypes) {
+    public static void addExceptionTypes(List<ExceptionType> exceptionTypes) {
         loadExceptionTypeStore(exceptionTypes);
         editor.putBoolean(HAS_DATA, true);
         editor.apply();
     }
 
-    private void loadExceptionTypeStore(List<ExceptionType> exceptionTypes) {
+    private static void loadExceptionTypeStore(List<ExceptionType> exceptionTypes) {
         int maxId = 0;
         for (ExceptionType exception : exceptionTypes) {
             if (!exceptionTypeStore.containsKey(exception.getType())) {
@@ -73,19 +65,19 @@ public class ExceptionTypeManager implements Wipeable {
         sortExceptionStore();
     }
 
-    public void setVotedExceptionTypes(List<ExceptionType> exceptionTypes) {
+    public static void setVotedExceptionTypes(List<ExceptionType> exceptionTypes) {
         votedExceptionTypeList = exceptionTypes;
         sortVotedExceptionList();
         notifyVotedTypeListeners();
     }
 
-    private void initPreferences(Context context) {
-        sharedPreferences = context.getSharedPreferences(instance.PREFS_NAME, Context.MODE_PRIVATE);
+    private static void initPreferences(Context context) {
+        sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
         editor.apply();
     }
 
-    private void initExceptionTypeStore() {
+    private static void initExceptionTypeStore() {
         int minId = sharedPreferences.getInt(MIN_ID, 1);
         int maxId = sharedPreferences.getInt(MAX_ID, 0);
         for (int i = minId; i <= maxId; i++) {
@@ -97,17 +89,17 @@ public class ExceptionTypeManager implements Wipeable {
         }
     }
 
-    private void sortExceptionStore() {
+    private static void sortExceptionStore() {
         for(List<ExceptionType> typeList : exceptionTypeStore.values()) {
             Collections.sort(typeList, new ExceptionType.ShortNameComparator());
         }
     }
 
-    private void sortVotedExceptionList() {
+    private static void sortVotedExceptionList() {
         Collections.sort(votedExceptionTypeList, new ExceptionType.VoteComparator());
     }
 
-    public ExceptionType findById(int id) {
+    public static ExceptionType findById(int id) {
         for (List<ExceptionType> exceptionTypeList : exceptionTypeStore.values()) {
             for (ExceptionType exceptionType : exceptionTypeList) {
                 if (id == exceptionType.getId()) {
@@ -118,55 +110,54 @@ public class ExceptionTypeManager implements Wipeable {
         return new ExceptionType();
     }
 
-    public Set<String> getExceptionTypes() {
+    public static Set<String> getExceptionTypes() {
         return exceptionTypeStore.keySet();
     }
 
-    public boolean isInitialized() {
+    public static boolean isInitialized() {
         return exceptionTypeStore != null;
     }
 
-    public List<ExceptionType> getExceptionTypeListByName(String typeName) {
+    public static List<ExceptionType> getExceptionTypeListByName(String typeName) {
         if (exceptionTypeStore.containsKey(typeName)) {
             return new ArrayList<>(exceptionTypeStore.get(typeName));
         }
         return new ArrayList<>();
     }
 
-    @Override
-    public void wipe() {
+    public static void wipe() {
         exceptionTypeStore.clear();
         votedExceptionTypeList.clear();
         editor.clear().apply();
     }
 
-    public List<ExceptionType> getVotedExceptionTypeList() {
+    public static List<ExceptionType> getVotedExceptionTypeList() {
         return votedExceptionTypeList;
     }
 
-    public void updateVotedType(ExceptionType votedType) {
+    public static void updateVotedType(ExceptionType votedType) {
         int index = votedExceptionTypeList.indexOf(votedType);
         ExceptionType listElementException = votedExceptionTypeList.get(index);
         listElementException.setVoteCount(votedType.getVoteCount());
         notifyVotedTypeListeners();
     }
 
-    public void addVotedType(ExceptionType submittedType) {
+    public static void addVotedType(ExceptionType submittedType) {
         votedExceptionTypeList.add(submittedType);
         notifyVotedTypeListeners();
     }
 
-    public void notifyVotedTypeListeners() {
+    public static void notifyVotedTypeListeners() {
         if (Looper.myLooper() == Looper.getMainLooper()) {
             of(votedTypeListeners).forEach(VotedTypeListener::onVoteListChanged);
         }
     }
 
-    public boolean addVotedTypeListener(VotedTypeListener listener) {
+    public static boolean addVotedTypeListener(VotedTypeListener listener) {
         return votedTypeListeners.add(listener);
     }
 
-    public boolean removeVotedTypeListener(VotedTypeListener listener) {
+    public static boolean removeVotedTypeListener(VotedTypeListener listener) {
         return votedTypeListeners.remove(listener);
     }
 }

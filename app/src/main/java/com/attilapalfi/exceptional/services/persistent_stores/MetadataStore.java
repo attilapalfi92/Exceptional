@@ -12,11 +12,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.annimon.stream.Stream.of;
+
 /**
  * Created by palfi on 2015-08-21.
  */
-public class MetadataStore implements Wipeable {
-    private static MetadataStore instance;
+public class MetadataStore {
 
     private static final String PREFS_NAME = "metadata_preferences";
     private static final String POINTS = "points";
@@ -26,36 +27,29 @@ public class MetadataStore implements Wipeable {
     private static final String VOTED_THIS_WEEK = "votedThisWeek";
     private static final String SUBMITTED_THIS_WEEK = "submittedThisWeek";
 
-    private boolean initialized = false;
-    private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
-    private int points = 100;
-    private int exceptionVersion = 0;
-    private boolean loggedIn = false;
-    private boolean firstStartFinished = false;
-    private boolean votedThisWeek = true;
-    private boolean submittedThisWeek = true;
-    private Set<FirstStartFinishedListener> firstStartFinishedListeners = new HashSet<>();
-    private Set<PointChangeListener> pointChangeListeners = new HashSet<>();
+    private static boolean initialized = false;
+    private static SharedPreferences sharedPreferences;
+    private static SharedPreferences.Editor editor;
+    private static int points = 100;
+    private static int exceptionVersion = 0;
+    private static boolean loggedIn = false;
+    private static boolean firstStartFinished = false;
+    private static boolean votedThisWeek = true;
+    private static boolean submittedThisWeek = true;
+    private static Set<FirstStartFinishedListener> firstStartFinishedListeners = new HashSet<>();
+    private static Set<PointChangeListener> pointChangeListeners = new HashSet<>();
 
     private MetadataStore() {
     }
 
-    public static MetadataStore getInstance() {
-        if (instance == null) {
-            instance = new MetadataStore();
-        }
-        return instance;
-    }
-
-    public void initialize(Context context) {
-        sharedPreferences = context.getSharedPreferences(instance.PREFS_NAME, Context.MODE_PRIVATE);
+    public static void initialize(Context context) {
+        sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
         initMetadata();
         initialized = true;
     }
 
-    private void initMetadata() {
+    private static void initMetadata() {
         points = sharedPreferences.getInt(POINTS, points);
         exceptionVersion = sharedPreferences.getInt(EXCEPTION_VERSION, exceptionVersion);
         loggedIn = sharedPreferences.getBoolean(LOGGED_IN, loggedIn);
@@ -65,40 +59,39 @@ public class MetadataStore implements Wipeable {
         editor.apply();
     }
 
-    public boolean isInitialized() {
+    public static boolean isInitialized() {
         return initialized;
     }
 
-    public void setPoints(int points) {
-        if (this.points != points) {
-            this.points = points;
+    public static void setPoints(int points) {
+        if (MetadataStore.points != points) {
+            MetadataStore.points = points;
             storeInt(POINTS, points);
             if (Looper.myLooper() == Looper.getMainLooper()) {
-                for (PointChangeListener listener : pointChangeListeners) {
-                    listener.onPointsChanged();
-                }
+                of(pointChangeListeners).forEach((PointChangeListener listener)
+                        -> listener.onPointsChanged());
             }
         }
     }
 
-    public int getPoints() {
+    public static int getPoints() {
         return points;
     }
 
-    public void setExceptionVersion(int exceptionVersion) {
-        if (this.exceptionVersion != exceptionVersion) {
-            this.exceptionVersion = exceptionVersion;
+    public static void setExceptionVersion(int exceptionVersion) {
+        if (MetadataStore.exceptionVersion != exceptionVersion) {
+            MetadataStore.exceptionVersion = exceptionVersion;
             storeInt(EXCEPTION_VERSION, exceptionVersion);
         }
     }
 
-    public int getExceptionVersion() {
+    public static int getExceptionVersion() {
         return exceptionVersion;
     }
 
-    public void setFirstStartFinished(boolean firstStartFinished) {
-        if (this.firstStartFinished != firstStartFinished) {
-            this.firstStartFinished = firstStartFinished;
+    public static void setFirstStartFinished(boolean firstStartFinished) {
+        if (MetadataStore.firstStartFinished != firstStartFinished) {
+            MetadataStore.firstStartFinished = firstStartFinished;
             storeBoolean(FIRST_START_FINISHED, firstStartFinished);
         }
         for (FirstStartFinishedListener l : firstStartFinishedListeners) {
@@ -106,55 +99,54 @@ public class MetadataStore implements Wipeable {
         }
     }
 
-    public boolean isFirstStartFinished() {
+    public static boolean isFirstStartFinished() {
         return firstStartFinished;
     }
 
-    public void setLoggedIn(boolean loggedIn) {
-        if (this.loggedIn != loggedIn) {
-            this.loggedIn = loggedIn;
+    public static void setLoggedIn(boolean loggedIn) {
+        if (MetadataStore.loggedIn != loggedIn) {
+            MetadataStore.loggedIn = loggedIn;
             storeBoolean(LOGGED_IN, loggedIn);
         }
     }
 
-    public boolean isLoggedIn() {
+    public static boolean isLoggedIn() {
         return loggedIn;
     }
 
-    public void setVotedThisWeek(boolean votedThisWeek) {
-        if (this.votedThisWeek != votedThisWeek) {
-            this.votedThisWeek = votedThisWeek;
+    public static void setVotedThisWeek(boolean votedThisWeek) {
+        if (MetadataStore.votedThisWeek != votedThisWeek) {
+            MetadataStore.votedThisWeek = votedThisWeek;
             storeBoolean(VOTED_THIS_WEEK, votedThisWeek);
         }
     }
 
-    public boolean isVotedThisWeek() {
+    public static boolean isVotedThisWeek() {
         return votedThisWeek;
     }
 
-    public void setSubmittedThisWeek(boolean submittedThisWeek) {
-        if (this.submittedThisWeek != submittedThisWeek) {
-            this.submittedThisWeek = submittedThisWeek;
+    public static void setSubmittedThisWeek(boolean submittedThisWeek) {
+        if (MetadataStore.submittedThisWeek != submittedThisWeek) {
+            MetadataStore.submittedThisWeek = submittedThisWeek;
             storeBoolean(SUBMITTED_THIS_WEEK, submittedThisWeek);
         }
     }
 
-    public boolean isSubmittedThisWeek() {
+    public static boolean isSubmittedThisWeek() {
         return submittedThisWeek;
     }
 
-    private void storeInt(String key, int value) {
+    private static void storeInt(String key, int value) {
         editor.putInt(key, value);
         editor.apply();
     }
 
-    private void storeBoolean(String key, boolean value) {
+    private static void storeBoolean(String key, boolean value) {
         editor.putBoolean(key, value);
         editor.apply();
     }
 
-    @Override
-    public void wipe() {
+    public static void wipe() {
         points = 100;
         exceptionVersion = 0;
         loggedIn = false;
@@ -162,19 +154,19 @@ public class MetadataStore implements Wipeable {
         editor.clear().apply();
     }
 
-    public boolean addFirstStartFinishedListener(FirstStartFinishedListener listener) {
+    public static boolean addFirstStartFinishedListener(FirstStartFinishedListener listener) {
         return firstStartFinishedListeners.add(listener);
     }
 
-    public boolean removeFirstStartFinishedListener(FirstStartFinishedListener listener) {
+    public static boolean removeFirstStartFinishedListener(FirstStartFinishedListener listener) {
         return firstStartFinishedListeners.remove(listener);
     }
 
-    public boolean addPointChangeListener(PointChangeListener listener) {
+    public static boolean addPointChangeListener(PointChangeListener listener) {
         return pointChangeListeners.add(listener);
     }
 
-    public boolean removePointChangeListener(PointChangeListener listener) {
+    public static boolean removePointChangeListener(PointChangeListener listener) {
         return pointChangeListeners.remove(listener);
     }
 }

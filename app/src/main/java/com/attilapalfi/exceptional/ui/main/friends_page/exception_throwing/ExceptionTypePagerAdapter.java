@@ -21,7 +21,7 @@ public class ExceptionTypePagerAdapter extends FragmentPagerAdapter implements V
     public ExceptionTypePagerAdapter(FragmentManager fm, Activity activity) {
         super(fm);
         this.activity = activity;
-        exceptionTypes.addAll(ExceptionTypeManager.getInstance().getExceptionTypes());
+        exceptionTypes.addAll(ExceptionTypeManager.getExceptionTypes());
     }
 
     @Override

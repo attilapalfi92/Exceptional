@@ -37,7 +37,7 @@ public class VotedExceptionsFragment extends Fragment implements VotedTypeListen
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        ExceptionTypeManager.getInstance().addVotedTypeListener(this);
+        ExceptionTypeManager.addVotedTypeListener(this);
     }
 
     @Override
@@ -51,11 +51,11 @@ public class VotedExceptionsFragment extends Fragment implements VotedTypeListen
     @Override
     public void onDetach() {
         super.onDetach();
-        ExceptionTypeManager.getInstance().removeVotedTypeListener(this);
+        ExceptionTypeManager.removeVotedTypeListener(this);
     }
 
     private void initTypeAdapter() {
-        votedTypeList = ExceptionTypeManager.getInstance().getVotedExceptionTypeList();
+        votedTypeList = ExceptionTypeManager.getVotedExceptionTypeList();
         if (votedTypeList == null) {
             votedTypeList = new ArrayList<>();
         }
@@ -74,7 +74,7 @@ public class VotedExceptionsFragment extends Fragment implements VotedTypeListen
 
     @Override
     public void onVoteListChanged() {
-        adapter.setValues(ExceptionTypeManager.getInstance().getVotedExceptionTypeList());
+        adapter.setValues(ExceptionTypeManager.getVotedExceptionTypeList());
         adapter.notifyDataSetChanged();
     }
 
@@ -87,7 +87,7 @@ public class VotedExceptionsFragment extends Fragment implements VotedTypeListen
             public void onClick(View view) {
                 int itemPosition = recyclerView.getChildPosition(view);
                 ExceptionType exceptionType = values.get(itemPosition);
-                if (MetadataStore.getInstance().isVotedThisWeek()) {
+                if (MetadataStore.isVotedThisWeek()) {
                     Toast.makeText(activity.getApplicationContext(), R.string.you_already_voted, Toast.LENGTH_SHORT).show();
                 } else {
                     showDialog(exceptionType);
@@ -108,7 +108,7 @@ public class VotedExceptionsFragment extends Fragment implements VotedTypeListen
                         .callback(new MaterialDialog.ButtonCallback() {
                             @Override
                             public void onPositive(MaterialDialog dialog) {
-                                BackendService.getInstance().voteForType(exceptionType);
+                                BackendService.voteForType(exceptionType);
                             }
                         })
                         .show();

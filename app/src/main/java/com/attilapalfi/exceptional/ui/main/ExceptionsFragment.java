@@ -47,7 +47,7 @@ public class ExceptionsFragment extends Fragment implements ExceptionRefreshList
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        ExceptionInstanceManager.getInstance().addExceptionChangeListener(this);
+        ExceptionInstanceManager.addExceptionChangeListener(this);
     }
 
     @Override
@@ -87,7 +87,7 @@ public class ExceptionsFragment extends Fragment implements ExceptionRefreshList
 
     @Override
     public void onDetach() {
-        ExceptionInstanceManager.getInstance().removeExceptionChangeListener(this);
+        ExceptionInstanceManager.removeExceptionChangeListener(this);
         super.onDetach();
     }
 
@@ -106,8 +106,8 @@ public class ExceptionsFragment extends Fragment implements ExceptionRefreshList
     }
 
     private void actualRefresh() {
-        if (MetadataStore.getInstance().isLoggedIn()) {
-            BackendService.getInstance().refreshExceptions(this);
+        if (MetadataStore.isLoggedIn()) {
+            BackendService.refreshExceptions(this);
         } else {
             Toast.makeText(getActivity().getApplicationContext(), "You have to login first!", Toast.LENGTH_SHORT).show();
             onExceptionRefreshFinished();
@@ -120,10 +120,10 @@ public class ExceptionsFragment extends Fragment implements ExceptionRefreshList
     }
 
     private void initExceptionAdapter() {
-        if (!ExceptionInstanceManager.getInstance().isInitialized()) {
-            ExceptionInstanceManager.getInstance().initialize(getActivity().getApplicationContext());
+        if (!ExceptionInstanceManager.isInitialized()) {
+            ExceptionInstanceManager.initialize(getActivity().getApplicationContext());
         }
-        List<Exception> values = generateValues(ExceptionInstanceManager.getInstance().getExceptionList());
+        List<Exception> values = generateValues(ExceptionInstanceManager.getExceptionList());
         exceptionAdapter = new ExceptionAdapter(getActivity(), values);
         onExceptionsChanged();
     }
@@ -223,9 +223,9 @@ public class ExceptionsFragment extends Fragment implements ExceptionRefreshList
             }
 
             public void bindRow(Exception model) {
-                fromWho = FriendsManager.getInstance().findFriendById(model.getFromWho());
-                toWho = FriendsManager.getInstance().findFriendById(model.getToWho());
-                yourself = FriendsManager.getInstance().getYourself();
+                fromWho = FriendsManager.findFriendById(model.getFromWho());
+                toWho = FriendsManager.findFriendById(model.getToWho());
+                yourself = FriendsManager.getYourself();
                 bindUserInfo(model);
                 bindExceptionInfo(model);
                 setDirectionImages();

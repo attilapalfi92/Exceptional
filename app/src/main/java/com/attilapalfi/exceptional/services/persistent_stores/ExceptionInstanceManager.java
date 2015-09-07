@@ -6,11 +6,11 @@ import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.os.Looper;
 
+import com.annimon.stream.Collectors;
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.services.rest.messages.ExceptionInstanceWrapper;
 import com.attilapalfi.exceptional.interfaces.ExceptionChangeListener;
-import com.attilapalfi.exceptional.interfaces.ExceptionSource;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -27,71 +27,57 @@ import static com.annimon.stream.Stream.of;
 /**
  * Created by Attila on 2015-06-08.
  */
-public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
-    private static ExceptionInstanceManager instance;
-
-    public final int STORE_SIZE = Integer.MAX_VALUE;
-
-    private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
-    private String PREFS_NAME;
-    private Set<ExceptionChangeListener> exceptionChangeListeners = new HashSet<>();
-    private List<Exception> storedExceptions = Collections.synchronizedList(new LinkedList<Exception>());
-    private Geocoder geocoder;
-    private List<BigInteger> knownIdsOnStart = new LinkedList<>();
-
-    public static ExceptionInstanceManager getInstance () {
-        if (instance == null) {
-            instance = new ExceptionInstanceManager();
-        }
-
-        return instance;
-    }
+public class ExceptionInstanceManager {
+    public static final int STORE_SIZE = Integer.MAX_VALUE;
+    private static SharedPreferences sharedPreferences;
+    private static SharedPreferences.Editor editor;
+    private static String PREFS_NAME;
+    private static Set<ExceptionChangeListener> exceptionChangeListeners = new HashSet<>();
+    private static List<Exception> storedExceptions = Collections.synchronizedList(new LinkedList<>());
+    private static Geocoder geocoder;
+    private static List<BigInteger> knownIdsOnStart = new LinkedList<>();
 
     private ExceptionInstanceManager() {}
 
-    public void initialize(Context context) {
-        if (!ExceptionTypeManager.getInstance().isInitialized()) {
-            ExceptionTypeManager.getInstance().initialize(context);
+    public static void initialize(Context context) {
+        if (!ExceptionTypeManager.isInitialized()) {
+            ExceptionTypeManager.initialize(context);
         }
         initPreferences(context);
         geocoder = new Geocoder(context, Locale.getDefault());
         loadExceptionInstances();
     }
 
-    private void initPreferences(Context context) {
+    private static void initPreferences(Context context) {
         PREFS_NAME = context.getString(R.string.exception_preferences);
-        sharedPreferences = context.getSharedPreferences(instance.PREFS_NAME, Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
         editor.apply();
     }
 
-    private void loadExceptionInstances() {
+    private static void loadExceptionInstances() {
         Map<String, ?> store = sharedPreferences.getAll();
         Set<String> instanceIds = store.keySet();
-        for (String id : instanceIds) {
-            knownIdsOnStart.add(new BigInteger(id));
-        }
+        knownIdsOnStart.addAll(of(instanceIds).map(BigInteger::new).collect(Collectors.toList()));
         new AsyncExceptionLoader(storedExceptions, store).execute();
     }
 
-    @Override
-    public void wipe() {
+    public static void wipe() {
         storedExceptions.clear();
         editor.clear().apply();
         of(exceptionChangeListeners).forEach(ExceptionChangeListener::onExceptionsChanged);
     }
 
-    public boolean isInitialized() {
+    public static boolean isInitialized() {
         return sharedPreferences != null;
     }
 
 
-    public int exceptionCount() {
+    public static int exceptionCount() {
         return storedExceptions.size();
     }
 
-    public BigInteger getLastKnownId() {
+    public static BigInteger getLastKnownId() {
         if (storedExceptions.isEmpty()) {
             return new BigInteger("0");
         }
@@ -99,7 +85,7 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
         return storedExceptions.get(0).getInstanceId();
     }
 
-    public void addException(final Exception e) {
+    public static void addException(final Exception e) {
         if (!storedExceptions.contains(e)) {
             new AsyncTask<Void, Void, Void>() {
                 @Override
@@ -141,7 +127,7 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
     }
 
 
-    public void saveExceptions(List<ExceptionInstanceWrapper> wrapperList) {
+    public static void saveExceptions(List<ExceptionInstanceWrapper> wrapperList) {
         if (!wrapperList.isEmpty()) {
             of(wrapperList).forEach(wrapper -> addException(new Exception(wrapper)));
             of(exceptionChangeListeners).forEach(ExceptionChangeListener::onExceptionsChanged);
@@ -149,14 +135,14 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
     }
 
 
-    private void removeLast() {
+    private static void removeLast() {
         Exception removed = storedExceptions.remove(storedExceptions.size() - 1);
         editor.remove(removed.getInstanceId().toString());
     }
 
 
 
-    public void removeException(Exception e) {
+    public static void removeException(Exception e) {
         editor.remove(e.getInstanceId().toString());
         editor.apply();
         for (int i = 0; i < storedExceptions.size(); i++) {
@@ -167,22 +153,19 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
         }
     }
 
-
-    public List<Exception> getExceptionList() {
+    public static List<Exception> getExceptionList() {
         return storedExceptions;
     }
 
-    @Override
-    public boolean addExceptionChangeListener(ExceptionChangeListener listener) {
+    public static boolean addExceptionChangeListener(ExceptionChangeListener listener) {
         return exceptionChangeListeners.add(listener);
     }
 
-    @Override
-    public boolean removeExceptionChangeListener(ExceptionChangeListener listener) {
+    public static boolean removeExceptionChangeListener(ExceptionChangeListener listener) {
         return exceptionChangeListeners.remove(listener);
     }
 
-    public List<BigInteger> getKnownIds() {
+    public static List<BigInteger> getKnownIds() {
         return knownIdsOnStart;
     }
 
@@ -208,7 +191,7 @@ public class ExceptionInstanceManager implements ExceptionSource, Wipeable {
         private void parseExceptionToMemoryList(Map<String, ?> store, String instanceId) {
             String excJson = (String) store.get(instanceId);
             Exception e = Exception.fromString(excJson);
-            e.setExceptionType(ExceptionTypeManager.getInstance().findById(e.getExceptionTypeId()));
+            e.setExceptionType(ExceptionTypeManager.findById(e.getExceptionTypeId()));
             if (!resultList.contains(e)) {
                 resultList.add(resultList.size(), e);
             }

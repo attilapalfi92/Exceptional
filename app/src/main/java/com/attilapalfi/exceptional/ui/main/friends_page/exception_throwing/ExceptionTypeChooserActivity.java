@@ -49,13 +49,13 @@ public class ExceptionTypeChooserActivity extends AppCompatActivity {
     }
 
     private void setTitle() {
-        List<String> exceptionTypeList = new ArrayList<>(ExceptionTypeManager.getInstance().getExceptionTypes());
+        List<String> exceptionTypeList = new ArrayList<>(ExceptionTypeManager.getExceptionTypes());
         setTitle(exceptionTypeList.get(0));
     }
 
     private void initFriend() {
         BigInteger friendId = new BigInteger(getIntent().getStringExtra(Constants.FRIEND_ID));
-        friend = FriendsManager.getInstance().findFriendById(friendId);
+        friend = FriendsManager.findFriendById(friendId);
     }
 
     private void initViewPager() {

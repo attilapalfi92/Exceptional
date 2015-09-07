@@ -30,7 +30,7 @@ public class FbLoginFragment extends Fragment implements FacebookLoginSuccessHan
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_fb_login, container, false);
 
-        FacebookManager.getInstance().registerLoginSuccessHandler(this);
+        FacebookManager.registerLoginSuccessHandler(this);
 
         LoginButton loginButton = (LoginButton) view.findViewById(R.id.login_button);
         loginButton.setReadPermissions("user_friends");
@@ -38,8 +38,8 @@ public class FbLoginFragment extends Fragment implements FacebookLoginSuccessHan
         loginButton.setFragment(this);
 
         loginButton.setReadPermissions("user_friends");
-        loginButton.registerCallback(FacebookManager.getInstance().getCallbackManager(),
-                FacebookManager.getInstance().getFacebookCallback());
+        loginButton.registerCallback(FacebookManager.getCallbackManager(),
+                FacebookManager.getFacebookCallback());
 
         welcomeText = (TextView) view.findViewById(R.id.welcomeText);
 
@@ -65,7 +65,7 @@ public class FbLoginFragment extends Fragment implements FacebookLoginSuccessHan
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        FacebookManager.getInstance().onActivityResult(requestCode, resultCode, data);
+        FacebookManager.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

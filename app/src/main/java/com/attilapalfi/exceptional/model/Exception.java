@@ -27,7 +27,7 @@ public class Exception {
 
     public Exception(ExceptionInstanceWrapper wrapper) {
         exceptionTypeId = wrapper.getExceptionTypeId();
-        exceptionType = ExceptionTypeManager.getInstance().findById(exceptionTypeId);
+        exceptionType = ExceptionTypeManager.findById(exceptionTypeId);
         instanceId = wrapper.getInstanceId();
         longitude = wrapper.getLongitude();
         latitude = wrapper.getLatitude();

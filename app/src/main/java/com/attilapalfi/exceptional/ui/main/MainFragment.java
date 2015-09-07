@@ -30,8 +30,8 @@ public class MainFragment extends Fragment implements FirstStartFinishedListener
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        MetadataStore.getInstance().addFirstStartFinishedListener(this);
-        MetadataStore.getInstance().addPointChangeListener(this);
+        MetadataStore.addFirstStartFinishedListener(this);
+        MetadataStore.addPointChangeListener(this);
         view = inflater.inflate(R.layout.fragment_main, container, false);
         return view;
     }
@@ -39,7 +39,7 @@ public class MainFragment extends Fragment implements FirstStartFinishedListener
     @Override
     public void onResume() {
         super.onResume();
-        if (MetadataStore.getInstance().isFirstStartFinished()) {
+        if (MetadataStore.isFirstStartFinished()) {
             setViews();
         }
     }
@@ -47,12 +47,12 @@ public class MainFragment extends Fragment implements FirstStartFinishedListener
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        MetadataStore.getInstance().removeFirstStartFinishedListener(this);
-        MetadataStore.getInstance().removePointChangeListener(this);
+        MetadataStore.removeFirstStartFinishedListener(this);
+        MetadataStore.removePointChangeListener(this);
     }
 
     private void setViews() {
-        if (FriendsManager.getInstance().getYourself() != null) {
+        if (FriendsManager.getYourself() != null) {
             setImageView();
             setNameView();
             setPointView();
@@ -61,13 +61,13 @@ public class MainFragment extends Fragment implements FirstStartFinishedListener
 
     private void setImageView() {
         ImageView imageView = (ImageView) view.findViewById(R.id.myMainImageView);
-        FriendsManager.getInstance().getYourself().setImageToView(imageView);
+        FriendsManager.getYourself().setImageToView(imageView);
     }
 
     private void setNameView() {
         TextView nameView = (TextView) view.findViewById(R.id.mainNameTextView);
         String nameText = getResources().getString(R.string.main_welcome_before_name)
-                + " " + FriendsManager.getInstance().getYourself().getFirstName().trim()
+                + " " + FriendsManager.getYourself().getFirstName().trim()
                 + "!";
         nameView.setText(nameText);
     }
@@ -75,7 +75,7 @@ public class MainFragment extends Fragment implements FirstStartFinishedListener
     private void setPointView() {
         TextView pointView = (TextView) view.findViewById(R.id.mainPointTextView);
         String pointText = getString(R.string.main_point_view_pre) + " "
-                + MetadataStore.getInstance().getPoints()
+                + MetadataStore.getPoints()
                 + " " + getString(R.string.main_point_view_post);
         pointView.setText(pointText);
     }

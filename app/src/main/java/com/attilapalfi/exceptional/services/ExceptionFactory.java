@@ -14,7 +14,7 @@ import java.util.Calendar;
 public class ExceptionFactory {
 
     public static Exception createExceptionWithTypeId(int typeId, BigInteger fromWho, BigInteger toWho) {
-        ExceptionType exceptionType = ExceptionTypeManager.getInstance().findById(typeId);
+        ExceptionType exceptionType = ExceptionTypeManager.findById(typeId);
         return createExceptionWithType(exceptionType, fromWho, toWho);
     }
 

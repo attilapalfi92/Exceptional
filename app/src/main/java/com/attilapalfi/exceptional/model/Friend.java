@@ -143,7 +143,7 @@ public class Friend {
 
         @Override
         protected Bitmap doInBackground(Void... params) {
-            return ImageCache.getInstance().getImageForFriend(friend);
+            return ImageCache.getImageForFriend(friend);
         }
 
         @Override

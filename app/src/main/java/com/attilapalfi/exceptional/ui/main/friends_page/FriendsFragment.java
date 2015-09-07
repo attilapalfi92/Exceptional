@@ -38,7 +38,7 @@ public class FriendsFragment extends Fragment implements FriendChangeListener {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        FriendsManager.getInstance().addFriendChangeListener(this);
+        FriendsManager.addFriendChangeListener(this);
     }
 
     @Override
@@ -62,15 +62,15 @@ public class FriendsFragment extends Fragment implements FriendChangeListener {
 
     @Override
     public void onDetach() {
-        FriendsManager.getInstance().removeFriendChangeListener(this);
+        FriendsManager.removeFriendChangeListener(this);
         super.onDetach();
     }
 
     private void initFriendAdapter() {
-        if (!FriendsManager.getInstance().isInitialized()) {
-            FriendsManager.getInstance().initialize(getActivity().getApplicationContext());
+        if (!FriendsManager.isInitialized()) {
+            FriendsManager.initialize(getActivity().getApplicationContext());
         }
-        List<Friend> values = FriendsManager.getInstance().getStoredFriends();
+        List<Friend> values = FriendsManager.getStoredFriends();
         friendAdapter = new FriendAdapter(getActivity(), values);
     }
 

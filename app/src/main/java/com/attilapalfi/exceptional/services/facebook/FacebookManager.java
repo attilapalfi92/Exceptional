@@ -37,30 +37,20 @@ import java.util.List;
  * Created by Attila on 2015-06-06.
  */
 public class FacebookManager {
-    private static FacebookManager instance;
-
-    private AccessToken accessToken;
-    private AccessTokenTracker tokenTracker;
-    private Profile profile;
-    private ProfileTracker profileTracker;
-    private BigInteger profileId = new BigInteger("0");
-    private Friend yourself;
-    private CallbackManager callbackManager;
-    private FacebookCallback<LoginResult> facebookCallback;
-    private FacebookLoginSuccessHandler loginSuccessHandler;
-
-    public static FacebookManager getInstance() {
-        if (instance == null) {
-            instance = new FacebookManager();
-        }
-
-        return instance;
-    }
+    private static AccessToken accessToken;
+    private static AccessTokenTracker tokenTracker;
+    private static Profile profile;
+    private static ProfileTracker profileTracker;
+    private static BigInteger profileId = new BigInteger("0");
+    private static Friend yourself;
+    private static CallbackManager callbackManager;
+    private static FacebookCallback<LoginResult> facebookCallback;
+    private static FacebookLoginSuccessHandler loginSuccessHandler;
 
     private FacebookManager() {
     }
 
-    public void onAppStart(Application application) {
+    public static void onAppStart(Application application) {
         initSubComponents(application);
         tokenTracker.startTracking();
         profileTracker.startTracking();
@@ -70,7 +60,7 @@ public class FacebookManager {
         }
     }
 
-    private void initSubComponents(Application application) {
+    private static void initSubComponents(Application application) {
         FacebookSdk.sdkInitialize(application.getApplicationContext());
         callbackManager = CallbackManager.Factory.create();
         initFacebookCallback();
@@ -78,7 +68,7 @@ public class FacebookManager {
         initProfileTracker();
     }
 
-    private void initProfileTracker() {
+    private static void initProfileTracker() {
         profileTracker = new ProfileTracker() {
             @Override
             protected void onCurrentProfileChanged(Profile oldProfile, Profile newProfile) {
@@ -89,7 +79,7 @@ public class FacebookManager {
         };
     }
 
-    private void initTokenTracker() {
+    private static void initTokenTracker() {
         tokenTracker = new AccessTokenTracker() {
             @Override
             protected void onCurrentAccessTokenChanged(AccessToken oldToken, AccessToken newToken) {
@@ -103,22 +93,22 @@ public class FacebookManager {
         };
     }
 
-    private void setUserLoggedOut() {
-        ImageCache.getInstance().wipe();
-        FriendsManager.getInstance().wipe();
-        ExceptionInstanceManager.getInstance().wipe();
-        ExceptionTypeManager.getInstance().wipe();
-        MetadataStore.getInstance().wipe();
+    private static void setUserLoggedOut() {
+        ImageCache.wipe();
+        FriendsManager.wipe();
+        ExceptionInstanceManager.wipe();
+        ExceptionTypeManager.wipe();
+        MetadataStore.wipe();
     }
 
-    private void initFacebookCallback() {
+    private static void initFacebookCallback() {
         facebookCallback = new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 accessToken = loginResult.getAccessToken();
                 loginSuccessHandler.onLoginSuccess(loginResult);
                 initYourself();
-                MetadataStore.getInstance().setLoggedIn(true);
+                MetadataStore.setLoggedIn(true);
             }
             @Override
             public void onCancel() {}
@@ -128,17 +118,14 @@ public class FacebookManager {
     }
 
 
-    private void refreshFriends() {
-        GraphRequest request = GraphRequest.newMyFriendsRequest(accessToken, new GraphRequest.GraphJSONArrayCallback() {
-            @Override
-            public void onCompleted(JSONArray jsonArray, GraphResponse graphResponse) {
-                if (graphResponse.getError() == null) {
-                    List<Friend> friends = parseFriendsJson(jsonArray);
-                    continueAppStart(friends);
-                } else {
-                    if (MetadataStore.getInstance().isLoggedIn()) {
-                        Log.e("FacebookManager: ", "GraphRequest error: " + graphResponse.getError());
-                    }
+    private static void refreshFriends() {
+        GraphRequest request = GraphRequest.newMyFriendsRequest(accessToken, (jsonArray, graphResponse) -> {
+            if (graphResponse.getError() == null) {
+                List<Friend> friends = parseFriendsJson(jsonArray);
+                continueAppStart(friends);
+            } else {
+                if (MetadataStore.isLoggedIn()) {
+                    Log.e("FacebookManager: ", "GraphRequest error: " + graphResponse.getError());
                 }
             }
         });
@@ -146,7 +133,7 @@ public class FacebookManager {
     }
 
     @NonNull
-    private List<Friend> parseFriendsJson(JSONArray jsonArray) {
+    private static List<Friend> parseFriendsJson(JSONArray jsonArray) {
         Log.d("response length: ", Integer.toString(jsonArray.length()));
         List<Friend> friends = new ArrayList<>();
         for(int i = 0; i < jsonArray.length(); i++) {
@@ -160,29 +147,29 @@ public class FacebookManager {
         return friends;
     }
 
-    private void continueAppStart(List<Friend> friends) {
+    private static void continueAppStart(List<Friend> friends) {
         Log.i("FacebookManager: ", "continueAppStart called.");
-        if (MetadataStore.getInstance().isLoggedIn()) {
-            if (!MetadataStore.getInstance().isFirstStartFinished()) {
+        if (MetadataStore.isLoggedIn()) {
+            if (!MetadataStore.isFirstStartFinished()) {
                 initYourself();
-                FriendsManager.getInstance().saveFriendsAndYourself(friends, yourself);
-                BackendService.getInstance().onFirstAppStart(friends);
+                FriendsManager.saveFriendsAndYourself(friends, yourself);
+                BackendService.onFirstAppStart(friends);
             } else {
                 initYourself();
-                FriendsManager.getInstance().updateFriendsAndYourself(friends, yourself);
-                BackendService.getInstance().onRegularAppStart(friends);
+                FriendsManager.updateFriendsAndYourself(friends, yourself);
+                BackendService.onRegularAppStart(friends);
             }
         }
     }
 
-    private void executeGraphRequest(GraphRequest request) {
+    private static void executeGraphRequest(GraphRequest request) {
         Bundle parameters = new Bundle();
         parameters.putString("fields", "id,name,picture");
         request.setParameters(parameters);
         request.executeAsync();
     }
 
-    private void initYourself() {
+    private static void initYourself() {
         profile = Profile.getCurrentProfile();
         if (profile != null) {
             yourself = new Friend(
@@ -194,7 +181,7 @@ public class FacebookManager {
     }
 
     @NonNull
-    private Friend parseFriend(JSONArray jsonArray, int i) throws JSONException {
+    private static Friend parseFriend(JSONArray jsonArray, int i) throws JSONException {
         JSONObject user = jsonArray.getJSONObject(i);
         String names[] = parseFirstAndLastName(user.getString("name"));
         String id = user.getString("id");
@@ -203,7 +190,7 @@ public class FacebookManager {
         return new Friend(new BigInteger(id), names[0], names[1], imageUrl, null);
     }
 
-    private String[] parseFirstAndLastName(String name) {
+    private static String[] parseFirstAndLastName(String name) {
         String[] names = name.split(" ");
         String[] firstAndLastName = {"", ""};
         firstAndLastName[1] = names[names.length - 1];
@@ -215,7 +202,7 @@ public class FacebookManager {
     }
 
 
-    public BigInteger getProfileId() {
+    public static BigInteger getProfileId() {
         if (profile == null) {
             profile = Profile.getCurrentProfile();
         }
@@ -228,26 +215,26 @@ public class FacebookManager {
     }
 
 
-    public void onAppKilled() {
+    public static void onAppKilled() {
         tokenTracker.stopTracking();
         profileTracker.stopTracking();
     }
 
 
-    public CallbackManager getCallbackManager() {
+    public static CallbackManager getCallbackManager() {
         return callbackManager;
     }
 
 
-    public FacebookCallback<LoginResult> getFacebookCallback() {
+    public static FacebookCallback<LoginResult> getFacebookCallback() {
         return facebookCallback;
     }
 
-    public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
+    public static boolean onActivityResult(int requestCode, int resultCode, Intent data) {
         return callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
-    public void registerLoginSuccessHandler(FacebookLoginSuccessHandler handler) {
+    public static void registerLoginSuccessHandler(FacebookLoginSuccessHandler handler) {
         loginSuccessHandler = handler;
     }
 }

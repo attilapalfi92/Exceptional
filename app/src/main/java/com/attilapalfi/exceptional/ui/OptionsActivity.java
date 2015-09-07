@@ -26,7 +26,7 @@ public class OptionsActivity extends AppCompatActivity {
     @Override
     public void onBackPressed()
     {
-        if (!MetadataStore.getInstance().isLoggedIn()) {
+        if (!MetadataStore.isLoggedIn()) {
             closeApp();
         } else {
             super.onBackPressed();

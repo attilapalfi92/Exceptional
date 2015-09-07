@@ -72,8 +72,8 @@ public class GcmMessageHandler extends IntentService {
 
     private void handleFriendNotification(Bundle extras) {
         String fullName = extras.getString("fullName");
-        if(!FriendsManager.getInstance().isInitialized()) {
-            FriendsManager.getInstance().initialize(getApplicationContext());
+        if(!FriendsManager.isInitialized()) {
+            FriendsManager.initialize(getApplicationContext());
         }
         showFriendNotification(fullName + " joined!", "Throw an exception into them face!");
     }
@@ -88,7 +88,7 @@ public class GcmMessageHandler extends IntentService {
     private void parseNotificationToException(Bundle extras) {
         initException();
         int typeId = Integer.parseInt(extras.getString("typeId"));
-        exception.setExceptionType(ExceptionTypeManager.getInstance().findById(typeId));
+        exception.setExceptionType(ExceptionTypeManager.findById(typeId));
         exception.setInstanceId(new BigInteger(extras.getString("instanceId")));
         exception.setFromWho(new BigInteger(extras.getString("fromWho")));
         exception.setToWho(new BigInteger(extras.getString("toWho")));
@@ -98,8 +98,8 @@ public class GcmMessageHandler extends IntentService {
     }
 
     private void initException() {
-        if (!ExceptionTypeManager.getInstance().isInitialized()) {
-            ExceptionTypeManager.getInstance().initialize(getApplicationContext());
+        if (!ExceptionTypeManager.isInitialized()) {
+            ExceptionTypeManager.initialize(getApplicationContext());
         }
         exception = new Exception();
     }
@@ -117,35 +117,32 @@ public class GcmMessageHandler extends IntentService {
 
     private void saveDataOnMainThread(final Bundle extras) {
         initServices();
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                ExceptionInstanceManager.getInstance().addException(exception);
-                savePoints(extras);
-            }
+        handler.post(() -> {
+            ExceptionInstanceManager.addException(exception);
+            savePoints(extras);
         });
     }
 
     private void initServices() {
-        if (!ExceptionInstanceManager.getInstance().isInitialized()) {
-            ExceptionInstanceManager.getInstance().initialize(getApplicationContext());
+        if (!ExceptionInstanceManager.isInitialized()) {
+            ExceptionInstanceManager.initialize(getApplicationContext());
         }
-        if (!MetadataStore.getInstance().isInitialized()) {
-            MetadataStore.getInstance().initialize(getApplicationContext());
+        if (!MetadataStore.isInitialized()) {
+            MetadataStore.initialize(getApplicationContext());
         }
-        if (!FriendsManager.getInstance().isInitialized()) {
-            FriendsManager.getInstance().initialize(getApplicationContext());
+        if (!FriendsManager.isInitialized()) {
+            FriendsManager.initialize(getApplicationContext());
         }
     }
 
     private void savePoints(Bundle extras) {
         String yourPointsString = extras.getString("yourPoints");
         if (yourPointsString != null) {
-            MetadataStore.getInstance().setPoints(Integer.parseInt(yourPointsString));
+            MetadataStore.setPoints(Integer.parseInt(yourPointsString));
         }
         String friendPointsString = extras.getString("friendPoints");
         if (friendPointsString != null) {
-            FriendsManager.getInstance().updateFriendPoints(exception.getFromWho(), Integer.parseInt(friendPointsString));
+            FriendsManager.updateFriendPoints(exception.getFromWho(), Integer.parseInt(friendPointsString));
         }
 
     }

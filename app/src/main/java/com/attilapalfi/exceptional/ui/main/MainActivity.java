@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        if(!MetadataStore.getInstance().isLoggedIn()) {
+        if(!MetadataStore.isLoggedIn()) {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void submitClicked(View view) {
-        if (MetadataStore.getInstance().isSubmittedThisWeek()) {
+        if (MetadataStore.isSubmittedThisWeek()) {
             Toast.makeText(this, R.string.already_submitted, Toast.LENGTH_SHORT).show();
         } else {
             MaterialDialog materialDialog = new MaterialDialog.Builder(this)
@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
                             getSubmitStrings(dialog.getCustomView());
 
                             if ( prefixIsValid() && shortNameIsValid() && descriptionIsValid() ) {
-                                BackendService.getInstance().submitType(new ExceptionType(
+                                BackendService.submitType(new ExceptionType(
                                         0,
                                         submitShortName,
                                         submitPrefix,

@@ -24,42 +24,32 @@ import static com.annimon.stream.Stream.of;
 /**
  * Created by 212461305 on 2015.07.06..
  */
-public class ImageCache implements Wipeable {
-    private LruCache<BigInteger, Bitmap> imageWarehouse;
-    private Context applicationContext;
-    private String filePath;
-
-    private static ImageCache instance;
-
-    public static ImageCache getInstance() {
-        if (instance == null) {
-            instance = new ImageCache();
-        }
-
-        return instance;
-    }
+public class ImageCache {
+    private static LruCache<BigInteger, Bitmap> imageWarehouse;
+    private static Context applicationContext;
+    private static String filePath;
 
 
     private ImageCache() {
-        final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
-        final int cacheSize = maxMemory / 8;
-        imageWarehouse = new LruCache<BigInteger, Bitmap>(cacheSize) {
-            @Override
-            protected int sizeOf(BigInteger key, Bitmap value) {
-                int bitmapByteCount = value.getRowBytes() * value.getHeight(); // The cache size will be measured in kilobytes rather than number of items.
-                return bitmapByteCount / 1024;
-            }
-        };
     }
 
-
-    public void initialize(Context context) {
+    public static void initialize(Context context) {
         applicationContext = context;
         try {
             filePath =
                     Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ||
                             !Environment.isExternalStorageRemovable() ? applicationContext.getExternalCacheDir().getPath() :
                             applicationContext.getCacheDir().getPath();
+
+            final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+            final int cacheSize = maxMemory / 8;
+            imageWarehouse = new LruCache<BigInteger, Bitmap>(cacheSize) {
+                @Override
+                protected int sizeOf(BigInteger key, Bitmap value) {
+                    int bitmapByteCount = value.getRowBytes() * value.getHeight(); // The cache size will be measured in kilobytes rather than number of items.
+                    return bitmapByteCount / 1024;
+                }
+            };
 
         } catch (NullPointerException npe) {
             Log.d("NullPointerException", npe.getMessage());
@@ -72,7 +62,7 @@ public class ImageCache implements Wipeable {
      * @param friend who's picture is added
      * @param image the picture that is added
      */
-    public void addImage(final Friend friend, final Bitmap image) {
+    public static void addImage(final Friend friend, final Bitmap image) {
         if (isNotInMemory(friend)) {
             imageWarehouse.put(friend.getId(), image);
             new AsyncTask<Void, Void, Void>() {
@@ -100,18 +90,18 @@ public class ImageCache implements Wipeable {
         }
     }
 
-    private boolean isNotInMemory(Friend friend) {
+    private static boolean isNotInMemory(Friend friend) {
         return imageWarehouse != null && imageWarehouse.get(friend.getId()) == null;
     }
 
 
-    private boolean imageFileExists(Friend friend) {
+    private static boolean imageFileExists(Friend friend) {
         String filePath = getFriendsImageFilePath(friend);
         File file = new File(filePath);
         return file.exists() && !file.isDirectory();
     }
 
-    private String getFriendsImageFilePath(Friend friend){
+    private static String getFriendsImageFilePath(Friend friend){
         try {
             File mediaStorageDir = makeStorageDirectory();
             if (mediaStorageDir == null) return null;
@@ -123,7 +113,7 @@ public class ImageCache implements Wipeable {
     }
 
     @Nullable
-    private File makeStorageDirectory() {
+    private static File makeStorageDirectory() {
         File mediaStorageDir = new File(filePath);
         if (!mediaStorageDir.exists()){
             if (!mediaStorageDir.mkdirs()){
@@ -139,7 +129,7 @@ public class ImageCache implements Wipeable {
      * @param friend who's image
      * @return image of friend or null
      */
-    public Bitmap getImageForFriend(Friend friend) {
+    public static Bitmap getImageForFriend(Friend friend) {
         Bitmap bitmap = imageWarehouse.get(friend.getId()); // getting image from memory cache, if available
         if (bitmap == null) {
             if (imageFileExists(friend)) {
@@ -160,7 +150,7 @@ public class ImageCache implements Wipeable {
         return bitmap;
     }
 
-    private Bitmap getBitmapFromInternet(Friend friend) throws IOException {
+    private static Bitmap getBitmapFromInternet(Friend friend) throws IOException {
         URL url = new URL(friend.getImageUrl());
         URLConnection connection = url.openConnection();
         connection.setUseCaches(true);
@@ -168,7 +158,7 @@ public class ImageCache implements Wipeable {
         return BitmapFactory.decodeStream(inputStream);
     }
 
-    private Bitmap getFromDisk(Friend friend) {
+    private static Bitmap getFromDisk(Friend friend) {
         String filePath = getFriendsImageFilePath(friend);
         if (filePath != null) {
             File file = new File(filePath);
@@ -178,22 +168,21 @@ public class ImageCache implements Wipeable {
         return null;
     }
 
-    public void removeImage(Friend friend) {
+    public static void removeImage(Friend friend) {
         imageWarehouse.remove(friend.getId());
         deleteFromDisk(friend);
     }
 
-    @Override
-    public void wipe() {
+    public static void wipe() {
         imageWarehouse.evictAll();
-        if (!FriendsManager.getInstance().isInitialized()) {
-            FriendsManager.getInstance().initialize(applicationContext);
+        if (!FriendsManager.isInitialized()) {
+            FriendsManager.initialize(applicationContext);
         }
-        of(FriendsManager.getInstance().getStoredFriends())
-                .forEach(this::deleteFromDisk);
+        of(FriendsManager.getStoredFriends())
+                .forEach(ImageCache::deleteFromDisk);
     }
 
-    private void deleteFromDisk(Friend friend) {
+    private static void deleteFromDisk(Friend friend) {
         String filePath = getFriendsImageFilePath(friend);
         File imageFile = new File(filePath);
         if (imageFile.exists()) {

@@ -50,10 +50,10 @@ public class ExceptionTypesFragment extends Fragment {
     }
 
     private void initExceptionTypes() {
-        int index = instanceCounter++ % ExceptionTypeManager.getInstance().getExceptionTypes().size();
-        List<String> types = new ArrayList<>(ExceptionTypeManager.getInstance().getExceptionTypes());
+        int index = instanceCounter++ % ExceptionTypeManager.getExceptionTypes().size();
+        List<String> types = new ArrayList<>(ExceptionTypeManager.getExceptionTypes());
         String typeOfThis = types.get(index);
-        exceptionTypes = ExceptionTypeManager.getInstance().getExceptionTypeListByName(typeOfThis);
+        exceptionTypes = ExceptionTypeManager.getExceptionTypeListByName(typeOfThis);
     }
 
     private void initTypeAdapter() {
@@ -82,7 +82,7 @@ public class ExceptionTypesFragment extends Fragment {
             public void onClick(View view) {
                 if (GpsService.getInstance().canGetLocation()) {
                     Exception exception = createException(view);
-                    BackendService.getInstance().throwException(exception);
+                    BackendService.throwException(exception);
                     navigateToMainPage();
                 } else {
                     Toast.makeText(activity.getApplicationContext(), R.string.can_throw_location_pls,
@@ -96,7 +96,7 @@ public class ExceptionTypesFragment extends Fragment {
                 BigInteger friendId = new BigInteger(activity.getIntent().getStringExtra(Constants.FRIEND_ID));
                 Exception exception = ExceptionFactory.createExceptionWithType(
                         exceptionType,
-                        FriendsManager.getInstance().getYourself().getId(),
+                        FriendsManager.getYourself().getId(),
                         friendId);
                 setLocationForException(exception);
                 return exception;

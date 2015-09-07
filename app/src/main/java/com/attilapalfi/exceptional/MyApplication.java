@@ -31,25 +31,25 @@ public class MyApplication extends android.support.multidex.MultiDexApplication 
         writeHashKeyToDebug();
         Context applicationContext = getApplicationContext();
         initializeServices(applicationContext);
-        FacebookManager.getInstance().onAppStart(this);
+        FacebookManager.onAppStart(this);
     }
 
     private void initializeServices(Context applicationContext) {
-        MetadataStore.getInstance().initialize(applicationContext);
-        ImageCache.getInstance().initialize(applicationContext);
-        ExceptionTypeManager.getInstance().initialize(applicationContext);
-        ExceptionInstanceManager.getInstance().initialize(applicationContext);
-        FriendsManager.getInstance().initialize(applicationContext);
+        MetadataStore.initialize(applicationContext);
+        ImageCache.initialize(applicationContext);
+        ExceptionTypeManager.initialize(applicationContext);
+        ExceptionInstanceManager.initialize(applicationContext);
+        FriendsManager.initialize(applicationContext);
         String androidId = Settings.Secure.getString(applicationContext
                 .getContentResolver(), Settings.Secure.ANDROID_ID);
         BackendService.init(applicationContext);
-        BackendService.getInstance().setAndroidId(androidId);
+        BackendService.setAndroidId(androidId);
     }
 
     @Override
     public void onTerminate() {
         super.onTerminate();
-        FacebookManager.getInstance().onAppKilled();
+        FacebookManager.onAppKilled();
     }
 
 
