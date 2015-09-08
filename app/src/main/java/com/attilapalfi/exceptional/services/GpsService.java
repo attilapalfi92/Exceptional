@@ -1,12 +1,10 @@
 package com.attilapalfi.exceptional.services;
 
-import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -30,94 +28,94 @@ public class GpsService extends Service implements LocationListener {
     private boolean isNetworkEnabled = false;
     private boolean canGetLocation = false;
 
-    public static GpsService getInstance() {
-        if (instance == null) {
+    public static GpsService getInstance( ) {
+        if ( instance == null ) {
             instance = new GpsService();
         }
 
         return instance;
     }
 
-    private GpsService() {
+    private GpsService( ) {
     }
 
-    public void initialize(Context context) {
+    public void initialize( Context context ) {
         this.context = context;
         getLocation();
     }
 
-    public Location getLocation() {
+    public Location getLocation( ) {
         try {
             getNetworkStatus();
-            if (isNetworkEnabled) {
+            if ( isNetworkEnabled ) {
                 canGetLocation = true;
                 initLocationNetworkProvider();
                 getLastKnownLocation();
             } else {
                 // no network provider is enabled
             }
-        } catch (Exception e) {
+        } catch ( Exception e ) {
             e.printStackTrace();
         }
         return location;
     }
 
-    private void getNetworkStatus() {
-        locationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
-        isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    private void getNetworkStatus( ) {
+        locationManager = (LocationManager) context.getSystemService( LOCATION_SERVICE );
+        isNetworkEnabled = locationManager.isProviderEnabled( LocationManager.NETWORK_PROVIDER );
     }
 
     // before
-    private void initLocationNetworkProvider() {
+    private void initLocationNetworkProvider( ) {
         locationManager.requestLocationUpdates(
                 LocationManager.NETWORK_PROVIDER,
                 MIN_TIME_BW_UPDATES,
-                MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
+                MIN_DISTANCE_CHANGE_FOR_UPDATES, this );
     }
 
     // before
-    private void getLastKnownLocation() {
-        if (locationManager != null) {
-            location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+    private void getLastKnownLocation( ) {
+        if ( locationManager != null ) {
+            location = locationManager.getLastKnownLocation( LocationManager.NETWORK_PROVIDER );
         }
     }
 
     // before
-    public void stopUsingGps(){
-        if(locationManager != null){
-            locationManager.removeUpdates(GpsService.this);
+    public void stopUsingGps( ) {
+        if ( locationManager != null ) {
+            locationManager.removeUpdates( GpsService.this );
         }
     }
 
-    public boolean canGetLocation() {
+    public boolean canGetLocation( ) {
         // getting network status
-        isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        isNetworkEnabled = locationManager.isProviderEnabled( LocationManager.NETWORK_PROVIDER );
         canGetLocation = isNetworkEnabled;
-        if (!canGetLocation) {
-            Toast.makeText(context, "Can't get device's location.\nPlease enable location services.", Toast.LENGTH_SHORT).show();
+        if ( !canGetLocation ) {
+            Toast.makeText( context, "Can't get device's location.\nPlease enable location services.", Toast.LENGTH_SHORT ).show();
         }
 
         return canGetLocation;
     }
 
 
-    public void showSettingsAlert(){
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
+    public void showSettingsAlert( ) {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder( context );
 
         // On pressing Settings button
-        alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog,int which) {
-                Intent intent = new Intent(Settings.ACTION_NETWORK_OPERATOR_SETTINGS);
-                context.startActivity(intent);
+        alertDialog.setPositiveButton( "Settings", new DialogInterface.OnClickListener() {
+            public void onClick( DialogInterface dialog, int which ) {
+                Intent intent = new Intent( Settings.ACTION_NETWORK_OPERATOR_SETTINGS );
+                context.startActivity( intent );
             }
-        });
+        } );
 
         // on pressing cancel button
-        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
+        alertDialog.setNegativeButton( "Cancel", new DialogInterface.OnClickListener() {
+            public void onClick( DialogInterface dialog, int which ) {
                 dialog.cancel();
             }
-        });
+        } );
 
         // Showing Alert Message
         alertDialog.show();
@@ -125,23 +123,23 @@ public class GpsService extends Service implements LocationListener {
 
 
     @Override
-    public void onLocationChanged(Location location) {
+    public void onLocationChanged( Location location ) {
     }
 
     @Override
-    public void onProviderDisabled(String provider) {
+    public void onProviderDisabled( String provider ) {
     }
 
     @Override
-    public void onProviderEnabled(String provider) {
+    public void onProviderEnabled( String provider ) {
     }
 
     @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
+    public void onStatusChanged( String provider, int status, Bundle extras ) {
     }
 
     @Override
-    public IBinder onBind(Intent arg0) {
+    public IBinder onBind( Intent arg0 ) {
         return null;
     }
 }

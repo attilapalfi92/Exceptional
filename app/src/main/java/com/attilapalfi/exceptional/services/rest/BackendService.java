@@ -107,7 +107,7 @@ public class BackendService {
                     Friend toWho = FriendsManager.findFriendById(e.getInstanceWrapper().getToWho());
                     MetadataStore.setPoints(e.getYourPoints());
                     FriendsManager.updateFriendPoints(e.getInstanceWrapper().getToWho(), e.getFriendsPoints());
-                    ExceptionInstanceManager.addException(new Exception(e.getInstanceWrapper()));
+                    ExceptionInstanceManager.addExceptionAsync( new Exception( e.getInstanceWrapper() ) );
                     Toast.makeText(context, e.getExceptionShortName() + " "
                                     + context.getString(R.string.successfully_thrown)
                                     + " " + toWho.getName(),
@@ -135,7 +135,7 @@ public class BackendService {
 
             @Override
             public void success(ExceptionRefreshResponse exceptionRefreshResponse, Response response) {
-                ExceptionInstanceManager.saveExceptions(exceptionRefreshResponse.getExceptionList());
+                ExceptionInstanceManager.saveExceptionListAsync( exceptionRefreshResponse.getExceptionList() );
                 Toast.makeText(context, R.string.exceptions_syncd, Toast.LENGTH_SHORT).show();
                 refreshListener.onExceptionRefreshFinished();
             }
@@ -246,7 +246,7 @@ public class BackendService {
             ExceptionTypeManager.addExceptionTypes(responseBody.getExceptionTypes());
         }
         MetadataStore.setExceptionVersion(responseBody.getExceptionVersion());
-        ExceptionInstanceManager.saveExceptions(responseBody.getMyExceptions());
+        ExceptionInstanceManager.saveExceptionListAsync( responseBody.getMyExceptions() );
         ExceptionTypeManager.setVotedExceptionTypes(responseBody.getBeingVotedTypes());
         MetadataStore.setPoints(responseBody.getPoints());
         MetadataStore.setSubmittedThisWeek(responseBody.isSubmittedThisWeek());

@@ -118,7 +118,7 @@ public class GcmMessageHandler extends IntentService {
     private void saveDataOnMainThread(final Bundle extras) {
         initServices();
         handler.post(() -> {
-            ExceptionInstanceManager.addException(exception);
+            ExceptionInstanceManager.addExceptionAsync( exception );
             savePoints(extras);
         });
     }
