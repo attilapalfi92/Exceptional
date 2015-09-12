@@ -9,27 +9,27 @@ public class VoteRequest {
     private BigInteger userId;
     private int votedExceptionId;
 
-    public VoteRequest() {
+    public VoteRequest( ) {
     }
 
-    public VoteRequest(BigInteger userId, int votedExceptionId) {
+    public VoteRequest( BigInteger userId, int votedExceptionId ) {
         this.userId = userId;
         this.votedExceptionId = votedExceptionId;
     }
 
-    public BigInteger getUserId() {
+    public BigInteger getUserId( ) {
         return userId;
     }
 
-    public void setUserId(BigInteger userId) {
+    public void setUserId( BigInteger userId ) {
         this.userId = userId;
     }
 
-    public int getVotedExceptionId() {
+    public int getVotedExceptionId( ) {
         return votedExceptionId;
     }
 
-    public void setVotedExceptionId(int votedExceptionId) {
+    public void setVotedExceptionId( int votedExceptionId ) {
         this.votedExceptionId = votedExceptionId;
     }
 }

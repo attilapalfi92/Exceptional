@@ -12,7 +12,7 @@
     <fragment
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:name="com.attilapalfi.exceptional.ui.FbLoginFragment"
+        android:name="com.attilapalfi.exceptional.ui.FacebookLoginFragment"
         android:id="@+id/login_fragment"
         tools:layout="@layout/fragment_fb_login" />
 

@@ -1,5 +1,9 @@
 package com.attilapalfi.exceptional.ui.main.friends_page;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,15 +17,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.attilapalfi.exceptional.R;
+import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.interfaces.FriendChangeListener;
 import com.attilapalfi.exceptional.model.Friend;
-import com.attilapalfi.exceptional.services.rest.BackendService;
 import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
+import com.attilapalfi.exceptional.services.persistent_stores.ImageCache;
 import com.attilapalfi.exceptional.ui.main.Constants;
-
-import java.util.List;
 
 /**
  * Created by palfi on 2015-08-23.
@@ -29,104 +31,102 @@ import java.util.List;
 public class FriendsFragment extends Fragment implements FriendChangeListener {
     private RecyclerView recyclerView;
     private FriendAdapter friendAdapter;
+    @Inject FriendsManager friendsManager;
+    @Inject ImageCache imageCache;
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onCreate( @Nullable Bundle savedInstanceState ) {
+        super.onCreate( savedInstanceState );
+        Injector.INSTANCE.getApplicationComponent().inject( this );
+        friendsManager.addFriendChangeListener( this );
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        FriendsManager.addFriendChangeListener(this);
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onActivityCreated( @Nullable Bundle savedInstanceState ) {
+        super.onActivityCreated( savedInstanceState );
     }
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView( LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState ) {
         initFriendAdapter();
-        View fragmentView = initRecyclerView(inflater, container);
+        View fragmentView = initRecyclerView( inflater, container );
         onFriendsChanged();
         return fragmentView;
     }
 
     @Override
-    public void onResume() {
+    public void onResume( ) {
         super.onResume();
     }
 
     @Override
-    public void onDetach() {
-        FriendsManager.removeFriendChangeListener(this);
-        super.onDetach();
+    public void onDestroy( ) {
+        friendsManager.removeFriendChangeListener( this );
+        super.onDestroy();
     }
 
-    private void initFriendAdapter() {
-        if (!FriendsManager.isInitialized()) {
-            FriendsManager.initialize(getActivity().getApplicationContext());
-        }
-        List<Friend> values = FriendsManager.getStoredFriends();
-        friendAdapter = new FriendAdapter(getActivity(), values);
+    private void initFriendAdapter( ) {
+        List<Friend> values = friendsManager.getStoredFriends();
+        friendAdapter = new FriendAdapter( values, getActivity(), imageCache );
     }
 
     @NonNull
-    private View initRecyclerView(LayoutInflater inflater, ViewGroup container) {
-        View fragmentView = inflater.inflate(R.layout.fragment_friends, container, false);
-        recyclerView = (RecyclerView) fragmentView.findViewById(R.id.friend_recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.setAdapter(friendAdapter);
-        friendAdapter.setRecyclerView(recyclerView);
+    private View initRecyclerView( LayoutInflater inflater, ViewGroup container ) {
+        View fragmentView = inflater.inflate( R.layout.fragment_friends, container, false );
+        recyclerView = (RecyclerView) fragmentView.findViewById( R.id.friend_recycler_view );
+        recyclerView.setLayoutManager( new LinearLayoutManager( getActivity() ) );
+        recyclerView.setAdapter( friendAdapter );
+        friendAdapter.setRecyclerView( recyclerView );
         return fragmentView;
     }
 
     @Override
-    public void onFriendsChanged() {
+    public void onFriendsChanged( ) {
         friendAdapter.notifyDataSetChanged();
     }
 
     private static class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.RowViewHolder> {
-        private Activity activity;
         private List<Friend> values;
         private RecyclerView recyclerView;
+        private Activity activity;
+        private ImageCache imageCache;
+
         private final View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                int itemPosition = recyclerView.getChildPosition(view);
-                Friend friend = values.get(itemPosition);
-                Intent intent = new Intent(activity, FriendDetailsActivity.class);
-                intent.putExtra(Constants.FRIEND_ID, friend.getId().toString());
-                activity.startActivity(intent);
+            public void onClick( View view ) {
+                int itemPosition = recyclerView.getChildPosition( view );
+                Friend friend = values.get( itemPosition );
+                Intent intent = new Intent( activity, FriendDetailsActivity.class );
+                intent.putExtra( Constants.FRIEND_ID, friend.getId().toString() );
+                activity.startActivity( intent );
             }
         };
 
-        public FriendAdapter(Activity activity, List<Friend> values) {
-            this.activity = activity;
+        public FriendAdapter( List<Friend> values, Activity activity, ImageCache imageCache ) {
             this.values = values;
+            this.activity = activity;
+            this.imageCache = imageCache;
         }
 
         @Override
-        public RowViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.friend_row_layout, parent, false);
-            view.setOnClickListener(onClickListener);
-            return new RowViewHolder(view);
+        public RowViewHolder onCreateViewHolder( ViewGroup parent, int viewType ) {
+            View view = LayoutInflater.from( parent.getContext() ).inflate( R.layout.friend_row_layout, parent, false );
+            view.setOnClickListener( onClickListener );
+            return new RowViewHolder( view, imageCache );
         }
 
         @Override
-        public void onBindViewHolder(RowViewHolder holder, int position) {
-            holder.bindRow(values.get(position));
+        public void onBindViewHolder( RowViewHolder holder, int position ) {
+            holder.bindRow( values.get( position ) );
         }
 
         @Override
-        public int getItemCount() {
+        public int getItemCount( ) {
             return values != null ? values.size() : 0;
         }
 
-        public void setRecyclerView(RecyclerView recyclerView) {
+        public void setRecyclerView( RecyclerView recyclerView ) {
             this.recyclerView = recyclerView;
         }
 
@@ -135,18 +135,20 @@ public class FriendsFragment extends Fragment implements FriendChangeListener {
             private TextView nameView;
             private TextView pointsView;
             private ImageView imageView;
+            private ImageCache imageCache;
 
-            public RowViewHolder(View rowView) {
-                super(rowView);
-                nameView = (TextView) rowView.findViewById(R.id.friendNameView);
-                pointsView = (TextView) rowView.findViewById(R.id.friendPointsView);
-                imageView = (ImageView) rowView.findViewById(R.id.friendImageView);
+            public RowViewHolder( View rowView, ImageCache imageCache ) {
+                super( rowView );
+                this.imageCache = imageCache;
+                nameView = (TextView) rowView.findViewById( R.id.friendNameView );
+                pointsView = (TextView) rowView.findViewById( R.id.friendPointsView );
+                imageView = (ImageView) rowView.findViewById( R.id.friendImageView );
             }
 
-            public void bindRow(Friend model) {
-                nameView.setText(model.getFirstName() + " " + model.getLastName());
-                pointsView.setText("Points: " + model.getPoints());
-                model.setImageToView(imageView);
+            public void bindRow( Friend model ) {
+                nameView.setText( model.getFirstName() + " " + model.getLastName() );
+                pointsView.setText( "Points: " + model.getPoints() );
+                model.setImageToView( imageView, imageCache );
             }
         }
 

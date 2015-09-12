@@ -1,12 +1,12 @@
 package com.attilapalfi.exceptional.services.rest.messages;
 
-import com.attilapalfi.exceptional.model.ExceptionType;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.attilapalfi.exceptional.model.ExceptionType;
 
 /**
  * Created by Attila on 2015-06-11.
@@ -21,74 +21,74 @@ public class AppStartResponse {
     private boolean submittedThisWeek;
     private boolean votedThisWeek;
 
-    public AppStartResponse() {
+    public AppStartResponse( ) {
         myExceptions = new ArrayList<>();
         exceptionTypes = new ArrayList<>();
         beingVotedTypes = new ArrayList<>();
         friendsPoints = new HashMap<>();
     }
 
-    public List<ExceptionInstanceWrapper> getMyExceptions() {
+    public List<ExceptionInstanceWrapper> getMyExceptions( ) {
         return myExceptions;
     }
 
-    public void setMyExceptions(List<ExceptionInstanceWrapper> myExceptions) {
+    public void setMyExceptions( List<ExceptionInstanceWrapper> myExceptions ) {
         this.myExceptions = myExceptions;
     }
 
-    public List<ExceptionType> getExceptionTypes() {
+    public List<ExceptionType> getExceptionTypes( ) {
         return exceptionTypes;
     }
 
-    public void setExceptionTypes(List<ExceptionType> exceptionTypes) {
+    public void setExceptionTypes( List<ExceptionType> exceptionTypes ) {
         this.exceptionTypes = exceptionTypes;
     }
 
-    public List<ExceptionType> getBeingVotedTypes() {
+    public List<ExceptionType> getBeingVotedTypes( ) {
         return beingVotedTypes;
     }
 
-    public void setBeingVotedTypes(List<ExceptionType> beingVotedTypes) {
+    public void setBeingVotedTypes( List<ExceptionType> beingVotedTypes ) {
         this.beingVotedTypes = beingVotedTypes;
     }
 
-    public int getPoints() {
+    public int getPoints( ) {
         return points;
     }
 
-    public void setPoints(int points) {
+    public void setPoints( int points ) {
         this.points = points;
     }
 
-    public int getExceptionVersion() {
+    public int getExceptionVersion( ) {
         return exceptionVersion;
     }
 
-    public void setExceptionVersion(int exceptionVersion) {
+    public void setExceptionVersion( int exceptionVersion ) {
         this.exceptionVersion = exceptionVersion;
     }
 
-    public Map<BigInteger, Integer> getFriendsPoints() {
+    public Map<BigInteger, Integer> getFriendsPoints( ) {
         return friendsPoints;
     }
 
-    public void setFriendsPoints(Map<BigInteger, Integer> friendsPoints) {
+    public void setFriendsPoints( Map<BigInteger, Integer> friendsPoints ) {
         this.friendsPoints = friendsPoints;
     }
 
-    public boolean isSubmittedThisWeek() {
+    public boolean isSubmittedThisWeek( ) {
         return submittedThisWeek;
     }
 
-    public void setSubmittedThisWeek(boolean submittedThisWeek) {
+    public void setSubmittedThisWeek( boolean submittedThisWeek ) {
         this.submittedThisWeek = submittedThisWeek;
     }
 
-    public boolean isVotedThisWeek() {
+    public boolean isVotedThisWeek( ) {
         return votedThisWeek;
     }
 
-    public void setVotedThisWeek(boolean votedThisWeek) {
+    public void setVotedThisWeek( boolean votedThisWeek ) {
         this.votedThisWeek = votedThisWeek;
     }
 }

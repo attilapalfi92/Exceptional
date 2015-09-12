@@ -8,18 +8,18 @@ import java.util.List;
 public class ExceptionRefreshResponse {
     List<ExceptionInstanceWrapper> exceptionList;
 
-    public ExceptionRefreshResponse() {
+    public ExceptionRefreshResponse( ) {
     }
 
-    public ExceptionRefreshResponse(List<ExceptionInstanceWrapper> exceptionList) {
+    public ExceptionRefreshResponse( List<ExceptionInstanceWrapper> exceptionList ) {
         this.exceptionList = exceptionList;
     }
 
-    public List<ExceptionInstanceWrapper> getExceptionList() {
+    public List<ExceptionInstanceWrapper> getExceptionList( ) {
         return exceptionList;
     }
 
-    public void setExceptionList(List<ExceptionInstanceWrapper> exceptionList) {
+    public void setExceptionList( List<ExceptionInstanceWrapper> exceptionList ) {
         this.exceptionList = exceptionList;
     }
 }

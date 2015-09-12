@@ -1,9 +1,9 @@
 package com.attilapalfi.exceptional.services.rest.messages;
 
 
-import com.attilapalfi.exceptional.model.Exception;
-
 import java.math.BigInteger;
+
+import com.attilapalfi.exceptional.model.Exception;
 
 
 /**
@@ -16,10 +16,10 @@ public class ExceptionInstanceWrapper {
     private int exceptionTypeId;
     private BigInteger instanceId;
 
-    public ExceptionInstanceWrapper() {
+    public ExceptionInstanceWrapper( ) {
     }
 
-    public ExceptionInstanceWrapper(Exception e) {
+    public ExceptionInstanceWrapper( Exception e ) {
         fromWho = e.getFromWho();
         toWho = e.getToWho();
         timeInMillis = e.getDate().getTime();
@@ -29,8 +29,8 @@ public class ExceptionInstanceWrapper {
         instanceId = e.getInstanceId();
     }
 
-    public ExceptionInstanceWrapper(BigInteger fromWho, BigInteger toWho, long timeInMillis,
-                                    double longitude, double latitude, int exceptionTypeId, BigInteger instanceId) {
+    public ExceptionInstanceWrapper( BigInteger fromWho, BigInteger toWho, long timeInMillis,
+                                     double longitude, double latitude, int exceptionTypeId, BigInteger instanceId ) {
         this.fromWho = fromWho;
         this.toWho = toWho;
         this.timeInMillis = timeInMillis;
@@ -40,59 +40,59 @@ public class ExceptionInstanceWrapper {
         this.instanceId = instanceId;
     }
 
-    public BigInteger getInstanceId() {
+    public BigInteger getInstanceId( ) {
         return instanceId;
     }
 
-    public void setInstanceId(BigInteger instanceId) {
+    public void setInstanceId( BigInteger instanceId ) {
         this.instanceId = instanceId;
     }
 
-    public BigInteger getFromWho() {
+    public BigInteger getFromWho( ) {
         return fromWho;
     }
 
-    public void setFromWho(BigInteger fromWho) {
+    public void setFromWho( BigInteger fromWho ) {
         this.fromWho = fromWho;
     }
 
-    public BigInteger getToWho() {
+    public BigInteger getToWho( ) {
         return toWho;
     }
 
-    public void setToWho(BigInteger toWho) {
+    public void setToWho( BigInteger toWho ) {
         this.toWho = toWho;
     }
 
-    public long getTimeInMillis() {
+    public long getTimeInMillis( ) {
         return timeInMillis;
     }
 
-    public void setTimeInMillis(long timeInMillis) {
+    public void setTimeInMillis( long timeInMillis ) {
         this.timeInMillis = timeInMillis;
     }
 
-    public double getLongitude() {
+    public double getLongitude( ) {
         return longitude;
     }
 
-    public void setLongitude(double longitude) {
+    public void setLongitude( double longitude ) {
         this.longitude = longitude;
     }
 
-    public double getLatitude() {
+    public double getLatitude( ) {
         return latitude;
     }
 
-    public void setLatitude(double latitude) {
+    public void setLatitude( double latitude ) {
         this.latitude = latitude;
     }
 
-    public int getExceptionTypeId() {
+    public int getExceptionTypeId( ) {
         return exceptionTypeId;
     }
 
-    public void setExceptionTypeId(int exceptionTypeId) {
+    public void setExceptionTypeId( int exceptionTypeId ) {
         this.exceptionTypeId = exceptionTypeId;
     }
 }

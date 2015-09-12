@@ -9,27 +9,27 @@ public class SubmitResponse {
     private ExceptionType submittedType;
     private boolean submittedThisWeek;
 
-    public SubmitResponse() {
+    public SubmitResponse( ) {
     }
 
-    public SubmitResponse(ExceptionType submittedType, boolean submittedThisWeek) {
+    public SubmitResponse( ExceptionType submittedType, boolean submittedThisWeek ) {
         this.submittedType = submittedType;
         this.submittedThisWeek = submittedThisWeek;
     }
 
-    public ExceptionType getSubmittedType() {
+    public ExceptionType getSubmittedType( ) {
         return submittedType;
     }
 
-    public void setSubmittedType(ExceptionType submittedType) {
+    public void setSubmittedType( ExceptionType submittedType ) {
         this.submittedType = submittedType;
     }
 
-    public boolean isSubmittedThisWeek() {
+    public boolean isSubmittedThisWeek( ) {
         return submittedThisWeek;
     }
 
-    public void setSubmittedThisWeek(boolean submittedThisWeek) {
+    public void setSubmittedThisWeek( boolean submittedThisWeek ) {
         this.submittedThisWeek = submittedThisWeek;
     }
 }

@@ -4,74 +4,78 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
+import javax.inject.Inject;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.os.Looper;
-import com.annimon.stream.Collectors;
 import com.attilapalfi.exceptional.R;
+import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.interfaces.ExceptionChangeListener;
 import com.attilapalfi.exceptional.model.Exception;
+import com.attilapalfi.exceptional.services.ExceptionFactory;
 import com.attilapalfi.exceptional.services.rest.messages.ExceptionInstanceWrapper;
+import java8.util.stream.Collectors;
 
-import static com.annimon.stream.Stream.of;
+import static java8.util.stream.StreamSupport.stream;
+
 
 /**
  * Created by Attila on 2015-06-08.
  */
 public class ExceptionInstanceManager {
-    public static final int STORE_SIZE = Integer.MAX_VALUE;
-    private static SharedPreferences sharedPreferences;
-    private static SharedPreferences.Editor editor;
-    private static String PREFS_NAME;
-    private static Set<ExceptionChangeListener> exceptionChangeListeners = new HashSet<>();
-    private static List<Exception> storedExceptions = Collections.synchronizedList( new LinkedList<>() );
-    private static Geocoder geocoder;
-    private static List<BigInteger> knownIdsOnStart = new LinkedList<>();
+    public final int STORE_SIZE = Integer.MAX_VALUE;
 
-    private ExceptionInstanceManager( ) {
-    }
+    @Inject Context context;
+    @Inject ExceptionTypeManager exceptionTypeManager;
+    @Inject ExceptionFactory exceptionFactory;
+    private SharedPreferences sharedPreferences;
+    private SharedPreferences.Editor editor;
+    private String PREFS_NAME;
+    private Set<ExceptionChangeListener> exceptionChangeListeners = new HashSet<>();
+    private List<Exception> storedExceptions = Collections.synchronizedList( new LinkedList<>() );
+    private Geocoder geocoder;
+    private List<BigInteger> knownIdsOnStart = new LinkedList<>();
 
-    public static void initialize( Context context ) {
-        if ( !ExceptionTypeManager.isInitialized() ) {
-            ExceptionTypeManager.initialize( context );
-        }
+    public ExceptionInstanceManager( ) {
+        Injector.INSTANCE.getApplicationComponent().inject( this );
         initPreferences( context );
         geocoder = new Geocoder( context, Locale.getDefault() );
         loadExceptionInstances();
     }
 
-    private static void initPreferences( Context context ) {
+    private void initPreferences( Context context ) {
         PREFS_NAME = context.getString( R.string.exception_preferences );
         sharedPreferences = context.getSharedPreferences( PREFS_NAME, Context.MODE_PRIVATE );
         editor = sharedPreferences.edit();
         editor.apply();
     }
 
-    private static void loadExceptionInstances( ) {
+    private void loadExceptionInstances( ) {
         Map<String, ?> store = sharedPreferences.getAll();
         Set<String> instanceIds = store.keySet();
-        knownIdsOnStart.addAll( of( instanceIds ).map( BigInteger::new ).collect( Collectors.toList() ) );
+        knownIdsOnStart.addAll( stream( instanceIds ).map( BigInteger::new ).collect( Collectors.toList() ) );
         new AsyncExceptionLoader( storedExceptions, store ).execute();
     }
 
-    public static void wipe( ) {
+    public void wipe( ) {
         storedExceptions.clear();
         editor.clear().apply();
-        of( exceptionChangeListeners ).forEach( ExceptionChangeListener::onExceptionsChanged );
+        stream( exceptionChangeListeners ).forEach( ExceptionChangeListener::onExceptionsChanged );
     }
 
-    public static boolean isInitialized( ) {
+    public boolean isInitialized( ) {
         return sharedPreferences != null;
     }
 
 
-    public static int exceptionCount( ) {
+    public int exceptionCount( ) {
         return storedExceptions.size();
     }
 
-    public static BigInteger getLastKnownId( ) {
+    public BigInteger getLastKnownId( ) {
         if ( storedExceptions.isEmpty() ) {
             return new BigInteger( "0" );
         }
@@ -79,7 +83,7 @@ public class ExceptionInstanceManager {
         return storedExceptions.get( 0 ).getInstanceId();
     }
 
-    public static void addExceptionAsync( final Exception e ) {
+    public void addExceptionAsync( final Exception e ) {
         if ( !storedExceptions.contains( e ) ) {
             new AsyncTask<Void, Void, Void>() {
                 @Override
@@ -94,7 +98,7 @@ public class ExceptionInstanceManager {
                 }
 
                 @Override
-                protected void onPostExecute( Void aVoid) {
+                protected void onPostExecute( Void aVoid ) {
                     notifyListeners();
                 }
 
@@ -117,13 +121,13 @@ public class ExceptionInstanceManager {
     }
 
 
-    public static void saveExceptionListAsync( List<ExceptionInstanceWrapper> wrapperList ) {
+    public void saveExceptionListAsync( List<ExceptionInstanceWrapper> wrapperList ) {
         if ( !wrapperList.isEmpty() ) {
             new AsyncTask<Void, Void, Void>() {
 
                 @Override
                 protected Void doInBackground( Void... params ) {
-                    of( wrapperList ).forEach( wrapper -> addException( new Exception( wrapper ) ) );
+                    stream( wrapperList ).forEach( wrapper -> addException( exceptionFactory.createFromWrapper( wrapper ) ) );
                     Collections.sort( storedExceptions, new Exception.DateComparator() );
                     return null;
                 }
@@ -161,13 +165,13 @@ public class ExceptionInstanceManager {
     }
 
 
-    private static void removeLast( ) {
+    private void removeLast( ) {
         Exception removed = storedExceptions.remove( storedExceptions.size() - 1 );
         editor.remove( removed.getInstanceId().toString() );
     }
 
 
-    public static void removeException( Exception e ) {
+    public void removeException( Exception e ) {
         editor.remove( e.getInstanceId().toString() );
         editor.apply();
         for ( int i = 0; i < storedExceptions.size(); i++ ) {
@@ -178,29 +182,29 @@ public class ExceptionInstanceManager {
         }
     }
 
-    private static void notifyListeners( ) {
+    private void notifyListeners( ) {
         if ( Looper.myLooper() == Looper.getMainLooper() ) {
-            of( exceptionChangeListeners ).forEach( ExceptionChangeListener::onExceptionsChanged );
+            stream( exceptionChangeListeners ).forEach( ExceptionChangeListener::onExceptionsChanged );
         }
     }
 
-    public static List<Exception> getExceptionList( ) {
+    public List<Exception> getExceptionList( ) {
         return storedExceptions;
     }
 
-    public static boolean addExceptionChangeListener( ExceptionChangeListener listener ) {
+    public boolean addExceptionChangeListener( ExceptionChangeListener listener ) {
         return exceptionChangeListeners.add( listener );
     }
 
-    public static boolean removeExceptionChangeListener( ExceptionChangeListener listener ) {
+    public boolean removeExceptionChangeListener( ExceptionChangeListener listener ) {
         return exceptionChangeListeners.remove( listener );
     }
 
-    public static List<BigInteger> getKnownIds( ) {
+    public List<BigInteger> getKnownIds( ) {
         return knownIdsOnStart;
     }
 
-    private static class AsyncExceptionLoader extends AsyncTask<Void, Void, Void> {
+    private class AsyncExceptionLoader extends AsyncTask<Void, Void, Void> {
         private List<Exception> resultList;
         private Map<String, ?> store;
 
@@ -222,7 +226,7 @@ public class ExceptionInstanceManager {
         private void parseExceptionToMemoryList( Map<String, ?> store, String instanceId ) {
             String excJson = (String) store.get( instanceId );
             Exception e = Exception.fromString( excJson );
-            e.setExceptionType( ExceptionTypeManager.findById( e.getExceptionTypeId() ) );
+            e.setExceptionType( exceptionTypeManager.findById( e.getExceptionTypeId() ) );
             if ( !resultList.contains( e ) ) {
                 resultList.add( resultList.size(), e );
             }

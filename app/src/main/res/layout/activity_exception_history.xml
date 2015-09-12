@@ -10,11 +10,11 @@
     tools:context="com.attilapalfi.exceptional.ui.ExceptionHistoryActivity" >
 
     <fragment
-        android:name="com.attilapalfi.exceptional.ui.main.ExceptionsFragment"
+        android:name="com.attilapalfi.exceptional.ui.main.ExceptionInstancesFragment"
         android:id="@+id/friend_details_exceptions"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:layout="@layout/fragment_exceptions"
+        tools:layout="@layout/fragment_exception_instances"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 

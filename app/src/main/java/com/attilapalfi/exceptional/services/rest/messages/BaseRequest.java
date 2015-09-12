@@ -8,11 +8,11 @@ import java.math.BigInteger;
 public abstract class BaseRequest {
     protected BigInteger userFacebookId;
 
-    public BigInteger getUserFacebookId() {
+    public BigInteger getUserFacebookId( ) {
         return userFacebookId;
     }
 
-    public void setUserFacebookId(BigInteger userFacebookId) {
+    public void setUserFacebookId( BigInteger userFacebookId ) {
         this.userFacebookId = userFacebookId;
     }
 }

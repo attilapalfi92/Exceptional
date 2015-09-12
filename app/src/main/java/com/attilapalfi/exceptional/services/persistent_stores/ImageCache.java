@@ -5,10 +5,13 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.LruCache;
 import android.util.Log;
 
+import android.widget.ImageView;
+import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Friend;
 
 import java.io.File;
@@ -18,28 +21,27 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
 
-import static com.annimon.stream.Stream.of;
+import javax.inject.Inject;
+
+import static java8.util.stream.StreamSupport.stream;
 
 /**
  * Created by 212461305 on 2015.07.06..
  */
 public class ImageCache {
-    private static LruCache<BigInteger, Bitmap> imageWarehouse;
-    private static Context applicationContext;
-    private static String filePath;
+    private LruCache<BigInteger, Bitmap> imageWarehouse;
+    private String filePath;
+    @Inject Context context;
 
-
-    private ImageCache() {
-    }
-
-    public static void initialize(Context context) {
-        applicationContext = context;
+    public ImageCache() {
+        Injector.INSTANCE.getApplicationComponent().inject( this );
         try {
             filePath =
                     Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ||
-                            !Environment.isExternalStorageRemovable() ? applicationContext.getExternalCacheDir().getPath() :
-                            applicationContext.getCacheDir().getPath();
+                            !Environment.isExternalStorageRemovable() ? context.getExternalCacheDir().getPath() :
+                            context.getCacheDir().getPath();
 
             final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
             final int cacheSize = maxMemory / 8;
@@ -56,13 +58,16 @@ public class ImageCache {
         }
     }
 
+    public void initialize() {
+    }
+
 
     /**
      * Adds the friend and it's image to the ram and disk cache
      * @param friend who's picture is added
      * @param image the picture that is added
      */
-    public static void addImage(final Friend friend, final Bitmap image) {
+    public void addImage(final Friend friend, final Bitmap image) {
         if (isNotInMemory(friend)) {
             imageWarehouse.put(friend.getId(), image);
             new AsyncTask<Void, Void, Void>() {
@@ -90,18 +95,18 @@ public class ImageCache {
         }
     }
 
-    private static boolean isNotInMemory(Friend friend) {
+    private boolean isNotInMemory(Friend friend) {
         return imageWarehouse != null && imageWarehouse.get(friend.getId()) == null;
     }
 
 
-    private static boolean imageFileExists(Friend friend) {
+    private boolean imageFileExists(Friend friend) {
         String filePath = getFriendsImageFilePath(friend);
         File file = new File(filePath);
         return file.exists() && !file.isDirectory();
     }
 
-    private static String getFriendsImageFilePath(Friend friend){
+    private String getFriendsImageFilePath(Friend friend){
         try {
             File mediaStorageDir = makeStorageDirectory();
             if (mediaStorageDir == null) return null;
@@ -113,7 +118,7 @@ public class ImageCache {
     }
 
     @Nullable
-    private static File makeStorageDirectory() {
+    private File makeStorageDirectory() {
         File mediaStorageDir = new File(filePath);
         if (!mediaStorageDir.exists()){
             if (!mediaStorageDir.mkdirs()){
@@ -129,7 +134,7 @@ public class ImageCache {
      * @param friend who's image
      * @return image of friend or null
      */
-    public static Bitmap getImageForFriend(Friend friend) {
+    public Bitmap getImageForFriend(Friend friend) {
         Bitmap bitmap = imageWarehouse.get(friend.getId()); // getting image from memory cache, if available
         if (bitmap == null) {
             if (imageFileExists(friend)) {
@@ -150,7 +155,7 @@ public class ImageCache {
         return bitmap;
     }
 
-    private static Bitmap getBitmapFromInternet(Friend friend) throws IOException {
+    private Bitmap getBitmapFromInternet(Friend friend) throws IOException {
         URL url = new URL(friend.getImageUrl());
         URLConnection connection = url.openConnection();
         connection.setUseCaches(true);
@@ -158,7 +163,7 @@ public class ImageCache {
         return BitmapFactory.decodeStream(inputStream);
     }
 
-    private static Bitmap getFromDisk(Friend friend) {
+    private Bitmap getFromDisk(Friend friend) {
         String filePath = getFriendsImageFilePath(friend);
         if (filePath != null) {
             File file = new File(filePath);
@@ -168,21 +173,17 @@ public class ImageCache {
         return null;
     }
 
-    public static void removeImage(Friend friend) {
+    public void removeImage(Friend friend) {
         imageWarehouse.remove(friend.getId());
         deleteFromDisk(friend);
     }
 
-    public static void wipe() {
+    public void wipe(List<Friend> friendList) {
         imageWarehouse.evictAll();
-        if (!FriendsManager.isInitialized()) {
-            FriendsManager.initialize(applicationContext);
-        }
-        of(FriendsManager.getStoredFriends())
-                .forEach(ImageCache::deleteFromDisk);
+        stream( friendList ).forEach( this::deleteFromDisk );
     }
 
-    private static void deleteFromDisk(Friend friend) {
+    private void deleteFromDisk(Friend friend) {
         String filePath = getFriendsImageFilePath(friend);
         File imageFile = new File(filePath);
         if (imageFile.exists()) {

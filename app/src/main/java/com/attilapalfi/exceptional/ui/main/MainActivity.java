@@ -1,65 +1,58 @@
 package com.attilapalfi.exceptional.ui.main;
 
 
+import javax.inject.Inject;
+
 import android.content.Intent;
 import android.location.Location;
-import android.provider.Settings;
-import android.support.v4.view.ViewPager;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.attilapalfi.exceptional.R;
+import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.ExceptionType;
-import com.attilapalfi.exceptional.services.rest.BackendService;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
+import com.attilapalfi.exceptional.services.rest.BackendService;
 import com.attilapalfi.exceptional.ui.ExceptionHistoryActivity;
 import com.attilapalfi.exceptional.ui.LoginActivity;
 import com.attilapalfi.exceptional.ui.OptionsActivity;
-import com.attilapalfi.exceptional.services.GpsService;
 import com.attilapalfi.exceptional.ui.main.page_transformers.ZoomOutPageTransformer;
 
 public class MainActivity extends AppCompatActivity {
-    private Location mLocation;
-    private String androidId;
     private MainPagerAdapter adapter;
     private ViewPager viewPager;
     private View submitView;
     private String submitPrefix = "";
     private String submitShortName = "";
     private String submitDescription = "";
+    @Inject BackendService backendService;
+    @Inject MetadataStore metadataStore;
 
-    GpsService gpsService;
-
-    // TODO: Check for Google Play Services APK
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    protected void onCreate( Bundle savedInstanceState ) {
+        super.onCreate( savedInstanceState );
+        setContentView( R.layout.activity_main );
+        Injector.INSTANCE.getApplicationComponent().inject( this );
 
-        setTitle("Your profile");
+        setTitle( "Your profile" );
 
-        GpsService.getInstance().initialize(getApplicationContext());
-        gpsService = GpsService.getInstance();
-        androidId = Settings.Secure.getString(getApplicationContext()
-                .getContentResolver(), Settings.Secure.ANDROID_ID);
-
-        adapter = new MainPagerAdapter(getSupportFragmentManager(), this);
-        viewPager = (ViewPager) findViewById(R.id.main_pager);
-        viewPager.setAdapter(adapter);
-        viewPager.addOnPageChangeListener(adapter);
-        viewPager.setPageTransformer(true, new ZoomOutPageTransformer());
+        adapter = new MainPagerAdapter( getSupportFragmentManager(), this );
+        viewPager = (ViewPager) findViewById( R.id.main_pager );
+        viewPager.setAdapter( adapter );
+        viewPager.addOnPageChangeListener( adapter );
+        viewPager.setPageTransformer( true, new ZoomOutPageTransformer() );
 
         Bundle bundle = getIntent().getExtras();
-        if (bundle != null) {
-            int startPage = bundle.getInt("startPage");
-            if (startPage != 0) {
-                viewPager.setCurrentItem(startPage);
+        if ( bundle != null ) {
+            int startPage = bundle.getInt( "startPage" );
+            if ( startPage != 0 ) {
+                viewPager.setCurrentItem( startPage );
             }
         }
     }
@@ -67,78 +60,77 @@ public class MainActivity extends AppCompatActivity {
 
     // TODO: Check for Google Play Services APK
     @Override
-    protected void onResume() {
+    protected void onResume( ) {
         super.onResume();
 
-        if(!MetadataStore.isLoggedIn()) {
-            Intent intent = new Intent(this, LoginActivity.class);
-            startActivity(intent);
+        if ( !metadataStore.isLoggedIn() ) {
+            Intent intent = new Intent( this, LoginActivity.class );
+            startActivity( intent );
         }
     }
 
 
     @Override
-    protected void onDestroy() {
+    protected void onDestroy( ) {
         super.onDestroy();
-        viewPager.removeOnPageChangeListener(adapter);
+        viewPager.removeOnPageChangeListener( adapter );
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu( Menu menu ) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main_activity2, menu);
+        getMenuInflater().inflate( R.menu.main_activity2, menu );
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected( MenuItem item ) {
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            Intent intent = new Intent(this, OptionsActivity.class);
-            startActivity(intent);
+        if ( id == R.id.action_settings ) {
+            Intent intent = new Intent( this, OptionsActivity.class );
+            startActivity( intent );
             return true;
         }
-        return super.onOptionsItemSelected(item);
+        return super.onOptionsItemSelected( item );
     }
 
     @Override
-    public void onBackPressed()
-    {
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+    public void onBackPressed( ) {
+        Intent intent = new Intent( Intent.ACTION_MAIN );
+        intent.addCategory( Intent.CATEGORY_HOME );
+        intent.setFlags( Intent.FLAG_ACTIVITY_NEW_TASK );
+        startActivity( intent );
     }
 
-    public void exceptionHistoryClicked(View view) {
-        Intent intent = new Intent(this, ExceptionHistoryActivity.class);
-        startActivity(intent);
+    public void exceptionHistoryClicked( View view ) {
+        Intent intent = new Intent( this, ExceptionHistoryActivity.class );
+        startActivity( intent );
     }
 
-    public void submitClicked(View view) {
-        if (MetadataStore.isSubmittedThisWeek()) {
-            Toast.makeText(this, R.string.already_submitted, Toast.LENGTH_SHORT).show();
+    public void submitClicked( View view ) {
+        if ( metadataStore.isSubmittedThisWeek() ) {
+            Toast.makeText( this, R.string.already_submitted, Toast.LENGTH_SHORT ).show();
         } else {
-            MaterialDialog materialDialog = new MaterialDialog.Builder(this)
-                    .title(R.string.exception_submitment)
-                    .customView(R.layout.submit_layout, true)
-                    .positiveText("Submit")
-                    .negativeText("Cancel")
-                    .callback(new MaterialDialog.ButtonCallback() {
+            MaterialDialog materialDialog = new MaterialDialog.Builder( this )
+                    .title( R.string.exception_submitment )
+                    .customView( R.layout.submit_layout, true )
+                    .positiveText( "Submit" )
+                    .negativeText( "Cancel" )
+                    .callback( new MaterialDialog.ButtonCallback() {
                         @Override
-                        public void onPositive(MaterialDialog dialog) {
-                            getSubmitStrings(dialog.getCustomView());
+                        public void onPositive( MaterialDialog dialog ) {
+                            getSubmitStrings( dialog.getCustomView() );
 
                             if ( prefixIsValid() && shortNameIsValid() && descriptionIsValid() ) {
-                                BackendService.submitType(new ExceptionType(
+                                backendService.submitType( new ExceptionType(
                                         0,
                                         submitShortName,
                                         submitPrefix,
                                         submitDescription
-                                ));
+                                ) );
                             }
                         }
-                    })
+                    } )
                     .build();
             materialDialog.show();
             submitView = materialDialog.getCustomView();
@@ -146,55 +138,55 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setSubmitStrings() {
-        ((EditText) submitView.findViewById(R.id.submit_prefix_input)).setText(submitPrefix);
-        ((EditText) submitView.findViewById(R.id.submit_shortname_input)).setText(submitShortName);
-        ((EditText) submitView.findViewById(R.id.submit_description_input)).setText(submitDescription);
+    private void setSubmitStrings( ) {
+        ( (EditText) submitView.findViewById( R.id.submit_prefix_input ) ).setText( submitPrefix );
+        ( (EditText) submitView.findViewById( R.id.submit_shortname_input ) ).setText( submitShortName );
+        ( (EditText) submitView.findViewById( R.id.submit_description_input ) ).setText( submitDescription );
     }
 
-    private void getSubmitStrings(View submitView) {
-        submitPrefix = ((EditText) submitView.findViewById(R.id.submit_prefix_input))
+    private void getSubmitStrings( View submitView ) {
+        submitPrefix = ( (EditText) submitView.findViewById( R.id.submit_prefix_input ) )
                 .getText().toString().trim();
-        submitShortName = ((EditText) submitView.findViewById(R.id.submit_shortname_input))
+        submitShortName = ( (EditText) submitView.findViewById( R.id.submit_shortname_input ) )
                 .getText().toString().trim();
-        submitDescription = ((EditText) submitView.findViewById(R.id.submit_description_input))
+        submitDescription = ( (EditText) submitView.findViewById( R.id.submit_description_input ) )
                 .getText().toString().trim();
     }
 
-    private boolean prefixIsValid() {
-        if (!submitPrefix.endsWith(".")) {
-            Toast.makeText(getApplicationContext(), R.string.prefix_end_with_dot_error, Toast.LENGTH_SHORT).show();
+    private boolean prefixIsValid( ) {
+        if ( !submitPrefix.endsWith( "." ) ) {
+            Toast.makeText( getApplicationContext(), R.string.prefix_end_with_dot_error, Toast.LENGTH_SHORT ).show();
             return false;
         }
-        if (submitPrefix.length() < 6) {
-            Toast.makeText(getApplicationContext(), R.string.prefix_too_short_error, Toast.LENGTH_SHORT).show();
+        if ( submitPrefix.length() < 6 ) {
+            Toast.makeText( getApplicationContext(), R.string.prefix_too_short_error, Toast.LENGTH_SHORT ).show();
             return false;
         }
-        if (submitPrefix.length() > 500) {
-            Toast.makeText(getApplicationContext(), R.string.prefix_too_long_error, Toast.LENGTH_SHORT).show();
+        if ( submitPrefix.length() > 500 ) {
+            Toast.makeText( getApplicationContext(), R.string.prefix_too_long_error, Toast.LENGTH_SHORT ).show();
         }
         return true;
     }
 
-    private boolean shortNameIsValid() {
-        if (submitShortName.length() < 6) {
-            Toast.makeText(getApplicationContext(), R.string.short_name_too_short_error, Toast.LENGTH_SHORT).show();
+    private boolean shortNameIsValid( ) {
+        if ( submitShortName.length() < 6 ) {
+            Toast.makeText( getApplicationContext(), R.string.short_name_too_short_error, Toast.LENGTH_SHORT ).show();
             return false;
         }
-        if (submitShortName.length() > 200) {
-            Toast.makeText(getApplicationContext(), R.string.short_name_too_long_error, Toast.LENGTH_SHORT).show();
+        if ( submitShortName.length() > 200 ) {
+            Toast.makeText( getApplicationContext(), R.string.short_name_too_long_error, Toast.LENGTH_SHORT ).show();
             return false;
         }
         return true;
     }
 
-    private boolean descriptionIsValid() {
-        if (submitDescription.length() < 12) {
-            Toast.makeText(getApplicationContext(), R.string.description_too_short_error, Toast.LENGTH_SHORT).show();
+    private boolean descriptionIsValid( ) {
+        if ( submitDescription.length() < 12 ) {
+            Toast.makeText( getApplicationContext(), R.string.description_too_short_error, Toast.LENGTH_SHORT ).show();
             return false;
         }
-        if (submitDescription.length() > 3000) {
-            Toast.makeText(getApplicationContext(), R.string.description_too_long_error, Toast.LENGTH_SHORT).show();
+        if ( submitDescription.length() > 3000 ) {
+            Toast.makeText( getApplicationContext(), R.string.description_too_long_error, Toast.LENGTH_SHORT ).show();
             return false;
         }
         return true;

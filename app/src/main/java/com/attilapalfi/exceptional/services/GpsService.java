@@ -1,9 +1,10 @@
 package com.attilapalfi.exceptional.services;
 
+import javax.inject.Inject;
+
 import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
@@ -12,43 +13,28 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.widget.Toast;
+import com.attilapalfi.exceptional.dependency_injection.Injector;
 
 /**
  * Created by Attila on 2015-06-20.
  */
 public class GpsService extends Service implements LocationListener {
-    private static GpsService instance;
-
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 100; // 100 meters
     private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 10; // 10 minute
 
-    private Context context;
+    @Inject Context context;
     private LocationManager locationManager;
     private Location location; // location
-    private boolean isNetworkEnabled = false;
-    private boolean canGetLocation = false;
+    private boolean networkEnabled = false;
 
-    public static GpsService getInstance( ) {
-        if ( instance == null ) {
-            instance = new GpsService();
-        }
-
-        return instance;
-    }
-
-    private GpsService( ) {
-    }
-
-    public void initialize( Context context ) {
-        this.context = context;
-        getLocation();
+    public GpsService( ) {
+        Injector.INSTANCE.getApplicationComponent().inject( this );
+        getNetworkStatus();
     }
 
     public Location getLocation( ) {
         try {
-            getNetworkStatus();
-            if ( isNetworkEnabled ) {
-                canGetLocation = true;
+            if ( networkEnabled ) {
                 initLocationNetworkProvider();
                 getLastKnownLocation();
             } else {
@@ -62,7 +48,7 @@ public class GpsService extends Service implements LocationListener {
 
     private void getNetworkStatus( ) {
         locationManager = (LocationManager) context.getSystemService( LOCATION_SERVICE );
-        isNetworkEnabled = locationManager.isProviderEnabled( LocationManager.NETWORK_PROVIDER );
+        networkEnabled = locationManager.isProviderEnabled( LocationManager.NETWORK_PROVIDER );
     }
 
     // before
@@ -88,36 +74,26 @@ public class GpsService extends Service implements LocationListener {
     }
 
     public boolean canGetLocation( ) {
-        // getting network status
-        isNetworkEnabled = locationManager.isProviderEnabled( LocationManager.NETWORK_PROVIDER );
-        canGetLocation = isNetworkEnabled;
-        if ( !canGetLocation ) {
+        networkEnabled = locationManager.isProviderEnabled( LocationManager.NETWORK_PROVIDER );
+        if ( !networkEnabled ) {
             Toast.makeText( context, "Can't get device's location.\nPlease enable location services.", Toast.LENGTH_SHORT ).show();
         }
-
-        return canGetLocation;
+        return networkEnabled;
     }
 
 
     public void showSettingsAlert( ) {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder( context );
 
-        // On pressing Settings button
-        alertDialog.setPositiveButton( "Settings", new DialogInterface.OnClickListener() {
-            public void onClick( DialogInterface dialog, int which ) {
-                Intent intent = new Intent( Settings.ACTION_NETWORK_OPERATOR_SETTINGS );
-                context.startActivity( intent );
-            }
+        alertDialog.setPositiveButton( "Settings", ( dialog, which ) -> {
+            Intent intent = new Intent( Settings.ACTION_NETWORK_OPERATOR_SETTINGS );
+            context.startActivity( intent );
         } );
 
-        // on pressing cancel button
-        alertDialog.setNegativeButton( "Cancel", new DialogInterface.OnClickListener() {
-            public void onClick( DialogInterface dialog, int which ) {
-                dialog.cancel();
-            }
+        alertDialog.setNegativeButton( "Cancel", ( dialog, which ) -> {
+            dialog.cancel();
         } );
 
-        // Showing Alert Message
         alertDialog.show();
     }
 

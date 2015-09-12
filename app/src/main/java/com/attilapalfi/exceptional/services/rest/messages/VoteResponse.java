@@ -9,27 +9,27 @@ public class VoteResponse {
     private boolean votedForThisWeek;
     private ExceptionType votedType;
 
-    public VoteResponse() {
+    public VoteResponse( ) {
     }
 
-    public VoteResponse(boolean votedForThisWeek, ExceptionType votedType) {
+    public VoteResponse( boolean votedForThisWeek, ExceptionType votedType ) {
         this.votedForThisWeek = votedForThisWeek;
         this.votedType = votedType;
     }
 
-    public boolean isVotedForThisWeek() {
+    public boolean isVotedForThisWeek( ) {
         return votedForThisWeek;
     }
 
-    public void setVotedForThisWeek(boolean votedForThisWeek) {
+    public void setVotedForThisWeek( boolean votedForThisWeek ) {
         this.votedForThisWeek = votedForThisWeek;
     }
 
-    public ExceptionType getVotedType() {
+    public ExceptionType getVotedType( ) {
         return votedType;
     }
 
-    public void setVotedType(ExceptionType votedType) {
+    public void setVotedType( ExceptionType votedType ) {
         this.votedType = votedType;
     }
 }
