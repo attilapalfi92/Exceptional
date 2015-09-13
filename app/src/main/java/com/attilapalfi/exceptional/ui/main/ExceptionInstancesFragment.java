@@ -30,7 +30,7 @@ import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceM
 import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
 import com.attilapalfi.exceptional.services.persistent_stores.ImageCache;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
-import com.attilapalfi.exceptional.services.rest.BackendService;
+import com.attilapalfi.exceptional.services.rest.ExceptionService;
 import com.attilapalfi.exceptional.ui.main.friends_page.FriendDetailsActivity;
 
 /**
@@ -41,7 +41,8 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
 
     private static long lastSyncTime = 0;
 
-    @Inject BackendService backendService;
+    @Inject
+    ExceptionService exceptionService;
     @Inject ExceptionInstanceManager exceptionInstanceManager;
     @Inject FriendsManager friendsManager;
     @Inject ImageCache imageCache;
@@ -110,7 +111,7 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
 
     private void actualRefresh( ) {
         if ( metadataStore.isLoggedIn() ) {
-            backendService.refreshExceptions( this );
+            exceptionService.refreshExceptions( this );
         } else {
             Toast.makeText( getActivity().getApplicationContext(), "You have to login first!", Toast.LENGTH_SHORT ).show();
             onExceptionRefreshFinished();

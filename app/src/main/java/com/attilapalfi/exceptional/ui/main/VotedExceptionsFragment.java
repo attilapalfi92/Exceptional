@@ -25,7 +25,7 @@ import com.attilapalfi.exceptional.interfaces.VotedTypeListener;
 import com.attilapalfi.exceptional.model.ExceptionType;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
-import com.attilapalfi.exceptional.services.rest.BackendService;
+import com.attilapalfi.exceptional.services.rest.VotingService;
 
 /**
  * Created by palfi on 2015-09-05.
@@ -35,7 +35,7 @@ public class VotedExceptionsFragment extends Fragment implements VotedTypeListen
     private RecyclerView recyclerView;
     private List<ExceptionType> votedTypeList;
     @Inject ExceptionTypeManager exceptionTypeManager;
-    @Inject BackendService backendService;
+    @Inject VotingService votingService;
     @Inject MetadataStore metadataStore;
 
     @Override
@@ -64,7 +64,7 @@ public class VotedExceptionsFragment extends Fragment implements VotedTypeListen
         if ( votedTypeList == null ) {
             votedTypeList = new ArrayList<>();
         }
-        adapter = new VotedExceptionAdapter( getActivity(), votedTypeList, backendService, metadataStore );
+        adapter = new VotedExceptionAdapter( getActivity(), votedTypeList, votingService, metadataStore );
     }
 
     @NonNull
@@ -87,7 +87,7 @@ public class VotedExceptionsFragment extends Fragment implements VotedTypeListen
         private RecyclerView recyclerView;
         private Activity activity;
         private List<ExceptionType> values;
-        private BackendService backendService;
+        private VotingService votingService;
         private MetadataStore metadataStore;
 
         private OnClickListener onClickListener = new OnClickListener() {
@@ -116,7 +116,7 @@ public class VotedExceptionsFragment extends Fragment implements VotedTypeListen
                         .callback( new MaterialDialog.ButtonCallback() {
                             @Override
                             public void onPositive( MaterialDialog dialog ) {
-                                backendService.voteForType( exceptionType );
+                                votingService.voteForType( exceptionType );
                             }
                         } )
                         .show();
@@ -128,10 +128,10 @@ public class VotedExceptionsFragment extends Fragment implements VotedTypeListen
         }
 
         public VotedExceptionAdapter( Activity activity, List<ExceptionType> votedTypeList,
-                                      BackendService backendService, MetadataStore metadataStore ) {
+                                      VotingService votingService, MetadataStore metadataStore ) {
             this.activity = activity;
             this.values = votedTypeList;
-            this.backendService = backendService;
+            this.votingService = votingService;
             this.metadataStore = metadataStore;
         }
 

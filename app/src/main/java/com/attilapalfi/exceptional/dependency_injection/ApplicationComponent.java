@@ -9,7 +9,8 @@ import com.attilapalfi.exceptional.services.GpsService;
 import com.attilapalfi.exceptional.services.facebook.FacebookManager;
 import com.attilapalfi.exceptional.services.persistent_stores.*;
 import com.attilapalfi.exceptional.services.rest.AppStartService;
-import com.attilapalfi.exceptional.services.rest.BackendService;
+import com.attilapalfi.exceptional.services.rest.ExceptionService;
+import com.attilapalfi.exceptional.services.rest.VotingService;
 import com.attilapalfi.exceptional.ui.FacebookLoginFragment;
 import com.attilapalfi.exceptional.ui.OptionsActivity;
 import com.attilapalfi.exceptional.ui.ShowNotificationActivity;
@@ -36,7 +37,7 @@ import dagger.Component;
 public interface ApplicationComponent extends AppContextComponent {
     void inject( GpsService gpsService );
     void inject( ExceptionTypeAdapter exceptionTypeAdapter );
-    void inject( BackendService backendService );
+    void inject( ExceptionService exceptionService );
     void inject( ExceptionalApplication exceptionalApplication );
     void inject( FacebookManager facebookManager );
     void inject( FacebookLoginFragment facebookLoginFragment );
@@ -60,4 +61,5 @@ public interface ApplicationComponent extends AppContextComponent {
     void inject( FriendsFragment friendsFragment );
     void inject( MetadataStore metadataStore );
     void inject( OptionsActivity optionsActivity );
+    void inject( VotingService votingService );
 }

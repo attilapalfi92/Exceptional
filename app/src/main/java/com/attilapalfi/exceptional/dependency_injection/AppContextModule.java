@@ -3,14 +3,15 @@ package com.attilapalfi.exceptional.dependency_injection;
 import javax.inject.Singleton;
 
 import android.content.Context;
-import android.view.ViewDebug;
 import com.attilapalfi.exceptional.ExceptionalApplication;
 import com.attilapalfi.exceptional.services.ExceptionFactory;
 import com.attilapalfi.exceptional.services.GpsService;
 import com.attilapalfi.exceptional.services.facebook.FacebookManager;
 import com.attilapalfi.exceptional.services.persistent_stores.*;
 import com.attilapalfi.exceptional.services.rest.AppStartService;
-import com.attilapalfi.exceptional.services.rest.BackendService;
+import com.attilapalfi.exceptional.services.rest.ExceptionService;
+import com.attilapalfi.exceptional.services.rest.RestInterfaceFactory;
+import com.attilapalfi.exceptional.services.rest.VotingService;
 import dagger.Module;
 import dagger.Provides;
 
@@ -53,8 +54,8 @@ public class AppContextModule {
 
     @Provides
     @Singleton
-    public BackendService backendService( ) {
-        return new BackendService();
+    public ExceptionService backendService( ) {
+        return new ExceptionService();
     }
 
     @Provides
@@ -97,5 +98,17 @@ public class AppContextModule {
     @Singleton
     public MetadataStore metadataStore( ) {
         return new MetadataStore();
+    }
+
+    @Provides
+    @Singleton
+    public VotingService votingService( ) {
+        return new VotingService();
+    }
+
+    @Provides
+    @Singleton
+    public RestInterfaceFactory restAdapterFactory( ) {
+        return new RestInterfaceFactory();
     }
 }

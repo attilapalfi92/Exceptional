@@ -8,46 +8,40 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.interfaces.ExceptionRefreshListener;
 import com.attilapalfi.exceptional.model.Exception;
-import com.attilapalfi.exceptional.model.ExceptionType;
 import com.attilapalfi.exceptional.model.Friend;
 import com.attilapalfi.exceptional.services.ExceptionFactory;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
-import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
 import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
-import com.attilapalfi.exceptional.services.rest.messages.*;
-import com.google.gson.GsonBuilder;
+import com.attilapalfi.exceptional.services.rest.messages.BaseExceptionRequest;
+import com.attilapalfi.exceptional.services.rest.messages.ExceptionInstanceWrapper;
+import com.attilapalfi.exceptional.services.rest.messages.ExceptionRefreshResponse;
+import com.attilapalfi.exceptional.services.rest.messages.ExceptionSentResponse;
 import retrofit.Callback;
-import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
-import retrofit.converter.GsonConverter;
 
 /**
  * Created by Attila on 2015-06-13.
  */
-public class BackendService {
+public class ExceptionService {
     @Inject Context context;
     @Inject ExceptionInstanceManager exceptionInstanceManager;
-    @Inject ExceptionTypeManager exceptionTypeManager;
     @Inject ExceptionFactory exceptionFactory;
     @Inject FriendsManager friendsManager;
     @Inject MetadataStore metadataStore;
-    private RestInterface restInterface;
+    @Inject RestInterfaceFactory restInterfaceFactory;
+    private ExceptionRestInterface exceptionRestInterface;
 
-    public BackendService( ) {
+    public ExceptionService( ) {
         Injector.INSTANCE.getApplicationComponent().inject( this );
-        RestAdapter restAdapter = new RestAdapter.Builder()
-                .setEndpoint( context.getString( R.string.backend_address ) )
-                .setConverter( new GsonConverter( ( new GsonBuilder().create() ) ) )
-                .build();
-        restInterface = restAdapter.create( RestInterface.class );
+        exceptionRestInterface = restInterfaceFactory.create( context, ExceptionRestInterface.class );
     }
 
     public void throwException( Exception exception ) {
         ExceptionInstanceWrapper exceptionInstanceWrapper = new ExceptionInstanceWrapper( exception );
         try {
-            restInterface.throwException( exceptionInstanceWrapper, new Callback<ExceptionSentResponse>() {
+            exceptionRestInterface.throwException( exceptionInstanceWrapper, new Callback<ExceptionSentResponse>() {
                 @Override
                 public void success( ExceptionSentResponse e, Response response ) {
                     Friend toWho = friendsManager.findFriendById( e.getInstanceWrapper().getToWho() );
@@ -77,7 +71,7 @@ public class BackendService {
                 friendsManager.getYourself().getId(),
                 exceptionInstanceManager.getExceptionList()
         );
-        restInterface.refreshExceptions( requestBody, new Callback<ExceptionRefreshResponse>() {
+        exceptionRestInterface.refreshExceptions( requestBody, new Callback<ExceptionRefreshResponse>() {
 
             @Override
             public void success( ExceptionRefreshResponse exceptionRefreshResponse, Response response ) {
@@ -90,42 +84,6 @@ public class BackendService {
             public void failure( RetrofitError error ) {
                 Toast.makeText( context, context.getString( R.string.failed_to_sync ) + error.getMessage(), Toast.LENGTH_SHORT ).show();
                 refreshListener.onExceptionRefreshFinished();
-            }
-        } );
-    }
-
-    public void voteForType( ExceptionType exceptionType ) {
-        VoteRequest voteRequest = new VoteRequest( friendsManager.getYourself().getId(), exceptionType.getId() );
-        restInterface.voteForType( voteRequest, new Callback<VoteResponse>() {
-            @Override
-            public void success( VoteResponse voteResponse, Response response ) {
-                if ( voteResponse.isVotedForThisWeek() ) {
-                    metadataStore.setVotedThisWeek( true );
-                    exceptionTypeManager.updateVotedType( voteResponse.getVotedType() );
-                }
-            }
-
-            @Override
-            public void failure( RetrofitError error ) {
-                Toast.makeText( context, R.string.failed_to_vote, Toast.LENGTH_SHORT ).show();
-            }
-        } );
-    }
-
-    public void submitType( ExceptionType submittedType ) {
-        SubmitRequest submitRequest = new SubmitRequest( friendsManager.getYourself().getId(), submittedType );
-        restInterface.submitTypeForVote( submitRequest, new Callback<SubmitResponse>() {
-            @Override
-            public void success( SubmitResponse submitResponse, Response response ) {
-                if ( submitResponse.isSubmittedThisWeek() ) {
-                    metadataStore.setSubmittedThisWeek( true );
-                    exceptionTypeManager.addVotedType( submitResponse.getSubmittedType() );
-                }
-            }
-
-            @Override
-            public void failure( RetrofitError error ) {
-                Toast.makeText( context, R.string.failed_to_submit, Toast.LENGTH_SHORT ).show();
             }
         } );
     }

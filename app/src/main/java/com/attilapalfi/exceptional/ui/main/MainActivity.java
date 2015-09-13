@@ -4,7 +4,6 @@ package com.attilapalfi.exceptional.ui.main;
 import javax.inject.Inject;
 
 import android.content.Intent;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -18,7 +17,7 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.ExceptionType;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
-import com.attilapalfi.exceptional.services.rest.BackendService;
+import com.attilapalfi.exceptional.services.rest.VotingService;
 import com.attilapalfi.exceptional.ui.ExceptionHistoryActivity;
 import com.attilapalfi.exceptional.ui.LoginActivity;
 import com.attilapalfi.exceptional.ui.OptionsActivity;
@@ -31,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
     private String submitPrefix = "";
     private String submitShortName = "";
     private String submitDescription = "";
-    @Inject BackendService backendService;
+    @Inject VotingService votingService;
     @Inject MetadataStore metadataStore;
 
     @Override
@@ -122,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
                             getSubmitStrings( dialog.getCustomView() );
 
                             if ( prefixIsValid() && shortNameIsValid() && descriptionIsValid() ) {
-                                backendService.submitType( new ExceptionType(
+                                votingService.submitType( new ExceptionType(
                                         0,
                                         submitShortName,
                                         submitPrefix,

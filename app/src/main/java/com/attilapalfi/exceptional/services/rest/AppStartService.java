@@ -20,13 +20,10 @@ import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
 import com.attilapalfi.exceptional.services.rest.messages.AppStartRequest;
 import com.attilapalfi.exceptional.services.rest.messages.AppStartResponse;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.google.gson.GsonBuilder;
 import java8.util.stream.Collectors;
 import retrofit.Callback;
-import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
-import retrofit.converter.GsonConverter;
 
 import static java8.util.stream.StreamSupport.stream;
 
@@ -39,12 +36,13 @@ public class AppStartService {
     @Inject ExceptionTypeManager exceptionTypeManager;
     @Inject FriendsManager friendsManager;
     @Inject MetadataStore metadataStore;
+    @Inject RestInterfaceFactory restInterfaceFactory;
     private String projectNumber;
-    private RestInterface restInterface;
+    private AppStartRestInterface appStartRestInterface;
     private GoogleCloudMessaging googleCloudMessaging;
     private String registrationId;
     private String androidId;
-    private AppStartRequest requestBody = new AppStartRequest(  );
+    private AppStartRequest requestBody = new AppStartRequest();
 
     public void setAndroidId( String aId ) {
         androidId = aId;
@@ -53,11 +51,7 @@ public class AppStartService {
     public AppStartService( ) {
         Injector.INSTANCE.getApplicationComponent().inject( this );
         projectNumber = context.getString( R.string.project_number );
-        RestAdapter restAdapter = new RestAdapter.Builder()
-                .setEndpoint( context.getString( R.string.backend_address ) )
-                .setConverter( new GsonConverter( ( new GsonBuilder().create() ) ) )
-                .build();
-        restInterface = restAdapter.create( RestInterface.class );
+        appStartRestInterface = restInterfaceFactory.create( context, AppStartRestInterface.class );
     }
 
     public void onFirstAppStart( List<Friend> friendList, BigInteger profileId ) {
@@ -70,7 +64,7 @@ public class AppStartService {
         initRequestBody( friendList, profileId );
         requestBody.setExceptionVersion( metadataStore.getExceptionVersion() );
         try {
-            restInterface.regularAppStart( requestBody, new Callback<AppStartResponse>() {
+            appStartRestInterface.regularAppStart( requestBody, new Callback<AppStartResponse>() {
                 @Override
                 public void success( AppStartResponse responseBody, Response response ) {
                     saveCommonData( responseBody );
@@ -126,7 +120,7 @@ public class AppStartService {
 
     private void backendFirstAppStart( ) {
         try {
-            restInterface.firstAppStart( requestBody, new Callback<AppStartResponse>() {
+            appStartRestInterface.firstAppStart( requestBody, new Callback<AppStartResponse>() {
                 @Override
                 public void success( AppStartResponse responseBody, Response response ) {
                     saveCommonData( responseBody );

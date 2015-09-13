@@ -7,7 +7,9 @@ import com.attilapalfi.exceptional.services.GpsService;
 import com.attilapalfi.exceptional.services.facebook.FacebookManager;
 import com.attilapalfi.exceptional.services.persistent_stores.*;
 import com.attilapalfi.exceptional.services.rest.AppStartService;
-import com.attilapalfi.exceptional.services.rest.BackendService;
+import com.attilapalfi.exceptional.services.rest.ExceptionService;
+import com.attilapalfi.exceptional.services.rest.RestInterfaceFactory;
+import com.attilapalfi.exceptional.services.rest.VotingService;
 
 /**
  * Created by palfi on 2015-09-12.
@@ -23,7 +25,7 @@ public interface AppContextComponent {
 
     ExceptionFactory exceptionFactory( );
 
-    BackendService backendService( );
+    ExceptionService backendService( );
 
     FacebookManager facebookManager( );
 
@@ -38,4 +40,8 @@ public interface AppContextComponent {
     ImageCache imageCache( );
 
     MetadataStore metadataStore( );
+
+    VotingService votingService( );
+
+    RestInterfaceFactory restAdapterFactory( );
 }

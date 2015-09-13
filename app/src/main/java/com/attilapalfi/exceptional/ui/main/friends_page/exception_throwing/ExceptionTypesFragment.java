@@ -28,7 +28,7 @@ import com.attilapalfi.exceptional.services.ExceptionFactory;
 import com.attilapalfi.exceptional.services.GpsService;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
 import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
-import com.attilapalfi.exceptional.services.rest.BackendService;
+import com.attilapalfi.exceptional.services.rest.ExceptionService;
 import com.attilapalfi.exceptional.ui.main.Constants;
 import com.attilapalfi.exceptional.ui.main.MainActivity;
 
@@ -85,7 +85,8 @@ public class ExceptionTypesFragment extends Fragment {
         private List<ExceptionType> values;
         @Inject GpsService gpsService;
         @Inject ExceptionFactory exceptionFactory;
-        @Inject BackendService backendService;
+        @Inject
+        ExceptionService exceptionService;
         @Inject FriendsManager friendsManager;
 
         private final View.OnClickListener onClickListener = new View.OnClickListener() {
@@ -93,7 +94,7 @@ public class ExceptionTypesFragment extends Fragment {
             public void onClick( View view ) {
                 if ( gpsService.canGetLocation() ) {
                     Exception exception = createException( view );
-                    backendService.throwException( exception );
+                    exceptionService.throwException( exception );
                     navigateToMainPage();
                 } else {
                     Toast.makeText( activity.getApplicationContext(), R.string.can_throw_location_pls,
