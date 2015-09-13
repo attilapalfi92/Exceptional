@@ -62,4 +62,6 @@ public interface ApplicationComponent extends AppContextComponent {
     void inject( MetadataStore metadataStore );
     void inject( OptionsActivity optionsActivity );
     void inject( VotingService votingService );
+    void inject( FriendRealm friendRealm );
+    void inject( YourselfRealm yourselfRealm );
 }

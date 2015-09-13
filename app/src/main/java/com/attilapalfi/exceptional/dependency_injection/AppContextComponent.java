@@ -44,4 +44,8 @@ public interface AppContextComponent {
     VotingService votingService( );
 
     RestInterfaceFactory restAdapterFactory( );
+
+    FriendRealm realmFriendManager( );
+
+    YourselfRealm yourselfRealm( );
 }

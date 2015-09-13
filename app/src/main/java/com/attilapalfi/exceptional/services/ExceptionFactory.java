@@ -26,12 +26,12 @@ public class ExceptionFactory {
         return new Exception( wrapper, exceptionTypeManager.findById( wrapper.getExceptionTypeId() ) );
     }
 
-    public Exception createExceptionWithTypeId( int typeId, BigInteger fromWho, BigInteger toWho ) {
+    public Exception createExceptionWithTypeId( int typeId, String fromWho, String toWho ) {
         ExceptionType exceptionType = exceptionTypeManager.findById( typeId );
         return createExceptionWithType( exceptionType, fromWho, toWho );
     }
 
-    public Exception createExceptionWithType( ExceptionType type, BigInteger fromWho, BigInteger toWho ) {
+    public Exception createExceptionWithType( ExceptionType type, String fromWho, String toWho ) {
         Exception exception = new Exception();
         exception.setFromWho( fromWho );
         exception.setToWho( toWho );

@@ -10,7 +10,7 @@ import java.util.List;
 public class AppStartRequest extends BaseExceptionRequest {
     private String deviceId;
     private String gcmId;
-    private Collection<BigInteger> friendsFacebookIds;
+    private Collection<String> friendsFacebookIds;
     private int exceptionVersion;
     private String firstName, lastName;
     private String deviceName;
@@ -18,24 +18,24 @@ public class AppStartRequest extends BaseExceptionRequest {
     public AppStartRequest( ) {
     }
 
-    public AppStartRequest( String deviceId, String gcmId, Collection<BigInteger> friendsFacebookIds ) {
+    public AppStartRequest( String deviceId, String gcmId, Collection<String> friendsFacebookIds ) {
         this.deviceId = deviceId;
         this.gcmId = gcmId;
         this.friendsFacebookIds = friendsFacebookIds;
     }
 
-    public AppStartRequest( BigInteger userId, List<com.attilapalfi.exceptional.model.Exception> exceptionList,
-                            String deviceId, String gcmId, Collection<BigInteger> friendsFacebookIds,
-                            List<BigInteger> deletedFacebookFriendIds, List<BigInteger> newFacebookFriendIds ) {
+    public AppStartRequest( String userId, List<com.attilapalfi.exceptional.model.Exception> exceptionList,
+                            String deviceId, String gcmId, Collection<String> friendsFacebookIds,
+                            List<String> deletedFacebookFriendIds, List<String> newFacebookFriendIds ) {
         super( userId, exceptionList );
         this.deviceId = deviceId;
         this.gcmId = gcmId;
         this.friendsFacebookIds = friendsFacebookIds;
     }
 
-    public AppStartRequest( String deviceId, BigInteger userId,
-                            List<BigInteger> friendsFacebookIds, List<BigInteger> exceptionIds,
-                            List<BigInteger> deletedFacebookFriendIds, List<BigInteger> newFacebookFriendIds ) {
+    public AppStartRequest( String deviceId, String userId,
+                            List<String> friendsFacebookIds, List<BigInteger> exceptionIds,
+                            List<String> deletedFacebookFriendIds, List<String> newFacebookFriendIds ) {
         this.deviceId = deviceId;
         this.userFacebookId = userId;
         this.friendsFacebookIds = friendsFacebookIds;
@@ -50,19 +50,19 @@ public class AppStartRequest extends BaseExceptionRequest {
         this.deviceId = deviceId;
     }
 
-    public BigInteger getUserFacebookId( ) {
+    public String getUserFacebookId( ) {
         return userFacebookId;
     }
 
-    public void setUserFacebookId( BigInteger userId ) {
+    public void setUserFacebookId( String userId ) {
         this.userFacebookId = userId;
     }
 
-    public Collection<BigInteger> getFriendsFacebookIds( ) {
+    public Collection<String> getFriendsFacebookIds( ) {
         return friendsFacebookIds;
     }
 
-    public void setFriendsFacebookIds( Collection<BigInteger> friendsFacebookIds ) {
+    public void setFriendsFacebookIds( Collection<String> friendsFacebookIds ) {
         this.friendsFacebookIds = friendsFacebookIds;
     }
 

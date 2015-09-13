@@ -20,10 +20,7 @@ import android.support.v4.app.TaskStackBuilder;
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Exception;
-import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
-import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
-import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
+import com.attilapalfi.exceptional.services.persistent_stores.*;
 import com.attilapalfi.exceptional.ui.ShowNotificationActivity;
 import com.attilapalfi.exceptional.ui.main.MainActivity;
 
@@ -37,7 +34,8 @@ public class GcmMessageHandler extends IntentService {
     private static int notificationIdCounter = 0;
     @Inject ExceptionInstanceManager exceptionInstanceManager;
     @Inject ExceptionTypeManager exceptionTypeManager;
-    @Inject FriendsManager friendsManager;
+    @Inject
+    FriendRealm friendManager;
     @Inject MetadataStore metadataStore;
 
     public GcmMessageHandler( ) {
@@ -94,8 +92,8 @@ public class GcmMessageHandler extends IntentService {
         int typeId = Integer.parseInt( extras.getString( "typeId" ) );
         exception.setExceptionType( exceptionTypeManager.findById( typeId ) );
         exception.setInstanceId( new BigInteger( extras.getString( "instanceId" ) ) );
-        exception.setFromWho( new BigInteger( extras.getString( "fromWho" ) ) );
-        exception.setToWho( new BigInteger( extras.getString( "toWho" ) ) );
+        exception.setFromWho( extras.getString( "fromWho" ) );
+        exception.setToWho( extras.getString( "toWho" ) );
         exception.setLongitude( Double.parseDouble( extras.getString( "longitude" ) ) );
         exception.setLatitude( Double.parseDouble( extras.getString( "latitude" ) ) );
         exception.setDate( new Timestamp( Long.parseLong( extras.getString( "timeInMillis" ) ) ) );
@@ -130,7 +128,7 @@ public class GcmMessageHandler extends IntentService {
         }
         String friendPointsString = extras.getString( "friendPoints" );
         if ( friendPointsString != null ) {
-            friendsManager.updateFriendPoints( exception.getFromWho(), Integer.parseInt( friendPointsString ) );
+            friendManager.updateFriendPoints( exception.getFromWho(), Integer.parseInt( friendPointsString ) );
         }
 
     }

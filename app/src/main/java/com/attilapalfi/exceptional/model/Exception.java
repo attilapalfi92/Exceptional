@@ -21,8 +21,8 @@ public class Exception {
     private double longitude;
     private double latitude;
     private Timestamp date;
-    private BigInteger fromWho;
-    private BigInteger toWho;
+    private String fromWho;
+    private String toWho;
     private String city = "";
 
     public Exception( ExceptionInstanceWrapper wrapper, ExceptionType exceptionType ) {
@@ -119,19 +119,19 @@ public class Exception {
         this.date = date;
     }
 
-    public BigInteger getFromWho( ) {
+    public String getFromWho( ) {
         return fromWho;
     }
 
-    public void setFromWho( BigInteger fromWho ) {
+    public void setFromWho( String fromWho ) {
         this.fromWho = fromWho;
     }
 
-    public BigInteger getToWho( ) {
+    public String getToWho( ) {
         return toWho;
     }
 
-    public void setToWho( BigInteger toWho ) {
+    public void setToWho( String toWho ) {
         this.toWho = toWho;
     }
 

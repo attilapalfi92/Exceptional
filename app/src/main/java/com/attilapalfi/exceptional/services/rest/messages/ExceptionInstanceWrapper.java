@@ -10,7 +10,7 @@ import com.attilapalfi.exceptional.model.Exception;
  * Created by Attila on 2015-06-11.
  */
 public class ExceptionInstanceWrapper {
-    private BigInteger fromWho, toWho;
+    private String fromWho, toWho;
     private long timeInMillis;
     private double longitude, latitude;
     private int exceptionTypeId;
@@ -29,7 +29,7 @@ public class ExceptionInstanceWrapper {
         instanceId = e.getInstanceId();
     }
 
-    public ExceptionInstanceWrapper( BigInteger fromWho, BigInteger toWho, long timeInMillis,
+    public ExceptionInstanceWrapper( String fromWho, String toWho, long timeInMillis,
                                      double longitude, double latitude, int exceptionTypeId, BigInteger instanceId ) {
         this.fromWho = fromWho;
         this.toWho = toWho;
@@ -48,19 +48,19 @@ public class ExceptionInstanceWrapper {
         this.instanceId = instanceId;
     }
 
-    public BigInteger getFromWho( ) {
+    public String getFromWho( ) {
         return fromWho;
     }
 
-    public void setFromWho( BigInteger fromWho ) {
+    public void setFromWho( String fromWho ) {
         this.fromWho = fromWho;
     }
 
-    public BigInteger getToWho( ) {
+    public String getToWho( ) {
         return toWho;
     }
 
-    public void setToWho( BigInteger toWho ) {
+    public void setToWho( String toWho ) {
         this.toWho = toWho;
     }
 

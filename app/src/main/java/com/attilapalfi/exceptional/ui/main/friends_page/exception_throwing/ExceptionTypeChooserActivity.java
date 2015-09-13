@@ -1,6 +1,5 @@
 package com.attilapalfi.exceptional.ui.main.friends_page.exception_throwing;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,16 +13,18 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Friend;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
+import com.attilapalfi.exceptional.services.persistent_stores.FriendRealm;
 import com.attilapalfi.exceptional.ui.main.Constants;
 import com.attilapalfi.exceptional.ui.main.page_transformers.ZoomOutPageTransformer;
+import io.realm.Realm;
 
 public class ExceptionTypeChooserActivity extends AppCompatActivity {
     private ExceptionTypePagerAdapter pagerAdapter;
     private ViewPager viewPager;
     private static Friend friend;
     @Inject ExceptionTypeManager exceptionTypeManager;
-    @Inject FriendsManager friendsManager;
+    @Inject
+    FriendRealm friendsManager;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
@@ -58,8 +59,10 @@ public class ExceptionTypeChooserActivity extends AppCompatActivity {
     }
 
     private void initFriend( ) {
-        BigInteger friendId = new BigInteger( getIntent().getStringExtra( Constants.FRIEND_ID ) );
-        friend = friendsManager.findFriendById( friendId );
+        String friendId = getIntent().getStringExtra( Constants.FRIEND_ID );
+        try ( Realm realm = Realm.getInstance( getApplicationContext() ) ) {
+            friend = realm.where( Friend.class ).equalTo( "id", friendId ).findFirst();
+        }
     }
 
     private void initViewPager( ) {

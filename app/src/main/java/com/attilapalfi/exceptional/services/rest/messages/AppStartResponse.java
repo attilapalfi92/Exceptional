@@ -1,6 +1,5 @@
 package com.attilapalfi.exceptional.services.rest.messages;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +14,7 @@ public class AppStartResponse {
     private List<ExceptionInstanceWrapper> myExceptions;
     private List<ExceptionType> exceptionTypes;
     private List<ExceptionType> beingVotedTypes;
-    private Map<BigInteger, Integer> friendsPoints;
+    private Map<String, Integer> friendsPoints;
     private int points;
     private int exceptionVersion;
     private boolean submittedThisWeek;
@@ -68,11 +67,11 @@ public class AppStartResponse {
         this.exceptionVersion = exceptionVersion;
     }
 
-    public Map<BigInteger, Integer> getFriendsPoints( ) {
+    public Map<String, Integer> getFriendsPoints( ) {
         return friendsPoints;
     }
 
-    public void setFriendsPoints( Map<BigInteger, Integer> friendsPoints ) {
+    public void setFriendsPoints( Map<String, Integer> friendsPoints ) {
         this.friendsPoints = friendsPoints;
     }
 

@@ -29,7 +29,7 @@ import static java8.util.stream.StreamSupport.stream;
  * Created by Attila on 2015-06-12.
  */
 public class FriendsManager {
-    @Inject Context context;
+    /*@Inject Context context;
     @Inject ImageCache imageCache;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
@@ -72,14 +72,6 @@ public class FriendsManager {
         editor.apply();
         new AsyncFriendOrganizer().execute();
         notifyChangeListeners();
-    }
-
-    public boolean isInitialized( ) {
-        return sharedPreferences != null;
-    }
-
-    public void initialize( ) {
-
     }
 
     public void saveFriendsAndYourself( List<Friend> friendList, Friend yourself ) {
@@ -174,7 +166,7 @@ public class FriendsManager {
                 }
             }
         }
-        return new Friend( new BigInteger( "0" ), "", "", "" );
+        return new Friend( "0", "", "", "" );
     }
 
     private void saveFriends( List<Friend> toBeSaved ) {
@@ -286,7 +278,7 @@ public class FriendsManager {
                 friendPicture = imageCache.getImageForFriend( friend );
                 if ( friendPicture == null ) {
                     friendPicture = downloadAndDecodeBitmap( downloadUrl );
-                    imageCache.addImage( friend, friendPicture );
+                    imageCache.saveImageToStore( friend, friendPicture );
                 }
             } catch ( IOException e ) {
                 Log.e( "Error", e.getMessage() );
@@ -343,5 +335,5 @@ public class FriendsManager {
         protected void onPostExecute( Void aVoid ) {
             notifyChangeListeners();
         }
-    }
+    }*/
 }

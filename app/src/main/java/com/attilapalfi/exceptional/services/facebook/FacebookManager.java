@@ -17,6 +17,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Friend;
+import com.attilapalfi.exceptional.model.Yourself;
 import com.attilapalfi.exceptional.services.persistent_stores.*;
 import com.attilapalfi.exceptional.services.rest.AppStartService;
 import com.facebook.*;
@@ -29,7 +30,8 @@ public class FacebookManager {
     @Inject AppStartService appStartService;
     @Inject ExceptionInstanceManager exceptionInstanceManager;
     @Inject ExceptionTypeManager exceptionTypeManager;
-    @Inject FriendsManager friendsManager;
+    @Inject FriendRealm friendRealm;
+    @Inject YourselfRealm yourselfRealm;
     @Inject ImageCache imageCache;
     @Inject MetadataStore metadataStore;
     private AccessToken accessToken;
@@ -37,7 +39,7 @@ public class FacebookManager {
     private Profile profile;
     private ProfileTracker profileTracker;
     private BigInteger profileId = new BigInteger( "0" );
-    private Friend yourself;
+    private Yourself yourself;
     private CallbackManager callbackManager;
     private FacebookCallback<LoginResult> facebookCallback;
     private FacebookLoginSuccessHandler loginSuccessHandler;
@@ -90,8 +92,8 @@ public class FacebookManager {
     }
 
     private void setUserLoggedOut( ) {
-        imageCache.wipe( friendsManager.getStoredFriends() );
-        friendsManager.wipe();
+        imageCache.wipe();
+        friendRealm.wipe();
         exceptionInstanceManager.wipe();
         exceptionTypeManager.wipe();
         metadataStore.wipe();
@@ -151,11 +153,13 @@ public class FacebookManager {
         if ( metadataStore.isLoggedIn() ) {
             if ( !metadataStore.isFirstStartFinished() ) {
                 initYourself();
-                friendsManager.saveFriendsAndYourself( friends, yourself );
+                yourselfRealm.saveYourself( yourself );
+                friendRealm.saveFriends( friends );
                 appStartService.onFirstAppStart( friends, yourself.getId() );
             } else {
                 initYourself();
-                friendsManager.updateFriendsAndYourself( friends, yourself );
+                yourselfRealm.updateYourself( yourself );
+                friendRealm.updateFriends( friends );
                 appStartService.onRegularAppStart( friends, yourself.getId() );
             }
         }
@@ -171,8 +175,8 @@ public class FacebookManager {
     private void initYourself( ) {
         profile = Profile.getCurrentProfile();
         if ( profile != null ) {
-            yourself = new Friend(
-                    new BigInteger( profile.getId() ),
+            yourself = new Yourself(
+                    profile.getId(),
                     profile.getFirstName() + " " + profile.getMiddleName(),
                     profile.getLastName(),
                     profile.getProfilePictureUri( 200, 200 ).toString() );
@@ -186,7 +190,7 @@ public class FacebookManager {
         String id = user.getString( "id" );
         JSONObject imageData = user.getJSONObject( "picture" ).getJSONObject( "data" );
         String imageUrl = imageData.getString( "url" );
-        return new Friend( new BigInteger( id ), names[0], names[1], imageUrl, null );
+        return new Friend( id, names[0], names[1], imageUrl, null );
     }
 
     private String[] parseFirstAndLastName( String name ) {

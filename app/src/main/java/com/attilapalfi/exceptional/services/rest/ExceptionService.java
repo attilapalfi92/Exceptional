@@ -11,12 +11,14 @@ import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.model.Friend;
 import com.attilapalfi.exceptional.services.ExceptionFactory;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
+import com.attilapalfi.exceptional.services.persistent_stores.FriendRealm;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
+import com.attilapalfi.exceptional.services.persistent_stores.YourselfRealm;
 import com.attilapalfi.exceptional.services.rest.messages.BaseExceptionRequest;
 import com.attilapalfi.exceptional.services.rest.messages.ExceptionInstanceWrapper;
 import com.attilapalfi.exceptional.services.rest.messages.ExceptionRefreshResponse;
 import com.attilapalfi.exceptional.services.rest.messages.ExceptionSentResponse;
+import io.realm.Realm;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -28,7 +30,8 @@ public class ExceptionService {
     @Inject Context context;
     @Inject ExceptionInstanceManager exceptionInstanceManager;
     @Inject ExceptionFactory exceptionFactory;
-    @Inject FriendsManager friendsManager;
+    @Inject FriendRealm friendRealm;
+    @Inject YourselfRealm yourselfRealm;
     @Inject MetadataStore metadataStore;
     @Inject RestInterfaceFactory restInterfaceFactory;
     private ExceptionRestInterface exceptionRestInterface;
@@ -44,14 +47,16 @@ public class ExceptionService {
             exceptionRestInterface.throwException( exceptionInstanceWrapper, new Callback<ExceptionSentResponse>() {
                 @Override
                 public void success( ExceptionSentResponse e, Response response ) {
-                    Friend toWho = friendsManager.findFriendById( e.getInstanceWrapper().getToWho() );
-                    metadataStore.setPoints( e.getYourPoints() );
-                    friendsManager.updateFriendPoints( e.getInstanceWrapper().getToWho(), e.getFriendsPoints() );
-                    exceptionInstanceManager.addExceptionAsync( exceptionFactory.createFromWrapper( e.getInstanceWrapper() ) );
-                    Toast.makeText( context, e.getExceptionShortName() + " "
-                                    + context.getString( R.string.successfully_thrown )
-                                    + " " + toWho.getName(),
-                            Toast.LENGTH_SHORT ).show();
+                    try ( Realm realm = Realm.getInstance( context ) ) {
+                        Friend toWho = realm.where( Friend.class ).equalTo( "id", e.getInstanceWrapper().getToWho() ).findFirst();
+                        metadataStore.setPoints( e.getYourPoints() );
+                        friendRealm.updateFriendPoints( e.getInstanceWrapper().getToWho(), e.getFriendsPoints() );
+                        exceptionInstanceManager.addExceptionAsync( exceptionFactory.createFromWrapper( e.getInstanceWrapper() ) );
+                        Toast.makeText( context, e.getExceptionShortName() + " "
+                                        + context.getString( R.string.successfully_thrown )
+                                        + " " + toWho.getFirstName() + " " + toWho.getLastName(),
+                                Toast.LENGTH_SHORT ).show();
+                    }
                 }
 
                 @Override
@@ -68,7 +73,7 @@ public class ExceptionService {
 
     public void refreshExceptions( final ExceptionRefreshListener refreshListener ) {
         BaseExceptionRequest requestBody = new BaseExceptionRequest(
-                friendsManager.getYourself().getId(),
+                yourselfRealm.getYourself().getId(),
                 exceptionInstanceManager.getExceptionList()
         );
         exceptionRestInterface.refreshExceptions( requestBody, new Callback<ExceptionRefreshResponse>() {

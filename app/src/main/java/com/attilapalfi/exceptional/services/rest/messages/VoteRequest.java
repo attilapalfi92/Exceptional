@@ -6,22 +6,22 @@ import java.math.BigInteger;
  * Created by palfi on 2015-09-06.
  */
 public class VoteRequest {
-    private BigInteger userId;
+    private String userId;
     private int votedExceptionId;
 
     public VoteRequest( ) {
     }
 
-    public VoteRequest( BigInteger userId, int votedExceptionId ) {
+    public VoteRequest( String userId, int votedExceptionId ) {
         this.userId = userId;
         this.votedExceptionId = votedExceptionId;
     }
 
-    public BigInteger getUserId( ) {
+    public String getUserId( ) {
         return userId;
     }
 
-    public void setUserId( BigInteger userId ) {
+    public void setUserId( String userId ) {
         this.userId = userId;
     }
 

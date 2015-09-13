@@ -1,6 +1,6 @@
 package com.attilapalfi.exceptional.ui;
 
-import java.math.BigInteger;
+import java.io.File;
 import java.sql.Timestamp;
 
 import javax.inject.Inject;
@@ -14,17 +14,17 @@ import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.ExceptionType;
 import com.attilapalfi.exceptional.model.Friend;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
 import com.attilapalfi.exceptional.services.persistent_stores.ImageCache;
+import com.attilapalfi.exceptional.services.persistent_stores.FriendRealm;
+import com.attilapalfi.exceptional.services.persistent_stores.YourselfRealm;
+import io.realm.Realm;
 
 
 public class ShowNotificationActivity extends AppCompatActivity {
-    @Inject
-    ExceptionTypeManager exceptionTypeManager;
-    @Inject
-    FriendsManager friendsManager;
-    @Inject
-    ImageCache imageCache;
+    @Inject ExceptionTypeManager exceptionTypeManager;
+    @Inject FriendRealm friendRealm;
+    @Inject YourselfRealm yourselfRealm;
+    @Inject ImageCache imageCache;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
@@ -34,7 +34,7 @@ public class ShowNotificationActivity extends AppCompatActivity {
 
         Bundle bundle = getIntent().getExtras();
         int typeId = bundle.getInt( "typeId" );
-        BigInteger fromWho = new BigInteger( bundle.getString( "fromWho" ) );
+        String fromWho = bundle.getString( "fromWho" );
         double longitude = bundle.getDouble( "longitude" );
         double latitude = bundle.getDouble( "latitude" );
         long timeInMillis = bundle.getLong( "timeInMillis" );
@@ -49,20 +49,20 @@ public class ShowNotificationActivity extends AppCompatActivity {
         ExceptionType exceptionType = exceptionTypeManager.findById( typeId );
         exceptionNameView.setText( exceptionType.getPrefix() + "\n" + exceptionType.getShortName() );
         exceptionDescView.setText( exceptionType.getDescription() );
-        Friend sender = friendsManager.findFriendById( fromWho );
+        try ( Realm realm = Realm.getInstance( getApplicationContext() ) ) {
+            Friend sender = realm.where( Friend.class ).equalTo( "id", fromWho ).findFirst();
+            if ( sender != null ) {
+                if ( sender.getId().equals( yourselfRealm.getYourself().getId() ) ) {
+                    senderNameView.setText( "Yourself" );
+                } else {
+                    senderNameView.setText( sender.getFirstName() );
+                }
 
-        if ( sender != null ) {
-            if ( friendsManager.isItYourself( sender ) ) {
-                senderNameView.setText( "Yourself" );
-            } else {
-                senderNameView.setText( sender.getFirstName() );
+                imageCache.setImageToView( sender, senderImageView );
+                senderPosView.setText( longitude + "\n" + latitude );
+                Timestamp timestamp = new Timestamp( timeInMillis );
+                sendDateView.setText( timestamp.toString() );
             }
-
-            sender.setImageToView( senderImageView, imageCache );
-            senderPosView.setText( longitude + "\n" + latitude );
-            Timestamp timestamp = new Timestamp( timeInMillis );
-            sendDateView.setText( timestamp.toString() );
         }
-
     }
 }

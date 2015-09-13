@@ -26,12 +26,11 @@ import com.attilapalfi.exceptional.interfaces.ExceptionChangeListener;
 import com.attilapalfi.exceptional.interfaces.ExceptionRefreshListener;
 import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.model.Friend;
-import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
-import com.attilapalfi.exceptional.services.persistent_stores.ImageCache;
-import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
+import com.attilapalfi.exceptional.model.Yourself;
+import com.attilapalfi.exceptional.services.persistent_stores.*;
 import com.attilapalfi.exceptional.services.rest.ExceptionService;
 import com.attilapalfi.exceptional.ui.main.friends_page.FriendDetailsActivity;
+import io.realm.Realm;
 
 /**
  * Created by palfi on 2015-08-24.
@@ -41,10 +40,10 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
 
     private static long lastSyncTime = 0;
 
-    @Inject
-    ExceptionService exceptionService;
+    @Inject ExceptionService exceptionService;
     @Inject ExceptionInstanceManager exceptionInstanceManager;
-    @Inject FriendsManager friendsManager;
+    @Inject FriendRealm friendsManager;
+    @Inject YourselfRealm yourselfRealm;
     @Inject ImageCache imageCache;
     @Inject MetadataStore metadataStore;
     private Friend friend;
@@ -125,7 +124,8 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
 
     private void initExceptionAdapter( ) {
         List<Exception> values = generateValues( exceptionInstanceManager.getExceptionList() );
-        exceptionInstanceAdapter = new ExceptionInstanceAdapter( values, getActivity().getApplicationContext(), friendsManager, imageCache );
+        exceptionInstanceAdapter = new ExceptionInstanceAdapter( values, getActivity().getApplicationContext(),
+                friendsManager, yourselfRealm, imageCache );
         onExceptionsChanged();
     }
 
@@ -156,10 +156,11 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
 
     private static class ExceptionInstanceAdapter extends RecyclerView.Adapter<ExceptionInstanceAdapter.RowViewHolder> {
         private Context context;
-        private FriendsManager friendsManager;
+        private FriendRealm friendRealm;
+        private YourselfRealm yourselfRealm;
+        private ImageCache imageCache;
         private List<Exception> values;
         private RecyclerView recyclerView;
-        private ImageCache imageCache;
 
         private final View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
@@ -170,10 +171,12 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
             }
         };
 
-        public ExceptionInstanceAdapter( List<Exception> values, Context context, FriendsManager friendsManager, ImageCache imageCache ) {
+        public ExceptionInstanceAdapter( List<Exception> values, Context context, FriendRealm friendRealm,
+                                         YourselfRealm yourselfRealm, ImageCache imageCache ) {
             this.values = values;
             this.context = context;
-            this.friendsManager = friendsManager;
+            this.friendRealm = friendRealm;
+            this.yourselfRealm = yourselfRealm;
             this.imageCache = imageCache;
         }
 
@@ -181,7 +184,7 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
         public RowViewHolder onCreateViewHolder( ViewGroup parent, int viewType ) {
             View view = LayoutInflater.from( parent.getContext() ).inflate( R.layout.exception_row_layout, parent, false );
             view.setOnClickListener( onClickListener );
-            return new RowViewHolder( view, context, friendsManager, imageCache );
+            return new RowViewHolder( view, context, friendRealm, yourselfRealm, imageCache );
         }
 
         @Override
@@ -201,7 +204,8 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
 
         public static class RowViewHolder extends RecyclerView.ViewHolder {
             private Context context;
-            private FriendsManager friendsManager;
+            private FriendRealm friendsManager;
+            private YourselfRealm yourselfRealm;
             private ImageCache imageCache;
             private ImageView friendImage;
             private TextView exceptionNameView;
@@ -213,12 +217,14 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
             private ImageView incomingImage;
             private Friend fromWho;
             private Friend toWho;
-            private Friend yourself;
+            private Yourself yourself;
 
-            public RowViewHolder( View rowView, Context context, FriendsManager friendsManager, ImageCache imageCache ) {
+            public RowViewHolder( View rowView, Context context, FriendRealm friendRealm, YourselfRealm yourselfRealm,
+                                  ImageCache imageCache ) {
                 super( rowView );
                 this.context = context;
-                this.friendsManager = friendsManager;
+                this.friendsManager = friendRealm;
+                this.yourselfRealm = yourselfRealm;
                 this.imageCache = imageCache;
                 friendImage = (ImageView) rowView.findViewById( R.id.exc_row_image );
                 exceptionNameView = (TextView) rowView.findViewById( R.id.exc_row_name );
@@ -231,16 +237,18 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
             }
 
             public void bindRow( Exception model ) {
-                fromWho = friendsManager.findFriendById( model.getFromWho() );
-                toWho = friendsManager.findFriendById( model.getToWho() );
-                yourself = friendsManager.getYourself();
-                bindUserInfo( model );
-                bindExceptionInfo( model );
-                setDirectionImages();
+                try ( Realm realm = Realm.getInstance( context ) ) {
+                    fromWho = realm.where( Friend.class ).equalTo( "id", model.getFromWho() ).findFirst();
+                    toWho = realm.where( Friend.class ).equalTo( "id", model.getToWho() ).findFirst();
+                    yourself = yourselfRealm.getYourself();
+                    bindUserInfo( model );
+                    bindExceptionInfo( model );
+                    setDirectionImages();
+                }
             }
 
             private void bindUserInfo( Exception model ) {
-                toNameView.setText( toWho.getName() );
+                toNameView.setText( toWho.getFirstName() + " " + toWho.getLastName() );
                 bindImage();
                 setFromWhoNameAndCity( model );
             }
@@ -248,15 +256,15 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
             private void bindImage( ) {
                 if ( yourself.equals( fromWho ) ) {
                     if ( yourself.equals( toWho ) ) {
-                        yourself.setImageToView( friendImage, imageCache );
+                        imageCache.setImageToView( yourself, friendImage );
                     } else {
-                        if ( toWho.getId().longValue() != 0 ) {
-                            toWho.setImageToView( friendImage, imageCache );
+                        if ( !"0".equals( toWho.getId() ) ) {
+                            imageCache.setImageToView( toWho, friendImage );
                         }
                     }
                 } else {
-                    if ( fromWho.getId().longValue() != 0 ) {
-                        fromWho.setImageToView( friendImage, imageCache );
+                    if ( !"0".equals( fromWho.getId() ) ) {
+                        imageCache.setImageToView( fromWho, friendImage );
                     }
                 }
             }
@@ -264,8 +272,8 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
             private void setFromWhoNameAndCity( Exception model ) {
                 String city = model.getCity();
                 String nameAndCity = "";
-                if ( fromWho.getId().longValue() != 0 ) {
-                    nameAndCity = fromWho.getName();
+                if ( !"0".equals( fromWho.getId() ) ) {
+                    nameAndCity = fromWho.getFirstName() + " " + fromWho.getLastName();
                     if ( !"".equals( city ) ) {
                         nameAndCity += ( ", " + city );
                     }

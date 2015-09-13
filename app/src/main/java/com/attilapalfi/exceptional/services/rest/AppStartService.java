@@ -1,7 +1,6 @@
 package com.attilapalfi.exceptional.services.rest;
 
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -13,10 +12,7 @@ import android.widget.Toast;
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Friend;
-import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
-import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
-import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
+import com.attilapalfi.exceptional.services.persistent_stores.*;
 import com.attilapalfi.exceptional.services.rest.messages.AppStartRequest;
 import com.attilapalfi.exceptional.services.rest.messages.AppStartResponse;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -34,7 +30,8 @@ public class AppStartService {
     @Inject Context context;
     @Inject ExceptionInstanceManager exceptionInstanceManager;
     @Inject ExceptionTypeManager exceptionTypeManager;
-    @Inject FriendsManager friendsManager;
+    @Inject FriendRealm friendRealm;
+    @Inject YourselfRealm yourselfRealm;
     @Inject MetadataStore metadataStore;
     @Inject RestInterfaceFactory restInterfaceFactory;
     private String projectNumber;
@@ -54,13 +51,13 @@ public class AppStartService {
         appStartRestInterface = restInterfaceFactory.create( context, AppStartRestInterface.class );
     }
 
-    public void onFirstAppStart( List<Friend> friendList, BigInteger profileId ) {
+    public void onFirstAppStart( List<Friend> friendList, String profileId ) {
         initRequestBody( friendList, profileId );
         requestBody.setDeviceName( getDeviceName() );
         gcmFirstAppStart();
     }
 
-    public void onRegularAppStart( List<Friend> friendList, BigInteger profileId ) {
+    public void onRegularAppStart( List<Friend> friendList, String profileId ) {
         initRequestBody( friendList, profileId );
         requestBody.setExceptionVersion( metadataStore.getExceptionVersion() );
         try {
@@ -82,13 +79,13 @@ public class AppStartService {
         }
     }
 
-    private void initRequestBody( List<Friend> friendList, BigInteger profileId ) {
+    private void initRequestBody( List<Friend> friendList, String profileId ) {
         requestBody.setDeviceId( androidId );
         requestBody.setUserFacebookId( profileId );
         requestBody.setFriendsFacebookIds( stream( friendList ).map( Friend::getId ).collect( Collectors.toList() ) );
         requestBody.setKnownExceptionIds( exceptionInstanceManager.getKnownIds() );
-        requestBody.setFirstName( friendsManager.getYourself().getFirstName() );
-        requestBody.setLastName( friendsManager.getYourself().getLastName() );
+        requestBody.setFirstName( yourselfRealm.getYourself().getFirstName() );
+        requestBody.setLastName( yourselfRealm.getYourself().getLastName() );
     }
 
     private void gcmFirstAppStart( ) {
@@ -148,7 +145,7 @@ public class AppStartService {
         metadataStore.setPoints( responseBody.getPoints() );
         metadataStore.setSubmittedThisWeek( responseBody.isSubmittedThisWeek() );
         metadataStore.setVotedThisWeek( responseBody.isVotedThisWeek() );
-        friendsManager.updateFriendsPoints( responseBody.getFriendsPoints() );
+        friendRealm.updatePointsOfFriendList( responseBody.getFriendsPoints() );
     }
 
     public String getDeviceName( ) {

@@ -6,13 +6,13 @@ import java.math.BigInteger;
  * Created by 212461305 on 2015.07.11..
  */
 public abstract class BaseRequest {
-    protected BigInteger userFacebookId;
+    protected String userFacebookId;
 
-    public BigInteger getUserFacebookId( ) {
+    public String getUserFacebookId( ) {
         return userFacebookId;
     }
 
-    public void setUserFacebookId( BigInteger userFacebookId ) {
+    public void setUserFacebookId( String userFacebookId ) {
         this.userFacebookId = userFacebookId;
     }
 }

@@ -111,4 +111,16 @@ public class AppContextModule {
     public RestInterfaceFactory restAdapterFactory( ) {
         return new RestInterfaceFactory();
     }
+
+    @Provides
+    @Singleton
+    public FriendRealm realmFriendManager( ) {
+        return new FriendRealm();
+    }
+
+    @Provides
+    @Singleton
+    public YourselfRealm yourselfRealm( ) {
+        return new YourselfRealm();
+    }
 }

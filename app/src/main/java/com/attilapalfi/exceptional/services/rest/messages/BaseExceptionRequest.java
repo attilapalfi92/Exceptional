@@ -18,7 +18,7 @@ public class BaseExceptionRequest extends BaseRequest {
     public BaseExceptionRequest( ) {
     }
 
-    public BaseExceptionRequest( BigInteger userId, List<Exception> exceptionList ) {
+    public BaseExceptionRequest( String userId, List<Exception> exceptionList ) {
         this.userFacebookId = userId;
 
         knownExceptionIds = new ArrayList<>( exceptionList.size() );

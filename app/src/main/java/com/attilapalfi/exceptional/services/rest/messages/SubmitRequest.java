@@ -8,22 +8,22 @@ import com.attilapalfi.exceptional.model.ExceptionType;
  * Created by palfi on 2015-09-06.
  */
 public class SubmitRequest {
-    private BigInteger submitterId;
+    private String submitterId;
     private ExceptionType submittedType;
 
     public SubmitRequest( ) {
     }
 
-    public SubmitRequest( BigInteger submitterId, ExceptionType submittedType ) {
+    public SubmitRequest( String submitterId, ExceptionType submittedType ) {
         this.submitterId = submitterId;
         this.submittedType = submittedType;
     }
 
-    public BigInteger getSubmitterId( ) {
+    public String getSubmitterId( ) {
         return submitterId;
     }
 
-    public void setSubmitterId( BigInteger submitterId ) {
+    public void setSubmitterId( String submitterId ) {
         this.submitterId = submitterId;
     }
 

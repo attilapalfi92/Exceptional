@@ -61,10 +61,6 @@ public class MetadataStore {
         editor.apply();
     }
 
-    public boolean isInitialized( ) {
-        return initialized;
-    }
-
     public void setPoints( int points ) {
         if ( this.points != points ) {
             this.points = points;

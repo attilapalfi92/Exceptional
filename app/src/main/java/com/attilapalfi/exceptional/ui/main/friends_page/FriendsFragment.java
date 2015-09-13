@@ -1,5 +1,6 @@
 package com.attilapalfi.exceptional.ui.main.friends_page;
 
+import java.io.File;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -21,9 +22,11 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.interfaces.FriendChangeListener;
 import com.attilapalfi.exceptional.model.Friend;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
 import com.attilapalfi.exceptional.services.persistent_stores.ImageCache;
+import com.attilapalfi.exceptional.services.persistent_stores.FriendRealm;
 import com.attilapalfi.exceptional.ui.main.Constants;
+import io.realm.Realm;
+import io.realm.RealmChangeListener;
 
 /**
  * Created by palfi on 2015-08-23.
@@ -31,19 +34,24 @@ import com.attilapalfi.exceptional.ui.main.Constants;
 public class FriendsFragment extends Fragment implements FriendChangeListener {
     private RecyclerView recyclerView;
     private FriendAdapter friendAdapter;
-    @Inject FriendsManager friendsManager;
+    private Realm realm;
+    @Inject FriendRealm friendsManager;
     @Inject ImageCache imageCache;
+
+    // Realm change listener that refreshes the UI when there is changes to Realm.
+    private RealmChangeListener realmListener = new RealmChangeListener() {
+        @Override
+        public void onChange() {
+            friendAdapter.notifyDataSetChanged();
+        }
+    };
 
     @Override
     public void onCreate( @Nullable Bundle savedInstanceState ) {
         super.onCreate( savedInstanceState );
         Injector.INSTANCE.getApplicationComponent().inject( this );
+        realm = Realm.getInstance( getContext() );
         friendsManager.addFriendChangeListener( this );
-    }
-
-    @Override
-    public void onActivityCreated( @Nullable Bundle savedInstanceState ) {
-        super.onActivityCreated( savedInstanceState );
     }
 
     @Nullable
@@ -58,17 +66,24 @@ public class FriendsFragment extends Fragment implements FriendChangeListener {
     @Override
     public void onResume( ) {
         super.onResume();
+        realm.addChangeListener( realmListener );
+    }
+
+    @Override
+    public void onPause( ) {
+        super.onPause();
+        realm.removeChangeListener( realmListener );
     }
 
     @Override
     public void onDestroy( ) {
         friendsManager.removeFriendChangeListener( this );
+        realm.close();
         super.onDestroy();
     }
 
     private void initFriendAdapter( ) {
-        List<Friend> values = friendsManager.getStoredFriends();
-        friendAdapter = new FriendAdapter( values, getActivity(), imageCache );
+        friendAdapter = new FriendAdapter( realm.where( Friend.class ).findAllSorted( "points" ), getActivity(), imageCache );
     }
 
     @NonNull
@@ -148,7 +163,7 @@ public class FriendsFragment extends Fragment implements FriendChangeListener {
             public void bindRow( Friend model ) {
                 nameView.setText( model.getFirstName() + " " + model.getLastName() );
                 pointsView.setText( "Points: " + model.getPoints() );
-                model.setImageToView( imageView, imageCache );
+                imageCache.setImageToView( model, imageView );
             }
         }
 

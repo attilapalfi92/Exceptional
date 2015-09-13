@@ -1,23 +1,18 @@
 package com.attilapalfi.exceptional.model;
 
 import java.lang.ref.WeakReference;
-import java.math.BigInteger;
 import java.util.Comparator;
 
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
-import android.widget.ImageView;
-import com.attilapalfi.exceptional.services.persistent_stores.ImageCache;
-import com.google.gson.Gson;
 import io.realm.RealmObject;
 import io.realm.annotations.Ignore;
 import io.realm.annotations.Index;
 import io.realm.annotations.PrimaryKey;
 
 /**
- * Created by Attila on 2015-06-12.
+ * Created by palfi on 2015-09-13.
  */
-public class Friend extends RealmObject {
+public class Yourself extends RealmObject {
     @Index
     @PrimaryKey
     private String id;
@@ -29,25 +24,25 @@ public class Friend extends RealmObject {
     @Ignore
     private transient WeakReference<Bitmap> imageWeakReference;
 
-    public static class NameComparator implements Comparator<Friend> {
+    public static class NameComparator implements Comparator<Yourself> {
         @Override
-        public int compare( Friend lhs, Friend rhs ) {
+        public int compare( Yourself lhs, Yourself rhs ) {
             return lhs.firstName.compareTo( rhs.firstName );
         }
     }
 
-    public static class PointComparator implements Comparator<Friend> {
+    public static class PointComparator implements Comparator<Yourself> {
         @Override
-        public int compare( Friend lhs, Friend rhs ) {
+        public int compare( Yourself lhs, Yourself rhs ) {
             return lhs.points < rhs.points ? 1 : ( lhs.points == rhs.points ? 0 : -1 );
         }
     }
 
-    public Friend( ) {
+    public Yourself( ) {
         imageWeakReference = new WeakReference<>( null );
     }
 
-    public Friend( String id, String firstName, String lastName, String imageUrl ) {
+    public Yourself( String id, String firstName, String lastName, String imageUrl ) {
         this.id = id;
         this.firstName = firstName.trim();
         this.lastName = lastName.trim();
@@ -55,7 +50,7 @@ public class Friend extends RealmObject {
         this.imageWeakReference = new WeakReference<>( null );
     }
 
-    public Friend( String id, String firstName, String lastName, String imageUrl, Bitmap image ) {
+    public Yourself( String id, String firstName, String lastName, String imageUrl, Bitmap image ) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;

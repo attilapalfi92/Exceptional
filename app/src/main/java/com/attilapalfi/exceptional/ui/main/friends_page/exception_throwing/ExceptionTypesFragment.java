@@ -1,6 +1,5 @@
 package com.attilapalfi.exceptional.ui.main.friends_page.exception_throwing;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +26,8 @@ import com.attilapalfi.exceptional.model.ExceptionType;
 import com.attilapalfi.exceptional.services.ExceptionFactory;
 import com.attilapalfi.exceptional.services.GpsService;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
+import com.attilapalfi.exceptional.services.persistent_stores.FriendRealm;
+import com.attilapalfi.exceptional.services.persistent_stores.YourselfRealm;
 import com.attilapalfi.exceptional.services.rest.ExceptionService;
 import com.attilapalfi.exceptional.ui.main.Constants;
 import com.attilapalfi.exceptional.ui.main.MainActivity;
@@ -79,15 +79,15 @@ public class ExceptionTypesFragment extends Fragment {
         return view;
     }
 
+    // TODO: not to inject here, but parent class
     public static class ExceptionTypeAdapter extends RecyclerView.Adapter<ExceptionTypeAdapter.RowViewHolder> {
         private RecyclerView recyclerView;
         private Activity activity;
         private List<ExceptionType> values;
         @Inject GpsService gpsService;
         @Inject ExceptionFactory exceptionFactory;
-        @Inject
-        ExceptionService exceptionService;
-        @Inject FriendsManager friendsManager;
+        @Inject ExceptionService exceptionService;
+        @Inject YourselfRealm yourselfRealm;
 
         private final View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
@@ -105,10 +105,10 @@ public class ExceptionTypesFragment extends Fragment {
             private Exception createException( View view ) {
                 int itemPosition = recyclerView.getChildPosition( view );
                 ExceptionType exceptionType = values.get( itemPosition );
-                BigInteger friendId = new BigInteger( activity.getIntent().getStringExtra( Constants.FRIEND_ID ) );
+                String friendId = activity.getIntent().getStringExtra( Constants.FRIEND_ID );
                 Exception exception = exceptionFactory.createExceptionWithType(
                         exceptionType,
-                        friendsManager.getYourself().getId(),
+                        yourselfRealm.getYourself().getId(),
                         friendId );
                 setLocationForException( exception );
                 return exception;
