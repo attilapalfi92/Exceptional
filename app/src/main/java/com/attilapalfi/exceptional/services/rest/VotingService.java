@@ -39,7 +39,7 @@ public class VotingService {
         votingRestInterface.voteForType( voteRequest, new Callback<VoteResponse>() {
             @Override
             public void success( VoteResponse voteResponse, Response response ) {
-                if ( voteResponse.isVotedForThisWeek() ) {
+                if ( voteResponse.getVotedForThisWeek() ) {
                     metadataStore.setVotedThisWeek( true );
                     exceptionTypeManager.updateVotedType( voteResponse.getVotedType() );
                 }
@@ -57,7 +57,7 @@ public class VotingService {
         votingRestInterface.submitTypeForVote( submitRequest, new Callback<SubmitResponse>() {
             @Override
             public void success( SubmitResponse submitResponse, Response response ) {
-                if ( submitResponse.isSubmittedThisWeek() ) {
+                if ( submitResponse.getSubmittedThisWeek() ) {
                     metadataStore.setSubmittedThisWeek( true );
                     exceptionTypeManager.addVotedType( submitResponse.getSubmittedType() );
                 }

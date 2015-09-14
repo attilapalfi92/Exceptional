@@ -20,7 +20,7 @@ public class Exception {
     private int exceptionTypeId;
     private double longitude;
     private double latitude;
-    private Timestamp date;
+    private Timestamp date; // TODO: long timestapm
     private BigInteger fromWho;
     private BigInteger toWho;
     private String city = "";

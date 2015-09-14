@@ -146,8 +146,8 @@ public class AppStartService {
         exceptionInstanceManager.saveExceptionListAsync( responseBody.getMyExceptions() );
         exceptionTypeManager.setVotedExceptionTypes( responseBody.getBeingVotedTypes() );
         metadataStore.setPoints( responseBody.getPoints() );
-        metadataStore.setSubmittedThisWeek( responseBody.isSubmittedThisWeek() );
-        metadataStore.setVotedThisWeek( responseBody.isVotedThisWeek() );
+        metadataStore.setSubmittedThisWeek( responseBody.getSubmittedThisWeek() );
+        metadataStore.setVotedThisWeek( responseBody.getVotedThisWeek() );
         friendsManager.updateFriendsPoints( responseBody.getFriendsPoints() );
     }
 

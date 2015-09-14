@@ -17,9 +17,12 @@ import com.attilapalfi.exceptional.services.rest.messages.BaseExceptionRequest;
 import com.attilapalfi.exceptional.services.rest.messages.ExceptionInstanceWrapper;
 import com.attilapalfi.exceptional.services.rest.messages.ExceptionRefreshResponse;
 import com.attilapalfi.exceptional.services.rest.messages.ExceptionSentResponse;
+import java8.util.stream.Collectors;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
+
+import static java8.util.stream.StreamSupport.stream;
 
 /**
  * Created by Attila on 2015-06-13.
@@ -69,7 +72,7 @@ public class ExceptionService {
     public void refreshExceptions( final ExceptionRefreshListener refreshListener ) {
         BaseExceptionRequest requestBody = new BaseExceptionRequest(
                 friendsManager.getYourself().getId(),
-                exceptionInstanceManager.getExceptionList()
+                stream( exceptionInstanceManager.getExceptionList() ).map( Exception::getInstanceId ).collect( Collectors.toList() )
         );
         exceptionRestInterface.refreshExceptions( requestBody, new Callback<ExceptionRefreshResponse>() {
 

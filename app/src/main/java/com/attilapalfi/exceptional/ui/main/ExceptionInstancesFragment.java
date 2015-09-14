@@ -43,10 +43,14 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
 
     @Inject
     ExceptionService exceptionService;
-    @Inject ExceptionInstanceManager exceptionInstanceManager;
-    @Inject FriendsManager friendsManager;
-    @Inject ImageCache imageCache;
-    @Inject MetadataStore metadataStore;
+    @Inject
+    ExceptionInstanceManager exceptionInstanceManager;
+    @Inject
+    FriendsManager friendsManager;
+    @Inject
+    ImageCache imageCache;
+    @Inject
+    MetadataStore metadataStore;
     private Friend friend;
     private RecyclerView recyclerView;
     private ExceptionInstanceAdapter exceptionInstanceAdapter;
@@ -273,6 +277,7 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
                 friendNameAndCityView.setText( nameAndCity );
             }
 
+            // TODO: get type information from exceptionTypeManager or what to remove redundant strings
             private void bindExceptionInfo( Exception model ) {
                 exceptionNameView.setText( model.getShortName() );
                 descriptionView.setText( model.getDescription() );
