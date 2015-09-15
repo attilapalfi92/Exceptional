@@ -74,14 +74,6 @@ public class FriendsManager {
         notifyChangeListeners();
     }
 
-    public boolean isInitialized( ) {
-        return sharedPreferences != null;
-    }
-
-    public void initialize( ) {
-
-    }
-
     public void saveFriendsAndYourself( List<Friend> friendList, Friend yourself ) {
         saveFriends( friendList );
         saveOrUpdateYourself( yourself );
@@ -144,7 +136,6 @@ public class FriendsManager {
                 this.yourself = yourself;
                 editor.putString( "yourself", yourself.toString() );
                 editor.apply();
-                new UpdateFriendsImageTask( yourself ).execute();
 
             } else {
                 checkFriendChange( yourself, this.yourself );
@@ -181,7 +172,6 @@ public class FriendsManager {
         for ( Friend f : toBeSaved ) {
             editor.putString( f.getId().toString(), f.toString() );
             storedFriends.add( f );
-            new UpdateFriendsImageTask( f ).execute();
         }
         editor.apply();
         notifyChangeListeners();
@@ -208,15 +198,13 @@ public class FriendsManager {
     private void saveNewFriends( List<Friend> friendList ) {
         List<Friend> workList = new ArrayList<>( friendList );
         workList.removeAll( storedFriends );
-        for ( Friend f : workList ) {
-            new UpdateFriendsImageTask( f ).execute();
-        }
     }
 
     private void checkFriendChange( Friend newFriendState, Friend oldFriendState ) {
         if ( areTheyTheSamePerson( newFriendState, oldFriendState ) ) {
             if ( isImageChanged( newFriendState, oldFriendState ) ) {
-                new UpdateFriendsImageTask( newFriendState ).execute();
+                updateFriendOrYourself( newFriendState );
+                imageCache.updateImageAsync( newFriendState, oldFriendState );
             }
             if ( isNameChanged( newFriendState, oldFriendState ) ) {
                 updateFriendOrYourself( newFriendState );
@@ -269,52 +257,6 @@ public class FriendsManager {
         editor.putString( "yourself", yourself.toString() );
         editor.apply();
         notifyChangeListeners();
-    }
-
-    private class UpdateFriendsImageTask extends AsyncTask<Void, Void, Bitmap> {
-        Friend friend;
-
-        public UpdateFriendsImageTask( Friend friend ) {
-            this.friend = friend;
-        }
-
-        @Override
-        protected Bitmap doInBackground( Void... param ) {
-            String downloadUrl = friend.getImageUrl();
-            Bitmap friendPicture = null;
-            try {
-                friendPicture = imageCache.getImageForFriend( friend );
-                if ( friendPicture == null ) {
-                    friendPicture = downloadAndDecodeBitmap( downloadUrl );
-                    imageCache.addImage( friend, friendPicture );
-                }
-            } catch ( IOException e ) {
-                Log.e( "Error", e.getMessage() );
-                e.printStackTrace();
-            }
-            return friendPicture;
-        }
-
-        private Bitmap downloadAndDecodeBitmap( String downloadUrl ) throws IOException {
-            URLConnection connection = createUrlConnection( downloadUrl );
-            InputStream inputStream = (InputStream) connection.getContent();
-            return BitmapFactory.decodeStream( inputStream );
-        }
-
-        @NonNull
-        private URLConnection createUrlConnection( String downloadUrl ) throws IOException {
-            URL url = new URL( downloadUrl );
-            URLConnection connection = url.openConnection();
-            connection.setUseCaches( true );
-            return connection;
-        }
-
-        @Override
-        protected void onPostExecute( Bitmap bitmap ) {
-            friend.setImage( bitmap );
-            updateFriendOrYourself( friend );
-        }
-
     }
 
     private void deleteFriends( List<Friend> toBeDeleted ) {

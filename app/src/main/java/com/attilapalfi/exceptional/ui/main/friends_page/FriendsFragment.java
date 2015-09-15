@@ -148,7 +148,7 @@ public class FriendsFragment extends Fragment implements FriendChangeListener {
             public void bindRow( Friend model ) {
                 nameView.setText( model.getFirstName() + " " + model.getLastName() );
                 pointsView.setText( "Points: " + model.getPoints() );
-                model.setImageToView( imageView, imageCache );
+                imageCache.setImageToView( model, imageView );
             }
         }
 

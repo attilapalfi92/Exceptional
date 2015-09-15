@@ -252,15 +252,15 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
             private void bindImage( ) {
                 if ( yourself.equals( fromWho ) ) {
                     if ( yourself.equals( toWho ) ) {
-                        yourself.setImageToView( friendImage, imageCache );
+                        imageCache.setImageToView( yourself, friendImage );
                     } else {
                         if ( toWho.getId().longValue() != 0 ) {
-                            toWho.setImageToView( friendImage, imageCache );
+                            imageCache.setImageToView( toWho, friendImage );
                         }
                     }
                 } else {
                     if ( fromWho.getId().longValue() != 0 ) {
-                        fromWho.setImageToView( friendImage, imageCache );
+                        imageCache.setImageToView( fromWho, friendImage );
                     }
                 }
             }

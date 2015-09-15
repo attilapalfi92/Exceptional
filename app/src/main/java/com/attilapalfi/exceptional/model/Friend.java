@@ -19,7 +19,6 @@ public class Friend {
     private String lastName;
     private String imageUrl;
     private int points = 100;
-    private transient WeakReference<Bitmap> imageWeakReference;
 
     private static Gson gson = new Gson();
 
@@ -54,7 +53,6 @@ public class Friend {
     }
 
     public Friend( ) {
-        imageWeakReference = new WeakReference<>( null );
     }
 
     public Friend( BigInteger id, String firstName, String lastName, String imageUrl ) {
@@ -62,15 +60,6 @@ public class Friend {
         this.firstName = firstName.trim();
         this.lastName = lastName.trim();
         this.imageUrl = imageUrl;
-        this.imageWeakReference = new WeakReference<>( null );
-    }
-
-    public Friend( BigInteger id, String firstName, String lastName, String imageUrl, Bitmap image ) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.imageUrl = imageUrl;
-        this.imageWeakReference = new WeakReference<>( image );
     }
 
     public BigInteger getId( ) {
@@ -115,44 +104,5 @@ public class Friend {
 
     public void setPoints( int points ) {
         this.points = points;
-    }
-
-    public void setImageToView( final ImageView view, ImageCache imageCache ) {
-        if ( imageWeakReference.get() == null ) {
-            new AsyncImageLoader( this, view, imageCache ).execute();
-
-        } else {
-            view.setImageBitmap( imageWeakReference.get() );
-        }
-    }
-
-    public void setImage( Bitmap image ) {
-        this.imageWeakReference = new WeakReference<>( image );
-    }
-
-
-    private static class AsyncImageLoader extends AsyncTask<Void, Void, Bitmap> {
-        private Friend friend;
-        private ImageView imageView;
-        private ImageCache imageCache;
-
-        public AsyncImageLoader( Friend friend, ImageView imageView, ImageCache imageCache ) {
-            this.friend = friend;
-            this.imageView = imageView;
-            this.imageCache = imageCache;
-        }
-
-        @Override
-        protected Bitmap doInBackground( Void... params ) {
-            return imageCache.getImageForFriend( friend );
-        }
-
-        @Override
-        protected void onPostExecute( Bitmap bitmap ) {
-            friend.setImage( bitmap );
-            imageView.setImageBitmap( bitmap );
-            imageView = null;
-            friend = null;
-        }
     }
 }

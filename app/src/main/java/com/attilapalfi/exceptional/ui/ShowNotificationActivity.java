@@ -57,8 +57,7 @@ public class ShowNotificationActivity extends AppCompatActivity {
             } else {
                 senderNameView.setText( sender.getFirstName() );
             }
-
-            sender.setImageToView( senderImageView, imageCache );
+            imageCache.setImageToView( sender, senderImageView );
             senderPosView.setText( longitude + "\n" + latitude );
             Timestamp timestamp = new Timestamp( timeInMillis );
             sendDateView.setText( timestamp.toString() );

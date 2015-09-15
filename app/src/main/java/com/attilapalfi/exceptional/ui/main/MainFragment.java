@@ -67,7 +67,7 @@ public class MainFragment extends Fragment implements FirstStartFinishedListener
 
     private void setImageView( ) {
         ImageView imageView = (ImageView) view.findViewById( R.id.myMainImageView );
-        friendsManager.getYourself().setImageToView( imageView, imageCache );
+        imageCache.setImageToView( friendsManager.getYourself(), imageView );
     }
 
     private void setNameView( ) {

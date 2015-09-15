@@ -37,7 +37,7 @@ public class FriendDetailsActivity extends AppCompatActivity {
 
         initFriend();
         ImageView imageView = (ImageView) findViewById( R.id.friend_details_image );
-        friend.setImageToView( imageView, imageCache );
+        imageCache.setImageToView( friend, imageView );
         TextView nameView = (TextView) findViewById( R.id.friend_details_name );
         nameView.setText( friend.getName() );
         TextView pointsView = (TextView) findViewById( R.id.friend_details_points );

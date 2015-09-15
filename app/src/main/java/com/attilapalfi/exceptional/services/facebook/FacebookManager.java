@@ -186,7 +186,7 @@ public class FacebookManager {
         String id = user.getString( "id" );
         JSONObject imageData = user.getJSONObject( "picture" ).getJSONObject( "data" );
         String imageUrl = imageData.getString( "url" );
-        return new Friend( new BigInteger( id ), names[0], names[1], imageUrl, null );
+        return new Friend( new BigInteger( id ), names[0], names[1], imageUrl );
     }
 
     private String[] parseFirstAndLastName( String name ) {
