@@ -57,5 +57,16 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:23.0.0'
     compile files('libs/gson-2.3.1.jar')
     compile files('libs/universal-image-loader-1.9.4-with-sources.jar')
-    compile "org.jetbrains.kotlin:kotlin-stdlib:0.12.1230"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+}
+buildscript {
+//    ext.kotlin_version = '0.13.1513'
+    ext.kotlin_version = '0.12.1230'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+//        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:0.12.1230"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
 }

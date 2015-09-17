@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.Comparator;
 
-import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
 import com.attilapalfi.exceptional.services.rest.messages.ExceptionInstanceWrapper;
 import com.google.gson.Gson;
 
@@ -16,7 +15,7 @@ public class Exception {
     private static Gson gson = new Gson();
 
     private transient ExceptionType exceptionType;
-    private BigInteger instanceId;
+    private BigInteger instanceId = new BigInteger( "0" );
     private int exceptionTypeId;
     private double longitude;
     private double latitude;
