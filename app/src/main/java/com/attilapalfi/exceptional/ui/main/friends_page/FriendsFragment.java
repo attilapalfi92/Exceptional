@@ -21,7 +21,7 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.interfaces.FriendChangeListener;
 import com.attilapalfi.exceptional.model.Friend;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
+import com.attilapalfi.exceptional.services.persistent_stores.FriendStore;
 import com.attilapalfi.exceptional.services.persistent_stores.ImageCache;
 import com.attilapalfi.exceptional.ui.main.Constants;
 
@@ -31,14 +31,15 @@ import com.attilapalfi.exceptional.ui.main.Constants;
 public class FriendsFragment extends Fragment implements FriendChangeListener {
     private RecyclerView recyclerView;
     private FriendAdapter friendAdapter;
-    @Inject FriendsManager friendsManager;
+    @Inject
+    FriendStore friendStore;
     @Inject ImageCache imageCache;
 
     @Override
     public void onCreate( @Nullable Bundle savedInstanceState ) {
         super.onCreate( savedInstanceState );
         Injector.INSTANCE.getApplicationComponent().inject( this );
-        friendsManager.addFriendChangeListener( this );
+        friendStore.addFriendChangeListener( this );
     }
 
     @Override
@@ -62,12 +63,12 @@ public class FriendsFragment extends Fragment implements FriendChangeListener {
 
     @Override
     public void onDestroy( ) {
-        friendsManager.removeFriendChangeListener( this );
+        friendStore.removeFriendChangeListener( this );
         super.onDestroy();
     }
 
     private void initFriendAdapter( ) {
-        List<Friend> values = friendsManager.getStoredFriends();
+        List<Friend> values = friendStore.getStoredFriends();
         friendAdapter = new FriendAdapter( values, getActivity(), imageCache );
     }
 

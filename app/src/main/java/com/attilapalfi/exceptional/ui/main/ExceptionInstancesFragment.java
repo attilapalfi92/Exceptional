@@ -1,5 +1,6 @@
 package com.attilapalfi.exceptional.ui.main;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +28,7 @@ import com.attilapalfi.exceptional.interfaces.ExceptionRefreshListener;
 import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.model.Friend;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
+import com.attilapalfi.exceptional.services.persistent_stores.FriendStore;
 import com.attilapalfi.exceptional.services.persistent_stores.ImageCache;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
 import com.attilapalfi.exceptional.services.rest.ExceptionService;
@@ -45,10 +46,6 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
     ExceptionService exceptionService;
     @Inject
     ExceptionInstanceManager exceptionInstanceManager;
-    @Inject
-    FriendsManager friendsManager;
-    @Inject
-    ImageCache imageCache;
     @Inject
     MetadataStore metadataStore;
     private Friend friend;
@@ -129,7 +126,7 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
 
     private void initExceptionAdapter( ) {
         List<Exception> values = generateValues( exceptionInstanceManager.getExceptionList() );
-        exceptionInstanceAdapter = new ExceptionInstanceAdapter( values, getActivity().getApplicationContext(), friendsManager, imageCache );
+        exceptionInstanceAdapter = new ExceptionInstanceAdapter( values, getActivity().getApplicationContext() );
         onExceptionsChanged();
     }
 
@@ -158,12 +155,16 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
     }
 
 
-    private static class ExceptionInstanceAdapter extends RecyclerView.Adapter<ExceptionInstanceAdapter.RowViewHolder> {
+    public static class ExceptionInstanceAdapter extends RecyclerView.Adapter<ExceptionInstanceAdapter.RowViewHolder> {
         private Context context;
-        private FriendsManager friendsManager;
         private List<Exception> values;
         private RecyclerView recyclerView;
-        private ImageCache imageCache;
+        @Inject
+        FriendStore friendStore;
+        @Inject
+        MetadataStore metadataStore;
+        @Inject
+        ImageCache imageCache;
 
         private final View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
@@ -174,18 +175,17 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
             }
         };
 
-        public ExceptionInstanceAdapter( List<Exception> values, Context context, FriendsManager friendsManager, ImageCache imageCache ) {
+        public ExceptionInstanceAdapter( List<Exception> values, Context context ) {
+            Injector.INSTANCE.getApplicationComponent().inject( this );
             this.values = values;
             this.context = context;
-            this.friendsManager = friendsManager;
-            this.imageCache = imageCache;
         }
 
         @Override
         public RowViewHolder onCreateViewHolder( ViewGroup parent, int viewType ) {
             View view = LayoutInflater.from( parent.getContext() ).inflate( R.layout.exception_row_layout, parent, false );
             view.setOnClickListener( onClickListener );
-            return new RowViewHolder( view, context, friendsManager, imageCache );
+            return new RowViewHolder( view, context, friendStore, metadataStore, imageCache );
         }
 
         @Override
@@ -205,7 +205,8 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
 
         public static class RowViewHolder extends RecyclerView.ViewHolder {
             private Context context;
-            private FriendsManager friendsManager;
+            private FriendStore friendStore;
+            private MetadataStore metadataStore;
             private ImageCache imageCache;
             private ImageView friendImage;
             private TextView exceptionNameView;
@@ -217,12 +218,14 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
             private ImageView incomingImage;
             private Friend fromWho;
             private Friend toWho;
-            private Friend yourself;
+            private Friend user;
 
-            public RowViewHolder( View rowView, Context context, FriendsManager friendsManager, ImageCache imageCache ) {
+            public RowViewHolder( View rowView, Context context, FriendStore friendStore, MetadataStore metadataStore,
+                                  ImageCache imageCache ) {
                 super( rowView );
                 this.context = context;
-                this.friendsManager = friendsManager;
+                this.friendStore = friendStore;
+                this.metadataStore = metadataStore;
                 this.imageCache = imageCache;
                 friendImage = (ImageView) rowView.findViewById( R.id.exc_row_image );
                 exceptionNameView = (TextView) rowView.findViewById( R.id.exc_row_name );
@@ -235,12 +238,30 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
             }
 
             public void bindRow( Exception model ) {
-                fromWho = friendsManager.findFriendById( model.getFromWho() );
-                toWho = friendsManager.findFriendById( model.getToWho() );
-                yourself = friendsManager.getYourself();
+                initBinding( model );
                 bindUserInfo( model );
                 bindExceptionInfo( model );
                 setDirectionImages();
+            }
+
+            private void initBinding( Exception model ) {
+                initFromWho( model );
+                initToWho( model );
+                user = metadataStore.getUser();
+            }
+
+            private void initFromWho( Exception model ) {
+                fromWho = friendStore.findFriendById( model.getFromWho() );
+                if ( fromWho.getId().equals( new BigInteger( "0" ) ) ) {
+                    fromWho = metadataStore.getUser();
+                }
+            }
+
+            private void initToWho( Exception model ) {
+                toWho = friendStore.findFriendById( model.getToWho() );
+                if ( toWho.getId().equals( new BigInteger( "0" ) ) ) {
+                    toWho = metadataStore.getUser();
+                }
             }
 
             private void bindUserInfo( Exception model ) {
@@ -250,9 +271,9 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
             }
 
             private void bindImage( ) {
-                if ( yourself.equals( fromWho ) ) {
-                    if ( yourself.equals( toWho ) ) {
-                        imageCache.setImageToView( yourself, friendImage );
+                if ( user.equals( fromWho ) ) {
+                    if ( user.equals( toWho ) ) {
+                        imageCache.setImageToView( user, friendImage );
                     } else {
                         if ( toWho.getId().longValue() != 0 ) {
                             imageCache.setImageToView( toWho, friendImage );
@@ -285,12 +306,12 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
             }
 
             private void setDirectionImages( ) {
-                if ( !fromWho.equals( yourself ) ) {
+                if ( !fromWho.equals( user ) ) {
                     outgoingImage.setImageBitmap( null );
                 } else {
                     outgoingImage.setImageDrawable( context.getResources().getDrawable( R.drawable.outgoing ) );
                 }
-                if ( !toWho.equals( yourself ) ) {
+                if ( !toWho.equals( user ) ) {
                     incomingImage.setImageBitmap( null );
                 } else {
                     incomingImage.setImageDrawable( context.getResources().getDrawable( R.drawable.incoming ) );

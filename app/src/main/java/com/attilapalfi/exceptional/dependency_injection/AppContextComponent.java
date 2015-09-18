@@ -35,7 +35,7 @@ public interface AppContextComponent {
 
     ExceptionTypeManager exceptionTypeManager( );
 
-    FriendsManager friendsManager( );
+    FriendStore friendsManager( );
 
     ImageCache imageCache( );
 

@@ -84,8 +84,8 @@ public class AppContextModule {
 
     @Provides
     @Singleton
-    public FriendsManager friendsManager( ) {
-        return new FriendsManager();
+    public FriendStore friendsManager( ) {
+        return new FriendStore();
     }
 
     @Provides

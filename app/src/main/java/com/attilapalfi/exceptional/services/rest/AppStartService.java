@@ -15,7 +15,7 @@ import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Friend;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
+import com.attilapalfi.exceptional.services.persistent_stores.FriendStore;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
 import com.attilapalfi.exceptional.services.rest.messages.AppStartRequest;
 import com.attilapalfi.exceptional.services.rest.messages.AppStartResponse;
@@ -34,7 +34,8 @@ public class AppStartService {
     @Inject Context context;
     @Inject ExceptionInstanceManager exceptionInstanceManager;
     @Inject ExceptionTypeManager exceptionTypeManager;
-    @Inject FriendsManager friendsManager;
+    @Inject
+    FriendStore friendStore;
     @Inject MetadataStore metadataStore;
     @Inject RestInterfaceFactory restInterfaceFactory;
     private String projectNumber;
@@ -87,8 +88,8 @@ public class AppStartService {
         requestBody.setUserFacebookId( profileId );
         requestBody.setFriendsFacebookIds( stream( friendList ).map( Friend::getId ).collect( Collectors.toList() ) );
         requestBody.setKnownExceptionIds( exceptionInstanceManager.getKnownIds() );
-        requestBody.setFirstName( friendsManager.getYourself().getFirstName() );
-        requestBody.setLastName( friendsManager.getYourself().getLastName() );
+        requestBody.setFirstName( metadataStore.getUser().getFirstName() );
+        requestBody.setLastName( metadataStore.getUser().getLastName() );
     }
 
     private void gcmFirstAppStart( ) {
@@ -148,7 +149,7 @@ public class AppStartService {
         metadataStore.setPoints( responseBody.getPoints() );
         metadataStore.setSubmittedThisWeek( responseBody.getSubmittedThisWeek() );
         metadataStore.setVotedThisWeek( responseBody.getVotedThisWeek() );
-        friendsManager.updateFriendsPoints( responseBody.getFriendsPoints() );
+        friendStore.updateFriendsPoints( responseBody.getFriendsPoints() );
     }
 
     public String getDeviceName( ) {

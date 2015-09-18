@@ -11,7 +11,7 @@ import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.model.Friend;
 import com.attilapalfi.exceptional.services.ExceptionFactory;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
+import com.attilapalfi.exceptional.services.persistent_stores.FriendStore;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
 import com.attilapalfi.exceptional.services.rest.messages.BaseExceptionRequest;
 import com.attilapalfi.exceptional.services.rest.messages.ExceptionInstanceWrapper;
@@ -31,7 +31,8 @@ public class ExceptionService {
     @Inject Context context;
     @Inject ExceptionInstanceManager exceptionInstanceManager;
     @Inject ExceptionFactory exceptionFactory;
-    @Inject FriendsManager friendsManager;
+    @Inject
+    FriendStore friendStore;
     @Inject MetadataStore metadataStore;
     @Inject RestInterfaceFactory restInterfaceFactory;
     private ExceptionRestInterface exceptionRestInterface;
@@ -47,9 +48,9 @@ public class ExceptionService {
             exceptionRestInterface.throwException( exceptionInstanceWrapper, new Callback<ExceptionSentResponse>() {
                 @Override
                 public void success( ExceptionSentResponse e, Response response ) {
-                    Friend toWho = friendsManager.findFriendById( e.getInstanceWrapper().getToWho() );
+                    Friend toWho = friendStore.findFriendById( e.getInstanceWrapper().getToWho() );
                     metadataStore.setPoints( e.getYourPoints() );
-                    friendsManager.updateFriendPoints( e.getInstanceWrapper().getToWho(), e.getFriendsPoints() );
+                    friendStore.updateFriendPoints( e.getInstanceWrapper().getToWho(), e.getFriendsPoints() );
                     exceptionInstanceManager.addExceptionAsync( exceptionFactory.createFromWrapper( e.getInstanceWrapper() ) );
                     Toast.makeText( context, e.getExceptionShortName() + " "
                                     + context.getString( R.string.successfully_thrown )
@@ -71,7 +72,7 @@ public class ExceptionService {
 
     public void refreshExceptions( final ExceptionRefreshListener refreshListener ) {
         BaseExceptionRequest requestBody = new BaseExceptionRequest(
-                friendsManager.getYourself().getId(),
+                metadataStore.getUser().getId(),
                 stream( exceptionInstanceManager.getExceptionList() ).map( Exception::getInstanceId ).collect( Collectors.toList() )
         );
         exceptionRestInterface.refreshExceptions( requestBody, new Callback<ExceptionRefreshResponse>() {

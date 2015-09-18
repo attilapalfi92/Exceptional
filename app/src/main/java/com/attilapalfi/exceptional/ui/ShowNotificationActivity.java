@@ -14,17 +14,16 @@ import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.ExceptionType;
 import com.attilapalfi.exceptional.model.Friend;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
+import com.attilapalfi.exceptional.services.persistent_stores.FriendStore;
 import com.attilapalfi.exceptional.services.persistent_stores.ImageCache;
+import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
 
 
 public class ShowNotificationActivity extends AppCompatActivity {
-    @Inject
-    ExceptionTypeManager exceptionTypeManager;
-    @Inject
-    FriendsManager friendsManager;
-    @Inject
-    ImageCache imageCache;
+    @Inject ExceptionTypeManager exceptionTypeManager;
+    @Inject FriendStore friendStore;
+    @Inject ImageCache imageCache;
+    @Inject MetadataStore metadataStore;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
@@ -49,10 +48,10 @@ public class ShowNotificationActivity extends AppCompatActivity {
         ExceptionType exceptionType = exceptionTypeManager.findById( typeId );
         exceptionNameView.setText( exceptionType.getPrefix() + "\n" + exceptionType.getShortName() );
         exceptionDescView.setText( exceptionType.getDescription() );
-        Friend sender = friendsManager.findFriendById( fromWho );
+        Friend sender = friendStore.findFriendById( fromWho );
 
         if ( sender != null ) {
-            if ( friendsManager.isItYourself( sender ) ) {
+            if ( metadataStore.isItUser( sender ) ) {
                 senderNameView.setText( "Yourself" );
             } else {
                 senderNameView.setText( sender.getFirstName() );

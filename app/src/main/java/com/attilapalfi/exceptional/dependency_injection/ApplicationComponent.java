@@ -54,7 +54,7 @@ public interface ApplicationComponent extends AppContextComponent {
     void inject( ShowNotificationActivity showNotificationActivity );
     void inject( ExceptionTypeChooserActivity exceptionTypeChooserActivity );
     void inject( ExceptionTypePagerAdapter exceptionTypePagerAdapter );
-    void inject( FriendsManager friendsManager );
+    void inject( FriendStore friendStore );
     void inject( ImageCache imageCache );
     void inject( MainFragment mainFragment );
     void inject( FriendDetailsActivity friendDetailsActivity );
@@ -62,4 +62,5 @@ public interface ApplicationComponent extends AppContextComponent {
     void inject( MetadataStore metadataStore );
     void inject( OptionsActivity optionsActivity );
     void inject( VotingService votingService );
+    void inject( ExceptionInstancesFragment.ExceptionInstanceAdapter exceptionInstanceAdapter );
 }

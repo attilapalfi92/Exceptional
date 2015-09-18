@@ -29,7 +29,8 @@ public class FacebookManager {
     @Inject AppStartService appStartService;
     @Inject ExceptionInstanceManager exceptionInstanceManager;
     @Inject ExceptionTypeManager exceptionTypeManager;
-    @Inject FriendsManager friendsManager;
+    @Inject
+    FriendStore friendStore;
     @Inject ImageCache imageCache;
     @Inject MetadataStore metadataStore;
     private AccessToken accessToken;
@@ -37,7 +38,7 @@ public class FacebookManager {
     private Profile profile;
     private ProfileTracker profileTracker;
     private BigInteger profileId = new BigInteger( "0" );
-    private Friend yourself;
+    private Friend user;
     private CallbackManager callbackManager;
     private FacebookCallback<LoginResult> facebookCallback;
     private FacebookLoginSuccessHandler loginSuccessHandler;
@@ -90,8 +91,8 @@ public class FacebookManager {
     }
 
     private void setUserLoggedOut( ) {
-        imageCache.wipe( friendsManager.getStoredFriends() );
-        friendsManager.wipe();
+        imageCache.wipe( friendStore.getStoredFriends() );
+        friendStore.wipe();
         exceptionInstanceManager.wipe();
         exceptionTypeManager.wipe();
         metadataStore.wipe();
@@ -147,18 +148,26 @@ public class FacebookManager {
     }
 
     private void continueAppStart( List<Friend> friends ) {
-        Log.i( "FacebookManager: ", "continueAppStart called." );
         if ( metadataStore.isLoggedIn() ) {
+            initYourself();
             if ( !metadataStore.isFirstStartFinished() ) {
-                initYourself();
-                friendsManager.saveFriendsAndYourself( friends, yourself );
-                appStartService.onFirstAppStart( friends, yourself.getId() );
+                saveData( friends, user );
+                appStartService.onFirstAppStart( friends, user.getId() );
             } else {
-                initYourself();
-                friendsManager.updateFriendsAndYourself( friends, yourself );
-                appStartService.onRegularAppStart( friends, yourself.getId() );
+                updateData( friends, user );
+                appStartService.onRegularAppStart( friends, user.getId() );
             }
         }
+    }
+
+    private void saveData( List<Friend> friends, Friend user ) {
+        friendStore.saveFriendList( friends );
+        metadataStore.saveUser( user );
+    }
+
+    private void updateData( List<Friend> friends, Friend user ) {
+        friendStore.updateFriendList( friends );
+        metadataStore.updateUser( user );
     }
 
     private void executeGraphRequest( GraphRequest request ) {
@@ -171,7 +180,7 @@ public class FacebookManager {
     private void initYourself( ) {
         profile = Profile.getCurrentProfile();
         if ( profile != null ) {
-            yourself = new Friend(
+            user = new Friend(
                     new BigInteger( profile.getId() ),
                     profile.getFirstName() + " " + profile.getMiddleName(),
                     profile.getLastName(),
@@ -198,18 +207,6 @@ public class FacebookManager {
         }
         firstAndLastName[0] = firstAndLastName[0].trim();
         return firstAndLastName;
-    }
-
-    public BigInteger getProfileId( ) {
-        if ( profile == null ) {
-            profile = Profile.getCurrentProfile();
-        }
-
-        if ( profileId.equals( new BigInteger( "0" ) ) ) {
-            profileId = new BigInteger( profile.getId() );
-        }
-
-        return profileId;
     }
 
     public void onAppKilled( ) {

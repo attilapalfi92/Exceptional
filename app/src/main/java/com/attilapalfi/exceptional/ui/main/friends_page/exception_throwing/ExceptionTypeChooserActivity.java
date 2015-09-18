@@ -14,7 +14,7 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Friend;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
+import com.attilapalfi.exceptional.services.persistent_stores.FriendStore;
 import com.attilapalfi.exceptional.ui.main.Constants;
 import com.attilapalfi.exceptional.ui.main.page_transformers.ZoomOutPageTransformer;
 
@@ -23,7 +23,8 @@ public class ExceptionTypeChooserActivity extends AppCompatActivity {
     private ViewPager viewPager;
     private static Friend friend;
     @Inject ExceptionTypeManager exceptionTypeManager;
-    @Inject FriendsManager friendsManager;
+    @Inject
+    FriendStore friendStore;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
@@ -59,7 +60,7 @@ public class ExceptionTypeChooserActivity extends AppCompatActivity {
 
     private void initFriend( ) {
         BigInteger friendId = new BigInteger( getIntent().getStringExtra( Constants.FRIEND_ID ) );
-        friend = friendsManager.findFriendById( friendId );
+        friend = friendStore.findFriendById( friendId );
     }
 
     private void initViewPager( ) {

@@ -22,7 +22,7 @@ import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
+import com.attilapalfi.exceptional.services.persistent_stores.FriendStore;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
 import com.attilapalfi.exceptional.ui.ShowNotificationActivity;
 import com.attilapalfi.exceptional.ui.main.MainActivity;
@@ -37,7 +37,8 @@ public class GcmMessageHandler extends IntentService {
     private static int notificationIdCounter = 0;
     @Inject ExceptionInstanceManager exceptionInstanceManager;
     @Inject ExceptionTypeManager exceptionTypeManager;
-    @Inject FriendsManager friendsManager;
+    @Inject
+    FriendStore friendStore;
     @Inject MetadataStore metadataStore;
 
     public GcmMessageHandler( ) {
@@ -130,7 +131,7 @@ public class GcmMessageHandler extends IntentService {
         }
         String friendPointsString = extras.getString( "friendPoints" );
         if ( friendPointsString != null ) {
-            friendsManager.updateFriendPoints( exception.getFromWho(), Integer.parseInt( friendPointsString ) );
+            friendStore.updateFriendPoints( exception.getFromWho(), Integer.parseInt( friendPointsString ) );
         }
 
     }

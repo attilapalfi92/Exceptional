@@ -14,7 +14,7 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.interfaces.FirstStartFinishedListener;
 import com.attilapalfi.exceptional.interfaces.PointChangeListener;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
+import com.attilapalfi.exceptional.services.persistent_stores.FriendStore;
 import com.attilapalfi.exceptional.services.persistent_stores.ImageCache;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
 
@@ -22,7 +22,8 @@ import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
  */
 public class MainFragment extends Fragment implements FirstStartFinishedListener, PointChangeListener {
     private View view;
-    @Inject FriendsManager friendsManager;
+    @Inject
+    FriendStore friendStore;
     @Inject ImageCache imageCache;
     @Inject MetadataStore metadataStore;
 
@@ -58,7 +59,7 @@ public class MainFragment extends Fragment implements FirstStartFinishedListener
     }
 
     private void setViews( ) {
-        if ( friendsManager.getYourself() != null ) {
+        if ( metadataStore.getUser() != null ) {
             setImageView();
             setNameView();
             setPointView();
@@ -67,13 +68,13 @@ public class MainFragment extends Fragment implements FirstStartFinishedListener
 
     private void setImageView( ) {
         ImageView imageView = (ImageView) view.findViewById( R.id.myMainImageView );
-        imageCache.setImageToView( friendsManager.getYourself(), imageView );
+        imageCache.setImageToView( metadataStore.getUser(), imageView );
     }
 
     private void setNameView( ) {
         TextView nameView = (TextView) view.findViewById( R.id.mainNameTextView );
         String nameText = getResources().getString( R.string.main_welcome_before_name )
-                + " " + friendsManager.getYourself().getFirstName().trim()
+                + " " + metadataStore.getUser().getFirstName().trim()
                 + "!";
         nameView.setText( nameText );
     }

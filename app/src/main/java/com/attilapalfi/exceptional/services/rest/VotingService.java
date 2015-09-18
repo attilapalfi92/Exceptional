@@ -8,7 +8,7 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.ExceptionType;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
+import com.attilapalfi.exceptional.services.persistent_stores.FriendStore;
 import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
 import com.attilapalfi.exceptional.services.rest.messages.SubmitRequest;
 import com.attilapalfi.exceptional.services.rest.messages.SubmitResponse;
@@ -24,7 +24,8 @@ import retrofit.client.Response;
 public class VotingService {
     @Inject Context context;
     @Inject MetadataStore metadataStore;
-    @Inject FriendsManager friendsManager;
+    @Inject
+    FriendStore friendStore;
     @Inject ExceptionTypeManager exceptionTypeManager;
     @Inject RestInterfaceFactory restInterfaceFactory;
     private VotingRestInterface votingRestInterface;
@@ -35,7 +36,7 @@ public class VotingService {
     }
 
     public void voteForType( ExceptionType exceptionType ) {
-        VoteRequest voteRequest = new VoteRequest( friendsManager.getYourself().getId(), exceptionType.getId() );
+        VoteRequest voteRequest = new VoteRequest( metadataStore.getUser().getId(), exceptionType.getId() );
         votingRestInterface.voteForType( voteRequest, new Callback<VoteResponse>() {
             @Override
             public void success( VoteResponse voteResponse, Response response ) {
@@ -53,7 +54,7 @@ public class VotingService {
     }
 
     public void submitType( ExceptionType submittedType ) {
-        SubmitRequest submitRequest = new SubmitRequest( friendsManager.getYourself().getId(), submittedType );
+        SubmitRequest submitRequest = new SubmitRequest( metadataStore.getUser().getId(), submittedType );
         votingRestInterface.submitTypeForVote( submitRequest, new Callback<SubmitResponse>() {
             @Override
             public void success( SubmitResponse submitResponse, Response response ) {

@@ -11,6 +11,7 @@ import android.os.Looper;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.interfaces.FirstStartFinishedListener;
 import com.attilapalfi.exceptional.interfaces.PointChangeListener;
+import com.attilapalfi.exceptional.model.Friend;
 
 import static java8.util.stream.StreamSupport.stream;
 
@@ -26,8 +27,10 @@ public class MetadataStore {
     private static final String FIRST_START_FINISHED = "firstStartFinished";
     private static final String VOTED_THIS_WEEK = "votedThisWeek";
     private static final String SUBMITTED_THIS_WEEK = "submittedThisWeek";
+    public static final String USER = "user";
 
     @Inject Context context;
+    @Inject ImageCache imageCache;
     private boolean initialized = false;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
@@ -37,6 +40,7 @@ public class MetadataStore {
     private boolean firstStartFinished = false;
     private boolean votedThisWeek = true;
     private boolean submittedThisWeek = true;
+    private Friend user;
     private Set<FirstStartFinishedListener> firstStartFinishedListeners = new HashSet<>();
     private Set<PointChangeListener> pointChangeListeners = new HashSet<>();
 
@@ -48,9 +52,6 @@ public class MetadataStore {
         initialized = true;
     }
 
-    public void initialize( ) {
-    }
-
     private void initMetadata( ) {
         points = sharedPreferences.getInt( POINTS, points );
         exceptionVersion = sharedPreferences.getInt( EXCEPTION_VERSION, exceptionVersion );
@@ -58,11 +59,8 @@ public class MetadataStore {
         firstStartFinished = sharedPreferences.getBoolean( FIRST_START_FINISHED, firstStartFinished );
         votedThisWeek = sharedPreferences.getBoolean( VOTED_THIS_WEEK, votedThisWeek );
         submittedThisWeek = sharedPreferences.getBoolean( SUBMITTED_THIS_WEEK, submittedThisWeek );
+        user = Friend.fromString( sharedPreferences.getString( USER, "" ) );
         editor.apply();
-    }
-
-    public boolean isInitialized( ) {
-        return initialized;
     }
 
     public void setPoints( int points ) {
@@ -136,6 +134,45 @@ public class MetadataStore {
 
     public boolean isSubmittedThisWeek( ) {
         return submittedThisWeek;
+    }
+
+
+    public boolean isItUser( Friend friend ) {
+        return friend.equals( user );
+    }
+
+    public Friend getUser( ) {
+        return user;
+    }
+
+    public void saveUser( Friend user ) {
+        this.user = user;
+        editor.putString( USER, user.toString() );
+        editor.apply();
+    }
+
+    public void updateUser( Friend newUserState ) {
+        if ( newUserState != null ) {
+            if ( this.user == null ) {
+                this.user = newUserState;
+                saveUser( newUserState );
+
+            } else {
+                lookForChange( newUserState );
+            }
+        }
+    }
+
+    private void lookForChange( Friend newUserState ) {
+        if ( newUserState.equals( user ) ) {
+            if ( !newUserState.getImageUrl().equals( user.getImageUrl() ) ) {
+                saveUser( newUserState );
+                imageCache.updateImageAsync( newUserState, user );
+            }
+            if ( !newUserState.getName().equals( user.getName() ) ) {
+                saveUser( newUserState );
+            }
+        }
     }
 
     private void storeInt( String key, int value ) {

@@ -27,7 +27,8 @@ import com.attilapalfi.exceptional.model.ExceptionType;
 import com.attilapalfi.exceptional.services.ExceptionFactory;
 import com.attilapalfi.exceptional.services.GpsService;
 import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendsManager;
+import com.attilapalfi.exceptional.services.persistent_stores.FriendStore;
+import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
 import com.attilapalfi.exceptional.services.rest.ExceptionService;
 import com.attilapalfi.exceptional.ui.main.Constants;
 import com.attilapalfi.exceptional.ui.main.MainActivity;
@@ -85,9 +86,9 @@ public class ExceptionTypesFragment extends Fragment {
         private List<ExceptionType> values;
         @Inject GpsService gpsService;
         @Inject ExceptionFactory exceptionFactory;
-        @Inject
-        ExceptionService exceptionService;
-        @Inject FriendsManager friendsManager;
+        @Inject ExceptionService exceptionService;
+        @Inject FriendStore friendStore;
+        @Inject MetadataStore metadataStore;
 
         private final View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
@@ -108,7 +109,7 @@ public class ExceptionTypesFragment extends Fragment {
                 BigInteger friendId = new BigInteger( activity.getIntent().getStringExtra( Constants.FRIEND_ID ) );
                 Exception exception = exceptionFactory.createExceptionWithType(
                         exceptionType,
-                        friendsManager.getYourself().getId(),
+                        metadataStore.getUser().getId(),
                         friendId );
                 setLocationForException( exception );
                 return exception;

@@ -1,13 +1,8 @@
 package com.attilapalfi.exceptional.model;
 
-import java.lang.ref.WeakReference;
 import java.math.BigInteger;
 import java.util.Comparator;
 
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
-import android.widget.ImageView;
-import com.attilapalfi.exceptional.services.persistent_stores.ImageCache;
 import com.google.gson.Gson;
 
 /**
