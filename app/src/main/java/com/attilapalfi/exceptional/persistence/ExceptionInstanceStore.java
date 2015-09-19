@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import android.content.Context;
 import android.location.Geocoder;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.Looper;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.interfaces.ExceptionChangeListener;
@@ -32,17 +33,19 @@ public class ExceptionInstanceStore {
     private static final Exception EMPTY_EXCEPTION = new Exception();
 
     @Inject Context context;
-    @Inject ExceptionTypeManager exceptionTypeManager;
+    @Inject ExceptionTypeStore exceptionTypeStore;
     @Inject ExceptionFactory exceptionFactory;
     private Book database;
     private Set<ExceptionChangeListener> exceptionChangeListeners = new HashSet<>();
     private List<Exception> storedExceptions = Collections.synchronizedList( new LinkedList<>() );
     private List<BigInteger> idList;
     private Geocoder geocoder;
+    private Handler handler;
 
     public ExceptionInstanceStore( ) {
         Injector.INSTANCE.getApplicationComponent().inject( this );
         database = Paper.book( INSTANCE_DATABASE );
+        handler = new Handler( Looper.getMainLooper() );
         geocoder = new Geocoder( context, Locale.getDefault() );
         loadExceptionInstances();
     }
@@ -57,7 +60,7 @@ public class ExceptionInstanceStore {
             protected Void doInBackground( Void... params ) {
                 stream( idList ).forEach( id -> {
                     Exception e = database.read( id.toString(), EMPTY_EXCEPTION );
-                    e.setExceptionType( exceptionTypeManager.findById( e.getExceptionTypeId() ) );
+                    e.setExceptionType( exceptionTypeStore.findById( e.getExceptionTypeId() ) );
                     int index = Collections.binarySearch( storedExceptions, e );
                     if ( index < 0 ) {
                         index = -index - 1;
@@ -100,28 +103,38 @@ public class ExceptionInstanceStore {
         }
     }
 
+    public void saveExceptionList( List<ExceptionInstanceWrapper> wrapperList ) {
+        if ( !wrapperList.isEmpty() ) {
+            List<Exception> toBeStored = wrapperListToExceptions( wrapperList );
+            storeEachIfNotContained( toBeStored );
+            database.write( INSTANCE_IDs, idList );
+            handler.post( this::notifyListeners );
+        }
+    }
+
+    private List<Exception> wrapperListToExceptions( List<ExceptionInstanceWrapper> wrappers ) {
+        return stream( wrappers ).map( exceptionFactory::createFromWrapper ).collect( Collectors.toList() );
+    }
+
+    private void storeEachIfNotContained( List<Exception> toBeStored ) {
+        stream( toBeStored ).forEach( e -> {
+            if ( !storedExceptions.contains( e ) ) {
+                saveWithoutIdListWrite( e );
+            }
+        } );
+    }
+
+
     public void saveExceptionListAsync( List<ExceptionInstanceWrapper> wrapperList ) {
         if ( !wrapperList.isEmpty() ) {
             new AsyncTask<Void, Void, Void>() {
 
                 @Override
                 protected Void doInBackground( Void... params ) {
-                    List<Exception> toBeStored = convertToExceptions();
-                    saveExceptions( toBeStored );
+                    List<Exception> toBeStored = wrapperListToExceptions( wrapperList );
+                    storeEachIfNotContained( toBeStored );
                     database.write( INSTANCE_IDs, idList );
                     return null;
-                }
-
-                private List<Exception> convertToExceptions( ) {
-                    return stream( wrapperList ).map( exceptionFactory::createFromWrapper ).collect( Collectors.toList() );
-                }
-
-                private void saveExceptions( List<Exception> toBeStored ) {
-                    stream( toBeStored ).forEach( e -> {
-                        if ( !storedExceptions.contains( e ) ) {
-                            saveWithoutIdListWrite( e );
-                        }
-                    } );
                 }
 
                 @Override
@@ -176,7 +189,6 @@ public class ExceptionInstanceStore {
         idList.add( index, e.getInstanceId() );
         database.write( e.getInstanceId().toString(), e );
     }
-
 
     private void setCityForException( Exception e ) {
         try {

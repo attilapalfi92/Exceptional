@@ -6,10 +6,11 @@ import java.util.*;
 import javax.inject.Inject;
 
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.os.Looper;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.interfaces.FriendChangeListener;
-import com.attilapalfi.exceptional.model.Friend;
+import com.attilapalfi.exceptional.model.*;
 import io.paperdb.Book;
 import io.paperdb.Paper;
 
@@ -26,6 +27,7 @@ public class FriendStore {
 
     @Inject ImageCache imageCache;
     private final Book database;
+    private Handler handler;
     private final List<Friend> storedFriends = Collections.synchronizedList( new LinkedList<>() );
     private List<BigInteger> idList;
     private Set<FriendChangeListener> friendChangeListeners = new HashSet<>();
@@ -45,6 +47,7 @@ public class FriendStore {
     public FriendStore( ) {
         Injector.INSTANCE.getApplicationComponent().inject( this );
         database = Paper.book( FRIEND_DATABASE );
+        handler = new Handler( Looper.getMainLooper() );
         idList = Collections.synchronizedList( database.read( FRIEND_IDS, new LinkedList<>() ) );
         stream( idList ).forEach( id -> ( storedFriends ).add( database.read( id.toString(), EMPTY_FRIEND ) ) );
         new AsyncFriendOrganizer().execute();
@@ -62,7 +65,7 @@ public class FriendStore {
                     database.write( friend.getId().toString(), friend );
                 } );
                 database.write( FRIEND_IDS, idList );
-                Collections.sort( storedFriends, new Friend.PointComparator() );
+                Collections.sort( storedFriends );
                 return null;
             }
 
@@ -86,7 +89,7 @@ public class FriendStore {
             @Override
             protected Void doInBackground( Void... params ) {
                 updatePointsById( id, points );
-                Collections.sort( storedFriends, new Friend.PointComparator() );
+                Collections.sort( storedFriends );
                 return null;
             }
 
@@ -99,12 +102,18 @@ public class FriendStore {
     }
 
     public void updatePointsOfFriends( Map<BigInteger, Integer> points ) {
+        stream( points.keySet() ).forEach( id -> updatePointsById( id, points.get( id ) ) );
+        Collections.sort( storedFriends );
+        handler.post( this::notifyChangeListeners );
+    }
+
+    public void updatePointsOfFriendsAsync( Map<BigInteger, Integer> points ) {
         new AsyncTask<Void, Void, Void>() {
 
             @Override
             protected Void doInBackground( Void... params ) {
                 stream( points.keySet() ).forEach( id -> updatePointsById( id, points.get( id ) ) );
-                Collections.sort( storedFriends, new Friend.PointComparator() );
+                Collections.sort( storedFriends );
                 return null;
             }
 
@@ -166,25 +175,24 @@ public class FriendStore {
     private void checkFriendChange( Friend newFriendState, Friend oldFriendState ) {
         if ( newFriendState.equals( oldFriendState ) ) {
             if ( !newFriendState.getImageUrl().equals( oldFriendState.getImageUrl() ) ) {
-                updateFriend( newFriendState );
+                updateFriend( newFriendState, oldFriendState );
                 imageCache.updateImageAsync( newFriendState, oldFriendState );
             }
             if ( !newFriendState.getName().equals( oldFriendState.getName() ) ) {
-                updateFriend( newFriendState );
+                updateFriend( newFriendState, oldFriendState );
             }
         }
     }
 
-    private void updateFriend( Friend newOne ) {
+    private void updateFriend( Friend newState, Friend oldInstance ) {
         new AsyncTask<Void, Void, Void>() {
 
             @Override
             protected Void doInBackground( Void... params ) {
-                Friend previousOne = findFriendById( newOne.getId() );
-                database.write( newOne.getId().toString(), newOne );
-                storedFriends.remove( previousOne );
-                storedFriends.add( newOne );
-                Collections.sort( storedFriends, new Friend.PointComparator() );
+                oldInstance.setFirstName( newState.getFirstName() );
+                oldInstance.setLastName( newState.getLastName() );
+                oldInstance.setImageUrl( newState.getImageUrl() );
+                database.write( oldInstance.getId().toString(), oldInstance );
                 return null;
             }
 
@@ -229,7 +237,7 @@ public class FriendStore {
 
         @Override
         protected Void doInBackground( Void... params ) {
-            Collections.sort( storedFriends, new Friend.PointComparator() );
+            Collections.sort( storedFriends );
             return null;
         }
 

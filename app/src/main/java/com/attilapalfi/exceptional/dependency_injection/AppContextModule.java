@@ -78,8 +78,8 @@ public class AppContextModule {
 
     @Provides
     @Singleton
-    public ExceptionTypeManager exceptionTypeManager( ) {
-        return new ExceptionTypeManager();
+    public ExceptionTypeStore exceptionTypeManager( ) {
+        return new ExceptionTypeStore();
     }
 
     @Provides

@@ -28,7 +28,6 @@ public class ExceptionalApplication extends android.support.multidex.MultiDexApp
     public void onCreate( ) {
         super.onCreate();
         Injector.INSTANCE.initializeApplicationComponent( this );
-        writeHashKeyToDebug();
         Context applicationContext = getApplicationContext();
         initializeServices( applicationContext );
         facebookManager.onAppStart( this );

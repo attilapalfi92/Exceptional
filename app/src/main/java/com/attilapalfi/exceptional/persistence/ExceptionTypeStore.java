@@ -2,88 +2,74 @@ package com.attilapalfi.exceptional.persistence;
 
 import java.util.*;
 
-import javax.inject.Inject;
-
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.os.Handler;
 import android.os.Looper;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.interfaces.VotedTypeListener;
 import com.attilapalfi.exceptional.model.ExceptionType;
+import io.paperdb.Book;
+import io.paperdb.Paper;
 
 import static java8.util.stream.StreamSupport.stream;
 
 /**
  * Created by Attila on 2015-06-09.
  */
-public class ExceptionTypeManager {
-    private final String PREFS_NAME = "exception_types";
-    private final String MIN_ID = "minId";
+public class ExceptionTypeStore {
+    private static final String TYPE_DATABASE = "TYPE_DATABASE";
+    private static final ExceptionType EMPTY_TYPE = new ExceptionType( 0, "", "", "" );
     private final String MAX_ID = "maxId";
     private final String HAS_DATA = "hasData";
 
-    @Inject Context context;
-    private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
+    private Book database;
+    private Handler handler;
     private Map<String, List<ExceptionType>> exceptionTypeStore;
     private List<ExceptionType> votedExceptionTypeList;
     private Set<VotedTypeListener> votedTypeListeners = new HashSet<>();
 
-    public ExceptionTypeManager( ) {
+    public ExceptionTypeStore( ) {
         Injector.INSTANCE.getApplicationComponent().inject( this );
-        initPreferences( context );
-        exceptionTypeStore = new HashMap<>();
-        if ( sharedPreferences.getBoolean( HAS_DATA, false ) ) {
+        exceptionTypeStore = Collections.synchronizedMap( new HashMap<>() );
+        database = Paper.book( TYPE_DATABASE );
+        handler = new Handler( Looper.getMainLooper() );
+        if ( database.read( HAS_DATA, false ) ) {
             initExceptionTypeStore();
             sortExceptionStore();
         }
     }
 
     public void addExceptionTypes( List<ExceptionType> exceptionTypes ) {
-        loadExceptionTypeStore( exceptionTypes );
-        editor.putBoolean( HAS_DATA, true );
-        editor.apply();
+        saveExceptionTypeStore( exceptionTypes );
+        database.write( HAS_DATA, true );
     }
 
-    private void loadExceptionTypeStore( List<ExceptionType> exceptionTypes ) {
+    private void saveExceptionTypeStore( List<ExceptionType> exceptionTypes ) {
         int maxId = 0;
         for ( ExceptionType exception : exceptionTypes ) {
             if ( !exceptionTypeStore.containsKey( exception.getType() ) ) {
                 exceptionTypeStore.put( exception.getType(), new ArrayList<>() );
             }
             exceptionTypeStore.get( exception.getType() ).add( exception );
-            editor.putString( Integer.toString( exception.getId() ), exception.toString() );
+            database.write( Integer.toString( exception.getId() ), exception );
             maxId = exception.getId() > maxId ? exception.getId() : maxId;
         }
-        editor.putInt( MAX_ID, maxId );
-        editor.apply();
+        database.write( MAX_ID, maxId );
         sortExceptionStore();
     }
 
     public void setVotedExceptionTypes( List<ExceptionType> exceptionTypes ) {
         votedExceptionTypeList = Collections.synchronizedList( exceptionTypes );
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            ( (Runnable) ( ) -> sortVotedExceptionList() ).run();
-            notifyVotedTypeListeners();
-
-        } else {
-            sortVotedExceptionList();
-        }
-    }
-
-    private void initPreferences( Context context ) {
-        sharedPreferences = context.getSharedPreferences( PREFS_NAME, Context.MODE_PRIVATE );
-        editor = sharedPreferences.edit();
-        editor.apply();
+        sortVotedExceptionList();
+        handler.post( this::notifyVotedTypeListeners );
     }
 
     private void initExceptionTypeStore( ) {
-        int minId = sharedPreferences.getInt( MIN_ID, 1 );
-        int maxId = sharedPreferences.getInt( MAX_ID, 0 );
+        int minId = 1;
+        int maxId = database.read( MAX_ID, 0 );
         for ( int i = minId; i <= maxId; i++ ) {
-            ExceptionType exceptionType = ExceptionType.fromString( sharedPreferences.getString( Integer.toString( i ), "" ) );
+            ExceptionType exceptionType = database.read( Integer.toString( i ), EMPTY_TYPE );
             if ( !exceptionTypeStore.containsKey( exceptionType.getType() ) ) {
-                exceptionTypeStore.put( exceptionType.getType(), new ArrayList<>() );
+                exceptionTypeStore.put( exceptionType.getType(), new LinkedList<>() );
             }
             exceptionTypeStore.get( exceptionType.getType() ).add( exceptionType );
         }
@@ -128,7 +114,7 @@ public class ExceptionTypeManager {
     public void wipe( ) {
         exceptionTypeStore.clear();
         votedExceptionTypeList.clear();
-        editor.clear().apply();
+        database.destroy();
     }
 
     public List<ExceptionType> getVotedExceptionTypeList( ) {

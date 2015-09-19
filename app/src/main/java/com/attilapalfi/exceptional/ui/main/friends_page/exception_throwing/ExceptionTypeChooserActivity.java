@@ -13,7 +13,7 @@ import android.view.MenuItem;
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Friend;
-import com.attilapalfi.exceptional.persistence.ExceptionTypeManager;
+import com.attilapalfi.exceptional.persistence.ExceptionTypeStore;
 import com.attilapalfi.exceptional.persistence.FriendStore;
 import com.attilapalfi.exceptional.ui.main.Constants;
 import com.attilapalfi.exceptional.ui.main.page_transformers.ZoomOutPageTransformer;
@@ -22,7 +22,8 @@ public class ExceptionTypeChooserActivity extends AppCompatActivity {
     private ExceptionTypePagerAdapter pagerAdapter;
     private ViewPager viewPager;
     private static Friend friend;
-    @Inject ExceptionTypeManager exceptionTypeManager;
+    @Inject
+    ExceptionTypeStore exceptionTypeStore;
     @Inject
     FriendStore friendStore;
 
@@ -54,7 +55,7 @@ public class ExceptionTypeChooserActivity extends AppCompatActivity {
     }
 
     private void setTitle( ) {
-        List<String> exceptionTypeList = new ArrayList<>( exceptionTypeManager.getExceptionTypes() );
+        List<String> exceptionTypeList = new ArrayList<>( exceptionTypeStore.getExceptionTypes() );
         setTitle( exceptionTypeList.get( 0 ) );
     }
 

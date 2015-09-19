@@ -1,5 +1,6 @@
 package com.attilapalfi.exceptional.persistence;
 
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -7,11 +8,14 @@ import javax.inject.Inject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.os.Looper;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.interfaces.FirstStartFinishedListener;
 import com.attilapalfi.exceptional.interfaces.PointChangeListener;
 import com.attilapalfi.exceptional.model.Friend;
+import io.paperdb.Book;
+import io.paperdb.Paper;
 
 import static java8.util.stream.StreamSupport.stream;
 
@@ -19,8 +23,7 @@ import static java8.util.stream.StreamSupport.stream;
  * Created by palfi on 2015-08-21.
  */
 public class MetadataStore {
-
-    private static final String PREFS_NAME = "metadata_preferences";
+    private static final String METADATA_DATABASE = "METADATA_DATABASE";
     private static final String POINTS = "points";
     private static final String EXCEPTION_VERSION = "exceptionVersion";
     private static final String LOGGED_IN = "loggedIn";
@@ -28,12 +31,11 @@ public class MetadataStore {
     private static final String VOTED_THIS_WEEK = "votedThisWeek";
     private static final String SUBMITTED_THIS_WEEK = "submittedThisWeek";
     public static final String USER = "user";
+    private static final Friend EMPTY_USER = new Friend( new BigInteger( "0" ), "", "", "" );
 
-    @Inject Context context;
     @Inject ImageCache imageCache;
-    private boolean initialized = false;
-    private SharedPreferences sharedPreferences;
-    private SharedPreferences.Editor editor;
+    private Book database;
+    private Handler handler;
     private int points = 100;
     private int exceptionVersion = 0;
     private boolean loggedIn = false;
@@ -46,30 +48,30 @@ public class MetadataStore {
 
     public MetadataStore( ) {
         Injector.INSTANCE.getApplicationComponent().inject( this );
-        sharedPreferences = context.getSharedPreferences( PREFS_NAME, Context.MODE_PRIVATE );
-        editor = sharedPreferences.edit();
+        database = Paper.book( METADATA_DATABASE );
+        handler = new Handler( Looper.getMainLooper() );
         initMetadata();
-        initialized = true;
     }
 
     private void initMetadata( ) {
-        points = sharedPreferences.getInt( POINTS, points );
-        exceptionVersion = sharedPreferences.getInt( EXCEPTION_VERSION, exceptionVersion );
-        loggedIn = sharedPreferences.getBoolean( LOGGED_IN, loggedIn );
-        firstStartFinished = sharedPreferences.getBoolean( FIRST_START_FINISHED, firstStartFinished );
-        votedThisWeek = sharedPreferences.getBoolean( VOTED_THIS_WEEK, votedThisWeek );
-        submittedThisWeek = sharedPreferences.getBoolean( SUBMITTED_THIS_WEEK, submittedThisWeek );
-        user = Friend.fromString( sharedPreferences.getString( USER, "" ) );
-        editor.apply();
+        points = database.read( POINTS, points );
+        exceptionVersion = database.read( EXCEPTION_VERSION, exceptionVersion );
+        loggedIn = database.read( LOGGED_IN, loggedIn );
+        firstStartFinished = database.read( FIRST_START_FINISHED, firstStartFinished );
+        votedThisWeek = database.read( VOTED_THIS_WEEK, votedThisWeek );
+        submittedThisWeek = database.read( SUBMITTED_THIS_WEEK, submittedThisWeek );
+        user = database.read( USER, EMPTY_USER );
     }
 
     public void setPoints( int points ) {
         if ( this.points != points ) {
             this.points = points;
-            storeInt( POINTS, points );
+            database.write( POINTS, points );
             if ( Looper.myLooper() == Looper.getMainLooper() ) {
-                stream( pointChangeListeners ).forEach( ( PointChangeListener listener )
-                        -> listener.onPointsChanged() );
+                stream( pointChangeListeners ).forEach( PointChangeListener::onPointsChanged );
+            } else {
+                handler.post( () -> stream( pointChangeListeners )
+                        .forEach( PointChangeListener::onPointsChanged ) );
             }
         }
     }
@@ -81,7 +83,7 @@ public class MetadataStore {
     public void setExceptionVersion( int exceptionVersion ) {
         if ( this.exceptionVersion != exceptionVersion ) {
             this.exceptionVersion = exceptionVersion;
-            storeInt( EXCEPTION_VERSION, exceptionVersion );
+            database.write( EXCEPTION_VERSION, exceptionVersion );
         }
     }
 
@@ -92,7 +94,7 @@ public class MetadataStore {
     public void setFirstStartFinished( boolean firstStartFinished ) {
         if ( this.firstStartFinished != firstStartFinished ) {
             this.firstStartFinished = firstStartFinished;
-            storeBoolean( FIRST_START_FINISHED, firstStartFinished );
+            database.write( FIRST_START_FINISHED, firstStartFinished );
         }
         for ( FirstStartFinishedListener l : firstStartFinishedListeners ) {
             l.onFirstStartFinished( firstStartFinished );
@@ -106,7 +108,7 @@ public class MetadataStore {
     public void setLoggedIn( boolean loggedIn ) {
         if ( this.loggedIn != loggedIn ) {
             this.loggedIn = loggedIn;
-            storeBoolean( LOGGED_IN, loggedIn );
+            database.write( LOGGED_IN, loggedIn );
         }
     }
 
@@ -117,7 +119,7 @@ public class MetadataStore {
     public void setVotedThisWeek( boolean votedThisWeek ) {
         if ( this.votedThisWeek != votedThisWeek ) {
             this.votedThisWeek = votedThisWeek;
-            storeBoolean( VOTED_THIS_WEEK, votedThisWeek );
+            database.write( VOTED_THIS_WEEK, votedThisWeek );
         }
     }
 
@@ -128,7 +130,7 @@ public class MetadataStore {
     public void setSubmittedThisWeek( boolean submittedThisWeek ) {
         if ( this.submittedThisWeek != submittedThisWeek ) {
             this.submittedThisWeek = submittedThisWeek;
-            storeBoolean( SUBMITTED_THIS_WEEK, submittedThisWeek );
+            database.write( SUBMITTED_THIS_WEEK, submittedThisWeek );
         }
     }
 
@@ -147,8 +149,7 @@ public class MetadataStore {
 
     public void saveUser( Friend user ) {
         this.user = user;
-        editor.putString( USER, user.toString() );
-        editor.apply();
+        database.write( USER, user );
     }
 
     public void updateUser( Friend newUserState ) {
@@ -175,22 +176,12 @@ public class MetadataStore {
         }
     }
 
-    private void storeInt( String key, int value ) {
-        editor.putInt( key, value );
-        editor.apply();
-    }
-
-    private void storeBoolean( String key, boolean value ) {
-        editor.putBoolean( key, value );
-        editor.apply();
-    }
-
     public void wipe( ) {
         points = 100;
         exceptionVersion = 0;
         loggedIn = false;
         firstStartFinished = false;
-        editor.clear().apply();
+        database.destroy();
     }
 
     public boolean addFirstStartFinishedListener( FirstStartFinishedListener listener ) {

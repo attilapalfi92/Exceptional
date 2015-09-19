@@ -298,7 +298,7 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
                 friendNameAndCityView.setText( nameAndCity );
             }
 
-            // TODO: get type information from exceptionTypeManager or what to remove redundant strings
+            // TODO: get type information from exceptionTypeStore or what to remove redundant strings
             private void bindExceptionInfo( Exception model ) {
                 exceptionNameView.setText( model.getShortName() );
                 descriptionView.setText( model.getDescription() );

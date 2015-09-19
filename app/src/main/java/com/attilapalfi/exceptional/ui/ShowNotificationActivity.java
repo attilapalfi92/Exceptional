@@ -13,14 +13,15 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.ExceptionType;
 import com.attilapalfi.exceptional.model.Friend;
-import com.attilapalfi.exceptional.persistence.ExceptionTypeManager;
+import com.attilapalfi.exceptional.persistence.ExceptionTypeStore;
 import com.attilapalfi.exceptional.persistence.FriendStore;
 import com.attilapalfi.exceptional.persistence.ImageCache;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
 
 
 public class ShowNotificationActivity extends AppCompatActivity {
-    @Inject ExceptionTypeManager exceptionTypeManager;
+    @Inject
+    ExceptionTypeStore exceptionTypeStore;
     @Inject FriendStore friendStore;
     @Inject ImageCache imageCache;
     @Inject MetadataStore metadataStore;
@@ -45,7 +46,7 @@ public class ShowNotificationActivity extends AppCompatActivity {
         TextView senderPosView = (TextView) findViewById( R.id.senderPositionText );
         TextView sendDateView = (TextView) findViewById( R.id.sendDateText );
 
-        ExceptionType exceptionType = exceptionTypeManager.findById( typeId );
+        ExceptionType exceptionType = exceptionTypeStore.findById( typeId );
         exceptionNameView.setText( exceptionType.getPrefix() + "\n" + exceptionType.getShortName() );
         exceptionDescView.setText( exceptionType.getDescription() );
         Friend sender = friendStore.findFriendById( fromWho );

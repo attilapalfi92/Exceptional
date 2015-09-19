@@ -8,36 +8,16 @@ import com.google.gson.Gson;
 /**
  * Created by Attila on 2015-06-12.
  */
-public class Friend {
+public class Friend implements Comparable<Friend> {
     private BigInteger id;
     private String firstName;
     private String lastName;
     private String imageUrl;
     private int points = 100;
 
-    private static Gson gson = new Gson();
-
-    public static class NameComparator implements Comparator<Friend> {
-        @Override
-        public int compare( Friend lhs, Friend rhs ) {
-            return lhs.firstName.compareTo( rhs.firstName );
-        }
-    }
-
-    public static class PointComparator implements Comparator<Friend> {
-        @Override
-        public int compare( Friend lhs, Friend rhs ) {
-            return lhs.points < rhs.points ? 1 : ( lhs.points == rhs.points ? 0 : -1 );
-        }
-    }
-
     @Override
-    public String toString( ) {
-        return gson.toJson( this );
-    }
-
-    public static Friend fromString( String friendJson ) {
-        return gson.fromJson( friendJson, Friend.class );
+    public int compareTo( Friend another ) {
+        return Integer.valueOf( another.points ).compareTo( points );
     }
 
     @Override

@@ -7,25 +7,26 @@ import java.util.Calendar;
 import javax.inject.Inject;
 
 import com.attilapalfi.exceptional.dependency_injection.Injector;
-import com.attilapalfi.exceptional.persistence.ExceptionTypeManager;
+import com.attilapalfi.exceptional.persistence.ExceptionTypeStore;
 import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper;
 
 /**
  * Created by palfi on 2015-08-30.
  */
 public class ExceptionFactory {
-    @Inject ExceptionTypeManager exceptionTypeManager;
+    @Inject
+    ExceptionTypeStore exceptionTypeStore;
 
     public ExceptionFactory( ) {
         Injector.INSTANCE.getApplicationComponent().inject( this );;
     }
 
     public Exception createFromWrapper( ExceptionInstanceWrapper wrapper ) {
-        return new Exception( wrapper, exceptionTypeManager.findById( wrapper.getExceptionTypeId() ) );
+        return new Exception( wrapper, exceptionTypeStore.findById( wrapper.getExceptionTypeId() ) );
     }
 
     public Exception createExceptionWithTypeId( int typeId, BigInteger fromWho, BigInteger toWho ) {
-        ExceptionType exceptionType = exceptionTypeManager.findById( typeId );
+        ExceptionType exceptionType = exceptionTypeStore.findById( typeId );
         return createExceptionWithType( exceptionType, fromWho, toWho );
     }
 

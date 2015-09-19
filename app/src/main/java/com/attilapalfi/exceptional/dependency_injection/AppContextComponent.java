@@ -33,7 +33,7 @@ public interface AppContextComponent {
 
     ExceptionInstanceStore exceptionInstanceManager( );
 
-    ExceptionTypeManager exceptionTypeManager( );
+    ExceptionTypeStore exceptionTypeManager( );
 
     FriendStore friendsManager( );
 

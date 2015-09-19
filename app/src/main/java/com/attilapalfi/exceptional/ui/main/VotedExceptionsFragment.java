@@ -23,7 +23,7 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.interfaces.VotedTypeListener;
 import com.attilapalfi.exceptional.model.ExceptionType;
-import com.attilapalfi.exceptional.persistence.ExceptionTypeManager;
+import com.attilapalfi.exceptional.persistence.ExceptionTypeStore;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
 import com.attilapalfi.exceptional.rest.VotingService;
 
@@ -34,7 +34,8 @@ public class VotedExceptionsFragment extends Fragment implements VotedTypeListen
     private VotedExceptionAdapter adapter;
     private RecyclerView recyclerView;
     private List<ExceptionType> votedTypeList;
-    @Inject ExceptionTypeManager exceptionTypeManager;
+    @Inject
+    ExceptionTypeStore exceptionTypeStore;
     @Inject VotingService votingService;
     @Inject MetadataStore metadataStore;
 
@@ -42,7 +43,7 @@ public class VotedExceptionsFragment extends Fragment implements VotedTypeListen
     public void onCreate( Bundle savedInstanceState ) {
         super.onCreate( savedInstanceState );
         Injector.INSTANCE.getApplicationComponent().inject( this );
-        exceptionTypeManager.addVotedTypeListener( this );
+        exceptionTypeStore.addVotedTypeListener( this );
     }
 
     @Override
@@ -55,12 +56,12 @@ public class VotedExceptionsFragment extends Fragment implements VotedTypeListen
 
     @Override
     public void onDestroy( ) {
-        exceptionTypeManager.removeVotedTypeListener( this );
+        exceptionTypeStore.removeVotedTypeListener( this );
         super.onDestroy();
     }
 
     private void initTypeAdapter( ) {
-        votedTypeList = exceptionTypeManager.getVotedExceptionTypeList();
+        votedTypeList = exceptionTypeStore.getVotedExceptionTypeList();
         if ( votedTypeList == null ) {
             votedTypeList = new ArrayList<>();
         }
@@ -79,7 +80,7 @@ public class VotedExceptionsFragment extends Fragment implements VotedTypeListen
 
     @Override
     public void onVoteListChanged( ) {
-        adapter.setValues( exceptionTypeManager.getVotedExceptionTypeList() );
+        adapter.setValues( exceptionTypeStore.getVotedExceptionTypeList() );
         adapter.notifyDataSetChanged();
     }
 

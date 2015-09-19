@@ -29,7 +29,8 @@ public class FacebookManager {
     @Inject AppStartService appStartService;
     @Inject
     ExceptionInstanceStore exceptionInstanceStore;
-    @Inject ExceptionTypeManager exceptionTypeManager;
+    @Inject
+    ExceptionTypeStore exceptionTypeStore;
     @Inject
     FriendStore friendStore;
     @Inject ImageCache imageCache;
@@ -94,7 +95,7 @@ public class FacebookManager {
         imageCache.wipe( friendStore.getStoredFriends() );
         friendStore.wipe();
         exceptionInstanceStore.wipe();
-        exceptionTypeManager.wipe();
+        exceptionTypeStore.wipe();
         metadataStore.wipe();
     }
 

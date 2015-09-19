@@ -7,7 +7,7 @@ import android.widget.Toast;
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.ExceptionType;
-import com.attilapalfi.exceptional.persistence.ExceptionTypeManager;
+import com.attilapalfi.exceptional.persistence.ExceptionTypeStore;
 import com.attilapalfi.exceptional.persistence.FriendStore;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
 import com.attilapalfi.exceptional.rest.messages.SubmitRequest;
@@ -26,7 +26,8 @@ public class VotingService {
     @Inject MetadataStore metadataStore;
     @Inject
     FriendStore friendStore;
-    @Inject ExceptionTypeManager exceptionTypeManager;
+    @Inject
+    ExceptionTypeStore exceptionTypeStore;
     @Inject RestInterfaceFactory restInterfaceFactory;
     private VotingRestInterface votingRestInterface;
 
@@ -42,7 +43,7 @@ public class VotingService {
             public void success( VoteResponse voteResponse, Response response ) {
                 if ( voteResponse.getVotedForThisWeek() ) {
                     metadataStore.setVotedThisWeek( true );
-                    exceptionTypeManager.updateVotedType( voteResponse.getVotedType() );
+                    exceptionTypeStore.updateVotedType( voteResponse.getVotedType() );
                 }
             }
 
@@ -60,7 +61,7 @@ public class VotingService {
             public void success( SubmitResponse submitResponse, Response response ) {
                 if ( submitResponse.getSubmittedThisWeek() ) {
                     metadataStore.setSubmittedThisWeek( true );
-                    exceptionTypeManager.addVotedType( submitResponse.getSubmittedType() );
+                    exceptionTypeStore.addVotedType( submitResponse.getSubmittedType() );
                 }
             }
 

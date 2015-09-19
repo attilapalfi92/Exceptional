@@ -25,8 +25,8 @@ import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.model.ExceptionType;
 import com.attilapalfi.exceptional.model.ExceptionFactory;
+import com.attilapalfi.exceptional.persistence.ExceptionTypeStore;
 import com.attilapalfi.exceptional.services.GpsService;
-import com.attilapalfi.exceptional.persistence.ExceptionTypeManager;
 import com.attilapalfi.exceptional.persistence.FriendStore;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
 import com.attilapalfi.exceptional.rest.ExceptionService;
@@ -39,7 +39,8 @@ public class ExceptionTypesFragment extends Fragment {
     private List<ExceptionType> exceptionTypes;
     private RecyclerView recyclerView;
     private ExceptionTypeAdapter typeAdapter;
-    @Inject ExceptionTypeManager exceptionTypeManager;
+    @Inject
+    ExceptionTypeStore exceptionTypeStore;
 
     @Override
     public void onCreate( Bundle savedInstanceState ) {
@@ -57,10 +58,10 @@ public class ExceptionTypesFragment extends Fragment {
     }
 
     private void initExceptionTypes( ) {
-        int index = instanceCounter++ % exceptionTypeManager.getExceptionTypes().size();
-        List<String> types = new ArrayList<>( exceptionTypeManager.getExceptionTypes() );
+        int index = instanceCounter++ % exceptionTypeStore.getExceptionTypes().size();
+        List<String> types = new ArrayList<>( exceptionTypeStore.getExceptionTypes() );
         String typeOfThis = types.get( index );
-        exceptionTypes = exceptionTypeManager.getExceptionTypeListByName( typeOfThis );
+        exceptionTypes = exceptionTypeStore.getExceptionTypeListByName( typeOfThis );
     }
 
     private void initTypeAdapter( ) {

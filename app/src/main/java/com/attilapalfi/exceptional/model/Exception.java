@@ -12,14 +12,12 @@ import com.google.gson.Gson;
  * Created by Attila on 2015-06-08.
  */
 public class Exception implements Comparable<Exception> {
-    private static Gson gson = new Gson();
-
     private transient ExceptionType exceptionType;
     private BigInteger instanceId = new BigInteger( "0" );
     private int exceptionTypeId = 0;
     private double longitude;
     private double latitude;
-    private Timestamp date; // TODO: long timestapm
+    private Timestamp date;
     private BigInteger fromWho;
     private BigInteger toWho;
     private String city = "";
@@ -40,19 +38,10 @@ public class Exception implements Comparable<Exception> {
         return another.instanceId.compareTo( instanceId );
     }
 
-    @Override
-    public String toString( ) {
-        return gson.toJson( this );
-    }
-
     public Exception clone( ) {
         Exception e = new Exception();
         e.setExceptionType( exceptionType );
         return e;
-    }
-
-    public static Exception fromString( String json ) {
-        return gson.fromJson( json, Exception.class );
     }
 
     public Exception( ) {
@@ -151,11 +140,8 @@ public class Exception implements Comparable<Exception> {
     public boolean equals( Object o ) {
         if ( this == o ) return true;
         if ( o == null || getClass() != o.getClass() ) return false;
-
         Exception exception = (Exception) o;
-
         return !( instanceId != null ? !instanceId.equals( exception.instanceId ) : exception.instanceId != null );
-
     }
 
     @Override

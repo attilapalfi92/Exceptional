@@ -48,7 +48,7 @@ public interface ApplicationComponent extends AppContextComponent {
     void inject( ExceptionInstanceStore exceptionInstanceStore );
     void inject( GcmMessageHandler gcmMessageHandler );
     void inject( ExceptionInstancesFragment exceptionInstancesFragment );
-    void inject( ExceptionTypeManager exceptionTypeManager );
+    void inject( ExceptionTypeStore exceptionTypeStore );
     void inject( ExceptionFactory exceptionFactory );
     void inject( ExceptionTypesFragment exceptionTypesFragment );
     void inject( ShowNotificationActivity showNotificationActivity );

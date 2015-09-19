@@ -21,7 +21,7 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.persistence.ExceptionInstanceStore;
-import com.attilapalfi.exceptional.persistence.ExceptionTypeManager;
+import com.attilapalfi.exceptional.persistence.ExceptionTypeStore;
 import com.attilapalfi.exceptional.persistence.FriendStore;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
 import com.attilapalfi.exceptional.ui.ShowNotificationActivity;
@@ -37,7 +37,8 @@ public class GcmMessageHandler extends IntentService {
     private static int notificationIdCounter = 0;
     @Inject
     ExceptionInstanceStore exceptionInstanceStore;
-    @Inject ExceptionTypeManager exceptionTypeManager;
+    @Inject
+    ExceptionTypeStore exceptionTypeStore;
     @Inject FriendStore friendStore;
     @Inject MetadataStore metadataStore;
 
@@ -92,7 +93,7 @@ public class GcmMessageHandler extends IntentService {
     private void parseNotificationToException( Bundle extras ) {
         initException();
         int typeId = Integer.parseInt( extras.getString( "typeId" ) );
-        exception.setExceptionType( exceptionTypeManager.findById( typeId ) );
+        exception.setExceptionType( exceptionTypeStore.findById( typeId ) );
         exception.setInstanceId( new BigInteger( extras.getString( "instanceId" ) ) );
         exception.setFromWho( new BigInteger( extras.getString( "fromWho" ) ) );
         exception.setToWho( new BigInteger( extras.getString( "toWho" ) ) );

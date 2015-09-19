@@ -14,7 +14,7 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Friend;
 import com.attilapalfi.exceptional.persistence.ExceptionInstanceStore;
-import com.attilapalfi.exceptional.persistence.ExceptionTypeManager;
+import com.attilapalfi.exceptional.persistence.ExceptionTypeStore;
 import com.attilapalfi.exceptional.persistence.FriendStore;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
 import com.attilapalfi.exceptional.rest.messages.AppStartRequest;
@@ -32,11 +32,10 @@ import static java8.util.stream.StreamSupport.stream;
  */
 public class AppStartService {
     @Inject Context context;
+    @Inject ExceptionInstanceStore exceptionInstanceStore;
     @Inject
-    ExceptionInstanceStore exceptionInstanceStore;
-    @Inject ExceptionTypeManager exceptionTypeManager;
-    @Inject
-    FriendStore friendStore;
+    ExceptionTypeStore exceptionTypeStore;
+    @Inject FriendStore friendStore;
     @Inject MetadataStore metadataStore;
     @Inject RestInterfaceFactory restInterfaceFactory;
     private String projectNumber;
@@ -141,16 +140,18 @@ public class AppStartService {
     }
 
     private void saveCommonData( AppStartResponse responseBody ) {
-        if ( responseBody.getExceptionVersion() > metadataStore.getExceptionVersion() ) {
-            exceptionTypeManager.addExceptionTypes( responseBody.getExceptionTypes() );
-        }
-        friendStore.updatePointsOfFriends( responseBody.getFriendsPoints() );
-        metadataStore.setPoints( responseBody.getPoints() );
-        metadataStore.setSubmittedThisWeek( responseBody.getSubmittedThisWeek() );
-        metadataStore.setVotedThisWeek( responseBody.getVotedThisWeek() );
-        metadataStore.setExceptionVersion( responseBody.getExceptionVersion() );
-        exceptionTypeManager.setVotedExceptionTypes( responseBody.getBeingVotedTypes() );
-        exceptionInstanceStore.saveExceptionListAsync( responseBody.getMyExceptions() );
+        new Thread( () -> {
+            if ( responseBody.getExceptionVersion() > metadataStore.getExceptionVersion() ) {
+                exceptionTypeStore.addExceptionTypes( responseBody.getExceptionTypes() );
+            }
+            friendStore.updatePointsOfFriends( responseBody.getFriendsPoints() );
+            metadataStore.setPoints( responseBody.getPoints() );
+            metadataStore.setSubmittedThisWeek( responseBody.getSubmittedThisWeek() );
+            metadataStore.setVotedThisWeek( responseBody.getVotedThisWeek() );
+            metadataStore.setExceptionVersion( responseBody.getExceptionVersion() );
+            exceptionTypeStore.setVotedExceptionTypes( responseBody.getBeingVotedTypes() );
+            exceptionInstanceStore.saveExceptionList( responseBody.getMyExceptions() );
+        } ).start();
     }
 
     public String getDeviceName( ) {

@@ -11,7 +11,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
-import com.attilapalfi.exceptional.persistence.ExceptionTypeManager;
+import com.attilapalfi.exceptional.persistence.ExceptionTypeStore;
 
 /**
  * Created by palfi on 2015-08-30.
@@ -19,13 +19,14 @@ import com.attilapalfi.exceptional.persistence.ExceptionTypeManager;
 public class ExceptionTypePagerAdapter extends FragmentPagerAdapter implements ViewPager.OnPageChangeListener {
     private List<String> exceptionTypes = new ArrayList<>();
     private Activity activity;
-    @Inject ExceptionTypeManager exceptionTypeManager;
+    @Inject
+    ExceptionTypeStore exceptionTypeStore;
 
     public ExceptionTypePagerAdapter( FragmentManager fragmentManager, Activity activity ) {
         super( fragmentManager );
         Injector.INSTANCE.getApplicationComponent().inject( this );
         this.activity = activity;
-        exceptionTypes.addAll( exceptionTypeManager.getExceptionTypes() );
+        exceptionTypes.addAll( exceptionTypeStore.getExceptionTypes() );
     }
 
     @Override
