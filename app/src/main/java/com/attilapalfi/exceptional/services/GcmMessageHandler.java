@@ -20,7 +20,7 @@ import android.support.v4.app.TaskStackBuilder;
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Exception;
-import com.attilapalfi.exceptional.persistence.ExceptionInstanceManager;
+import com.attilapalfi.exceptional.persistence.ExceptionInstanceStore;
 import com.attilapalfi.exceptional.persistence.ExceptionTypeManager;
 import com.attilapalfi.exceptional.persistence.FriendStore;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
@@ -35,7 +35,8 @@ public class GcmMessageHandler extends IntentService {
     private Handler handler;
     private Exception exception;
     private static int notificationIdCounter = 0;
-    @Inject ExceptionInstanceManager exceptionInstanceManager;
+    @Inject
+    ExceptionInstanceStore exceptionInstanceStore;
     @Inject ExceptionTypeManager exceptionTypeManager;
     @Inject FriendStore friendStore;
     @Inject MetadataStore metadataStore;
@@ -117,7 +118,7 @@ public class GcmMessageHandler extends IntentService {
 
     private void saveDataOnMainThread( final Bundle extras ) {
         handler.post( ( ) -> {
-            exceptionInstanceManager.addExceptionAsync( exception );
+            exceptionInstanceStore.addExceptionAsync( exception );
             savePoints( extras );
         } );
     }

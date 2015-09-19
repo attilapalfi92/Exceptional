@@ -45,7 +45,7 @@ public interface ApplicationComponent extends AppContextComponent {
     void inject( VotedExceptionsFragment votedExceptionsFragment );
     void inject( VotedExceptionAdapter votedExceptionAdapter );
     void inject( AppStartService appStartService );
-    void inject( ExceptionInstanceManager exceptionInstanceManager );
+    void inject( ExceptionInstanceStore exceptionInstanceStore );
     void inject( GcmMessageHandler gcmMessageHandler );
     void inject( ExceptionInstancesFragment exceptionInstancesFragment );
     void inject( ExceptionTypeManager exceptionTypeManager );

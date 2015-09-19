@@ -72,8 +72,8 @@ public class AppContextModule {
 
     @Provides
     @Singleton
-    public ExceptionInstanceManager exceptionInstanceManager( ) {
-        return new ExceptionInstanceManager();
+    public ExceptionInstanceStore exceptionInstanceManager( ) {
+        return new ExceptionInstanceStore();
     }
 
     @Provides

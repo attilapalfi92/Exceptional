@@ -27,7 +27,7 @@ import com.attilapalfi.exceptional.interfaces.ExceptionChangeListener;
 import com.attilapalfi.exceptional.interfaces.ExceptionRefreshListener;
 import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.model.Friend;
-import com.attilapalfi.exceptional.persistence.ExceptionInstanceManager;
+import com.attilapalfi.exceptional.persistence.ExceptionInstanceStore;
 import com.attilapalfi.exceptional.persistence.FriendStore;
 import com.attilapalfi.exceptional.persistence.ImageCache;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
@@ -45,7 +45,7 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
     @Inject
     ExceptionService exceptionService;
     @Inject
-    ExceptionInstanceManager exceptionInstanceManager;
+    ExceptionInstanceStore exceptionInstanceStore;
     @Inject
     MetadataStore metadataStore;
     private Friend friend;
@@ -57,7 +57,7 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
     public void onCreate( @Nullable Bundle savedInstanceState ) {
         super.onCreate( savedInstanceState );
         Injector.INSTANCE.getApplicationComponent().inject( this );
-        exceptionInstanceManager.addExceptionChangeListener( this );
+        exceptionInstanceStore.addExceptionChangeListener( this );
         FriendDetailsActivity activity;
         if ( getActivity() instanceof FriendDetailsActivity ) {
             activity = (FriendDetailsActivity) getActivity();
@@ -92,7 +92,7 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
 
     @Override
     public void onDestroy( ) {
-        exceptionInstanceManager.removeExceptionChangeListener( this );
+        exceptionInstanceStore.removeExceptionChangeListener( this );
         super.onDestroy();
     }
 
@@ -125,7 +125,7 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
     }
 
     private void initExceptionAdapter( ) {
-        List<Exception> values = generateValues( exceptionInstanceManager.getExceptionList() );
+        List<Exception> values = generateValues( exceptionInstanceStore.getExceptionList() );
         exceptionInstanceAdapter = new ExceptionInstanceAdapter( values, getActivity().getApplicationContext() );
         onExceptionsChanged();
     }

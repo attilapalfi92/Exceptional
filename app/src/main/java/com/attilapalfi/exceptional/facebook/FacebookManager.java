@@ -27,7 +27,8 @@ import com.facebook.login.LoginResult;
  */
 public class FacebookManager {
     @Inject AppStartService appStartService;
-    @Inject ExceptionInstanceManager exceptionInstanceManager;
+    @Inject
+    ExceptionInstanceStore exceptionInstanceStore;
     @Inject ExceptionTypeManager exceptionTypeManager;
     @Inject
     FriendStore friendStore;
@@ -92,7 +93,7 @@ public class FacebookManager {
     private void setUserLoggedOut( ) {
         imageCache.wipe( friendStore.getStoredFriends() );
         friendStore.wipe();
-        exceptionInstanceManager.wipe();
+        exceptionInstanceStore.wipe();
         exceptionTypeManager.wipe();
         metadataStore.wipe();
     }

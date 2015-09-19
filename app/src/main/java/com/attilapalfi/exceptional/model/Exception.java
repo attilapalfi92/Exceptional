@@ -11,12 +11,12 @@ import com.google.gson.Gson;
 /**
  * Created by Attila on 2015-06-08.
  */
-public class Exception {
+public class Exception implements Comparable<Exception> {
     private static Gson gson = new Gson();
 
     private transient ExceptionType exceptionType;
     private BigInteger instanceId = new BigInteger( "0" );
-    private int exceptionTypeId;
+    private int exceptionTypeId = 0;
     private double longitude;
     private double latitude;
     private Timestamp date; // TODO: long timestapm
@@ -35,21 +35,10 @@ public class Exception {
         this.toWho = wrapper.getToWho();
     }
 
-    public static class ShortNameComparator implements Comparator<Exception> {
-        @Override
-        public int compare( Exception lhs, Exception rhs ) {
-            return lhs.getShortName().compareTo( rhs.getShortName() );
-        }
+    @Override
+    public int compareTo( Exception another ) {
+        return another.instanceId.compareTo( instanceId );
     }
-
-
-    public static class DateComparator implements Comparator<Exception> {
-        @Override
-        public int compare( Exception lhs, Exception rhs ) {
-            return rhs.getDate().compareTo( lhs.getDate() );
-        }
-    }
-
 
     @Override
     public String toString( ) {
@@ -165,15 +154,12 @@ public class Exception {
 
         Exception exception = (Exception) o;
 
-        if ( instanceId != null ? !instanceId.equals( exception.instanceId ) : exception.instanceId != null )
-            return false;
-        return !( date != null ? !date.equals( exception.date ) : exception.date != null );
+        return !( instanceId != null ? !instanceId.equals( exception.instanceId ) : exception.instanceId != null );
+
     }
 
     @Override
     public int hashCode( ) {
-        int result = instanceId != null ? instanceId.hashCode() : 0;
-        result = 31 * result + ( date != null ? date.hashCode() : 0 );
-        return result;
+        return instanceId != null ? instanceId.hashCode() : 0;
     }
 }

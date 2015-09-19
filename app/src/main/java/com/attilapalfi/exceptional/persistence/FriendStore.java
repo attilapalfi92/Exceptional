@@ -5,7 +5,6 @@ import java.util.*;
 
 import javax.inject.Inject;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Looper;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
@@ -22,9 +21,9 @@ import static java8.util.stream.StreamSupport.stream;
  */
 public class FriendStore {
     private static final String FRIEND_DATABASE = "FRIEND_DATABASE";
-    private static final String IDs = "IDs";
+    private static final String FRIEND_IDS = "FRIEND_IDS";
+    private static final Friend EMPTY_FRIEND = new Friend( new BigInteger( "0" ), "", "", "" );
 
-    @Inject Context context;
     @Inject ImageCache imageCache;
     private final Book database;
     private final List<Friend> storedFriends = Collections.synchronizedList( new LinkedList<>() );
@@ -46,8 +45,8 @@ public class FriendStore {
     public FriendStore( ) {
         Injector.INSTANCE.getApplicationComponent().inject( this );
         database = Paper.book( FRIEND_DATABASE );
-        idList = Collections.synchronizedList( database.read( IDs, new LinkedList<>() ) );
-        stream( idList ).forEach( id -> ( storedFriends ).add( database.read( id.toString() ) ) );
+        idList = Collections.synchronizedList( database.read( FRIEND_IDS, new LinkedList<>() ) );
+        stream( idList ).forEach( id -> ( storedFriends ).add( database.read( id.toString(), EMPTY_FRIEND ) ) );
         new AsyncFriendOrganizer().execute();
     }
 
@@ -62,7 +61,7 @@ public class FriendStore {
                     idList.add( friend.getId() );
                     database.write( friend.getId().toString(), friend );
                 } );
-                database.write( IDs, idList );
+                database.write( FRIEND_IDS, idList );
                 Collections.sort( storedFriends, new Friend.PointComparator() );
                 return null;
             }
@@ -208,7 +207,7 @@ public class FriendStore {
                     database.delete( friend.getId().toString() );
                     idList.remove( friend.getId() );
                 } );
-                database.write( IDs, idList );
+                database.write( FRIEND_IDS, idList );
                 return null;
             }
 

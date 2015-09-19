@@ -31,7 +31,7 @@ public interface AppContextComponent {
 
     AppStartService appStartService( );
 
-    ExceptionInstanceManager exceptionInstanceManager( );
+    ExceptionInstanceStore exceptionInstanceManager( );
 
     ExceptionTypeManager exceptionTypeManager( );
 

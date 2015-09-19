@@ -10,7 +10,7 @@ import com.attilapalfi.exceptional.interfaces.ExceptionRefreshListener;
 import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.model.Friend;
 import com.attilapalfi.exceptional.model.ExceptionFactory;
-import com.attilapalfi.exceptional.persistence.ExceptionInstanceManager;
+import com.attilapalfi.exceptional.persistence.ExceptionInstanceStore;
 import com.attilapalfi.exceptional.persistence.FriendStore;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
 import com.attilapalfi.exceptional.rest.messages.BaseExceptionRequest;
@@ -29,7 +29,8 @@ import static java8.util.stream.StreamSupport.stream;
  */
 public class ExceptionService {
     @Inject Context context;
-    @Inject ExceptionInstanceManager exceptionInstanceManager;
+    @Inject
+    ExceptionInstanceStore exceptionInstanceStore;
     @Inject ExceptionFactory exceptionFactory;
     @Inject
     FriendStore friendStore;
@@ -51,7 +52,7 @@ public class ExceptionService {
                     Friend toWho = friendStore.findFriendById( e.getInstanceWrapper().getToWho() );
                     metadataStore.setPoints( e.getYourPoints() );
                     friendStore.updateFriendPoints( e.getInstanceWrapper().getToWho(), e.getFriendsPoints() );
-                    exceptionInstanceManager.addExceptionAsync( exceptionFactory.createFromWrapper( e.getInstanceWrapper() ) );
+                    exceptionInstanceStore.addExceptionAsync( exceptionFactory.createFromWrapper( e.getInstanceWrapper() ) );
                     Toast.makeText( context, e.getExceptionShortName() + " "
                                     + context.getString( R.string.successfully_thrown )
                                     + " " + toWho.getName(),
@@ -73,13 +74,13 @@ public class ExceptionService {
     public void refreshExceptions( final ExceptionRefreshListener refreshListener ) {
         BaseExceptionRequest requestBody = new BaseExceptionRequest(
                 metadataStore.getUser().getId(),
-                stream( exceptionInstanceManager.getExceptionList() ).map( Exception::getInstanceId ).collect( Collectors.toList() )
+                stream( exceptionInstanceStore.getExceptionList() ).map( Exception::getInstanceId ).collect( Collectors.toList() )
         );
         exceptionRestInterface.refreshExceptions( requestBody, new Callback<ExceptionRefreshResponse>() {
 
             @Override
             public void success( ExceptionRefreshResponse exceptionRefreshResponse, Response response ) {
-                exceptionInstanceManager.saveExceptionListAsync( exceptionRefreshResponse.getExceptionList() );
+                exceptionInstanceStore.saveExceptionListAsync( exceptionRefreshResponse.getExceptionList() );
                 Toast.makeText( context, R.string.exceptions_syncd, Toast.LENGTH_SHORT ).show();
                 refreshListener.onExceptionRefreshFinished();
             }

@@ -13,7 +13,7 @@ import android.widget.Toast;
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Friend;
-import com.attilapalfi.exceptional.persistence.ExceptionInstanceManager;
+import com.attilapalfi.exceptional.persistence.ExceptionInstanceStore;
 import com.attilapalfi.exceptional.persistence.ExceptionTypeManager;
 import com.attilapalfi.exceptional.persistence.FriendStore;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
@@ -32,7 +32,8 @@ import static java8.util.stream.StreamSupport.stream;
  */
 public class AppStartService {
     @Inject Context context;
-    @Inject ExceptionInstanceManager exceptionInstanceManager;
+    @Inject
+    ExceptionInstanceStore exceptionInstanceStore;
     @Inject ExceptionTypeManager exceptionTypeManager;
     @Inject
     FriendStore friendStore;
@@ -87,7 +88,7 @@ public class AppStartService {
         requestBody.setDeviceId( androidId );
         requestBody.setUserFacebookId( profileId );
         requestBody.setFriendsFacebookIds( stream( friendList ).map( Friend::getId ).collect( Collectors.toList() ) );
-        requestBody.setKnownExceptionIds( exceptionInstanceManager.getKnownIds() );
+        requestBody.setKnownExceptionIds( exceptionInstanceStore.getKnownIds() );
         requestBody.setFirstName( metadataStore.getUser().getFirstName() );
         requestBody.setLastName( metadataStore.getUser().getLastName() );
     }
@@ -149,7 +150,7 @@ public class AppStartService {
         metadataStore.setVotedThisWeek( responseBody.getVotedThisWeek() );
         metadataStore.setExceptionVersion( responseBody.getExceptionVersion() );
         exceptionTypeManager.setVotedExceptionTypes( responseBody.getBeingVotedTypes() );
-        exceptionInstanceManager.saveExceptionListAsync( responseBody.getMyExceptions() );
+        exceptionInstanceStore.saveExceptionListAsync( responseBody.getMyExceptions() );
     }
 
     public String getDeviceName( ) {
