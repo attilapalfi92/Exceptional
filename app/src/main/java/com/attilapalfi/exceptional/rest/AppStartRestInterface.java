@@ -1,6 +1,6 @@
-package com.attilapalfi.exceptional.services.rest;
+package com.attilapalfi.exceptional.rest;
 
-import com.attilapalfi.exceptional.services.rest.messages.*;
+import com.attilapalfi.exceptional.rest.messages.*;
 import retrofit.Callback;
 import retrofit.http.Body;
 import retrofit.http.POST;

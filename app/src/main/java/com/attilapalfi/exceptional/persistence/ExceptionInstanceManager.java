@@ -1,4 +1,4 @@
-package com.attilapalfi.exceptional.services.persistent_stores;
+package com.attilapalfi.exceptional.persistence;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -15,8 +15,8 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.interfaces.ExceptionChangeListener;
 import com.attilapalfi.exceptional.model.Exception;
-import com.attilapalfi.exceptional.services.ExceptionFactory;
-import com.attilapalfi.exceptional.services.rest.messages.ExceptionInstanceWrapper;
+import com.attilapalfi.exceptional.model.ExceptionFactory;
+import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper;
 import java8.util.stream.Collectors;
 
 import static java8.util.stream.StreamSupport.stream;
@@ -66,34 +66,13 @@ public class ExceptionInstanceManager {
         stream( exceptionChangeListeners ).forEach( ExceptionChangeListener::onExceptionsChanged );
     }
 
-    public boolean isInitialized( ) {
-        return sharedPreferences != null;
-    }
-
-
-    public int exceptionCount( ) {
-        return storedExceptions.size();
-    }
-
-    public BigInteger getLastKnownId( ) {
-        if ( storedExceptions.isEmpty() ) {
-            return new BigInteger( "0" );
-        }
-
-        return storedExceptions.get( 0 ).getInstanceId();
-    }
-
-    public void addExceptionAsync( final Exception e ) {
-        if ( !storedExceptions.contains( e ) ) {
+    public void addExceptionAsync( final Exception exception ) {
+        if ( !storedExceptions.contains( exception ) ) {
             new AsyncTask<Void, Void, Void>() {
+
                 @Override
                 protected Void doInBackground( Void... params ) {
-                    if ( !storedExceptions.contains( e ) ) {
-                        setCityForException();
-                        addToMemoryStore();
-                        editor.putString( e.getInstanceId().toString(), e.toString() );
-                        editor.apply();
-                    }
+                    saveToStore( exception );
                     return null;
                 }
 
@@ -102,24 +81,9 @@ public class ExceptionInstanceManager {
                     notifyListeners();
                 }
 
-                private void setCityForException( ) {
-                    try {
-                        e.setCity( geocoder.getFromLocation( e.getLatitude(), e.getLongitude(), 1 ).get( 0 ).getLocality() );
-                    } catch ( IOException ioe ) {
-                        ioe.printStackTrace();
-                    }
-                }
-
-                private void addToMemoryStore( ) {
-                    if ( storedExceptions.size() >= STORE_SIZE ) {
-                        removeLast();
-                    }
-                    storedExceptions.add( 0, e );
-                }
             }.execute();
         }
     }
-
 
     public void saveExceptionListAsync( List<ExceptionInstanceWrapper> wrapperList ) {
         if ( !wrapperList.isEmpty() ) {
@@ -127,7 +91,7 @@ public class ExceptionInstanceManager {
 
                 @Override
                 protected Void doInBackground( Void... params ) {
-                    stream( wrapperList ).forEach( wrapper -> addException( exceptionFactory.createFromWrapper( wrapper ) ) );
+                    stream( wrapperList ).forEach( wrapper -> saveToStore( exceptionFactory.createFromWrapper( wrapper ) ) );
                     Collections.sort( storedExceptions, new Exception.DateComparator() );
                     return null;
                 }
@@ -137,33 +101,33 @@ public class ExceptionInstanceManager {
                     notifyListeners();
                 }
 
-                private void addException( Exception e ) {
-                    if ( !storedExceptions.contains( e ) ) {
-                        setCityForException( e );
-                        addToMemoryStore( e );
-                        editor.putString( e.getInstanceId().toString(), e.toString() );
-                        editor.apply();
-                    }
-                }
-
-                private void setCityForException( Exception e ) {
-                    try {
-                        e.setCity( geocoder.getFromLocation( e.getLatitude(), e.getLongitude(), 1 ).get( 0 ).getLocality() );
-                    } catch ( IOException ioe ) {
-                        ioe.printStackTrace();
-                    }
-                }
-
-                private void addToMemoryStore( Exception e ) {
-                    if ( storedExceptions.size() >= STORE_SIZE ) {
-                        removeLast();
-                    }
-                    storedExceptions.add( 0, e );
-                }
             }.execute();
         }
     }
 
+    private void saveToStore( Exception e ) {
+        if ( !storedExceptions.contains( e ) ) {
+            setCityForException( e );
+            addToMemoryStore( e );
+            editor.putString( e.getInstanceId().toString(), e.toString() );
+            editor.apply();
+        }
+    }
+
+    private void setCityForException( Exception e ) {
+        try {
+            e.setCity( geocoder.getFromLocation( e.getLatitude(), e.getLongitude(), 1 ).get( 0 ).getLocality() );
+        } catch ( IOException ioe ) {
+            ioe.printStackTrace();
+        }
+    }
+
+    private void addToMemoryStore( Exception e ) {
+        if ( storedExceptions.size() >= STORE_SIZE ) {
+            removeLast();
+        }
+        storedExceptions.add( 0, e );
+    }
 
     private void removeLast( ) {
         Exception removed = storedExceptions.remove( storedExceptions.size() - 1 );

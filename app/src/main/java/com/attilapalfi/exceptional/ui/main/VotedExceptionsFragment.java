@@ -23,9 +23,9 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.interfaces.VotedTypeListener;
 import com.attilapalfi.exceptional.model.ExceptionType;
-import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
-import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
-import com.attilapalfi.exceptional.services.rest.VotingService;
+import com.attilapalfi.exceptional.persistence.ExceptionTypeManager;
+import com.attilapalfi.exceptional.persistence.MetadataStore;
+import com.attilapalfi.exceptional.rest.VotingService;
 
 /**
  * Created by palfi on 2015-09-05.

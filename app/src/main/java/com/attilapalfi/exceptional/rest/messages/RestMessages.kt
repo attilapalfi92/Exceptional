@@ -1,4 +1,4 @@
-package com.attilapalfi.exceptional.services.rest.messages
+package com.attilapalfi.exceptional.rest.messages
 
 import com.attilapalfi.exceptional.model.ExceptionType
 import java.math.BigInteger

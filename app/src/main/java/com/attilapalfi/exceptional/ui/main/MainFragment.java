@@ -14,9 +14,9 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.interfaces.FirstStartFinishedListener;
 import com.attilapalfi.exceptional.interfaces.PointChangeListener;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendStore;
-import com.attilapalfi.exceptional.services.persistent_stores.ImageCache;
-import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
+import com.attilapalfi.exceptional.persistence.FriendStore;
+import com.attilapalfi.exceptional.persistence.ImageCache;
+import com.attilapalfi.exceptional.persistence.MetadataStore;
 
 /**
  */

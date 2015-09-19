@@ -13,10 +13,10 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.ExceptionType;
 import com.attilapalfi.exceptional.model.Friend;
-import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendStore;
-import com.attilapalfi.exceptional.services.persistent_stores.ImageCache;
-import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
+import com.attilapalfi.exceptional.persistence.ExceptionTypeManager;
+import com.attilapalfi.exceptional.persistence.FriendStore;
+import com.attilapalfi.exceptional.persistence.ImageCache;
+import com.attilapalfi.exceptional.persistence.MetadataStore;
 
 
 public class ShowNotificationActivity extends AppCompatActivity {

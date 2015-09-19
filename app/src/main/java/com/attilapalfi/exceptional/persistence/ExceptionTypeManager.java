@@ -1,4 +1,4 @@
-package com.attilapalfi.exceptional.services.persistent_stores;
+package com.attilapalfi.exceptional.persistence;
 
 import java.util.*;
 

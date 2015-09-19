@@ -13,8 +13,9 @@ import android.provider.Settings;
 import android.util.Base64;
 import android.util.Log;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
-import com.attilapalfi.exceptional.services.facebook.FacebookManager;
-import com.attilapalfi.exceptional.services.rest.AppStartService;
+import com.attilapalfi.exceptional.facebook.FacebookManager;
+import com.attilapalfi.exceptional.rest.AppStartService;
+import io.paperdb.Paper;
 
 /**
  * Created by Attila on 2015-06-05.
@@ -34,6 +35,7 @@ public class ExceptionalApplication extends android.support.multidex.MultiDexApp
     }
 
     private void initializeServices( Context applicationContext ) {
+        Paper.init( applicationContext );
         Injector.INSTANCE.getApplicationComponent().inject( this );
         String androidId = Settings.Secure.getString( applicationContext
                 .getContentResolver(), Settings.Secure.ANDROID_ID );

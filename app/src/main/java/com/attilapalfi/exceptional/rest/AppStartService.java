@@ -1,4 +1,4 @@
-package com.attilapalfi.exceptional.services.rest;
+package com.attilapalfi.exceptional.rest;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -13,12 +13,12 @@ import android.widget.Toast;
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Friend;
-import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
-import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendStore;
-import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
-import com.attilapalfi.exceptional.services.rest.messages.AppStartRequest;
-import com.attilapalfi.exceptional.services.rest.messages.AppStartResponse;
+import com.attilapalfi.exceptional.persistence.ExceptionInstanceManager;
+import com.attilapalfi.exceptional.persistence.ExceptionTypeManager;
+import com.attilapalfi.exceptional.persistence.FriendStore;
+import com.attilapalfi.exceptional.persistence.MetadataStore;
+import com.attilapalfi.exceptional.rest.messages.AppStartRequest;
+import com.attilapalfi.exceptional.rest.messages.AppStartResponse;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import java8.util.stream.Collectors;
 import retrofit.Callback;
@@ -143,13 +143,13 @@ public class AppStartService {
         if ( responseBody.getExceptionVersion() > metadataStore.getExceptionVersion() ) {
             exceptionTypeManager.addExceptionTypes( responseBody.getExceptionTypes() );
         }
-        metadataStore.setExceptionVersion( responseBody.getExceptionVersion() );
-        exceptionInstanceManager.saveExceptionListAsync( responseBody.getMyExceptions() );
-        exceptionTypeManager.setVotedExceptionTypes( responseBody.getBeingVotedTypes() );
+        friendStore.updatePointsOfFriends( responseBody.getFriendsPoints() );
         metadataStore.setPoints( responseBody.getPoints() );
         metadataStore.setSubmittedThisWeek( responseBody.getSubmittedThisWeek() );
         metadataStore.setVotedThisWeek( responseBody.getVotedThisWeek() );
-        friendStore.updateFriendsPoints( responseBody.getFriendsPoints() );
+        metadataStore.setExceptionVersion( responseBody.getExceptionVersion() );
+        exceptionTypeManager.setVotedExceptionTypes( responseBody.getBeingVotedTypes() );
+        exceptionInstanceManager.saveExceptionListAsync( responseBody.getMyExceptions() );
     }
 
     public String getDeviceName( ) {

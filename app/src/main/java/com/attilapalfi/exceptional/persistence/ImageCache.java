@@ -1,4 +1,4 @@
-package com.attilapalfi.exceptional.services.persistent_stores;
+package com.attilapalfi.exceptional.persistence;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -7,7 +7,10 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -31,8 +34,8 @@ import static java8.util.stream.StreamSupport.stream;
 public class ImageCache {
     private LruCache<BigInteger, Bitmap> imageWarehouse;
     private String filePath;
-    @Inject
-    Context context;
+    private Set<Friend> currentlyLoading = Collections.synchronizedSet( new HashSet<>() );
+    @Inject Context context;
 
     public ImageCache( ) {
         Injector.INSTANCE.getApplicationComponent().inject( this );
@@ -66,6 +69,16 @@ public class ImageCache {
         }
     }
 
+    public void loadImagesInitially( List<Friend> friendList ) {
+        currentlyLoading.addAll( friendList );
+        new Thread( () -> {
+            stream( friendList ).forEach( friend -> {
+                getImageForFriend( friend );
+                currentlyLoading.remove( friend );
+            } );
+        }).start();
+    }
+
     public void updateImageAsync( Friend newFriendState, Friend oldFriendState ) {
         new AsyncTask<Void, Void, Void>() {
             @Override
@@ -93,6 +106,14 @@ public class ImageCache {
 
         @Override
         protected Bitmap doInBackground( Void... params ) {
+            while ( currentlyLoading.contains( friend ) ) {
+                try {
+                    Thread.sleep( 150 );
+                } catch ( InterruptedException e ) {
+                    e.printStackTrace();
+                }
+            }
+
             return getImageForFriend( friend );
         }
 
@@ -102,24 +123,24 @@ public class ImageCache {
             imageView = null;
             friend = null;
         }
+    }
 
-        private Bitmap getImageForFriend( Friend friend ) {
-            Bitmap bitmap = imageWarehouse.get( friend.getId() ); // getting image from memory cache, if available
-            if ( bitmap == null ) {
-                if ( imageFileExists( friend ) ) {
-                    bitmap = getFromDisk( friend ); // getting from disk, if available
-                    imageWarehouse.put( friend.getId(), bitmap );
-                } else {
-                    try {
-                        bitmap = getFromInternet( friend );
-                        saveBitmapToDiskAndMem( friend, bitmap );
-                    } catch ( IOException e ) {
-                        e.printStackTrace();
-                    }
+    private Bitmap getImageForFriend( Friend friend ) {
+        Bitmap bitmap = imageWarehouse.get( friend.getId() );
+        if ( bitmap == null ) {
+            if ( imageFileExists( friend ) ) {
+                bitmap = getFromDisk( friend );
+                imageWarehouse.put( friend.getId(), bitmap );
+            } else {
+                try {
+                    bitmap = getFromInternet( friend );
+                    saveBitmapToDiskAndMem( friend, bitmap );
+                } catch ( IOException e ) {
+                    e.printStackTrace();
                 }
             }
-            return bitmap;
         }
+        return bitmap;
     }
 
     private void saveBitmapToDiskAndMem( final Friend friend, final Bitmap image ) {

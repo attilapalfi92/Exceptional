@@ -1,4 +1,4 @@
-package com.attilapalfi.exceptional.services.rest;
+package com.attilapalfi.exceptional.rest;
 
 import javax.inject.Inject;
 
@@ -7,13 +7,13 @@ import android.widget.Toast;
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.ExceptionType;
-import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendStore;
-import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
-import com.attilapalfi.exceptional.services.rest.messages.SubmitRequest;
-import com.attilapalfi.exceptional.services.rest.messages.SubmitResponse;
-import com.attilapalfi.exceptional.services.rest.messages.VoteRequest;
-import com.attilapalfi.exceptional.services.rest.messages.VoteResponse;
+import com.attilapalfi.exceptional.persistence.ExceptionTypeManager;
+import com.attilapalfi.exceptional.persistence.FriendStore;
+import com.attilapalfi.exceptional.persistence.MetadataStore;
+import com.attilapalfi.exceptional.rest.messages.SubmitRequest;
+import com.attilapalfi.exceptional.rest.messages.SubmitResponse;
+import com.attilapalfi.exceptional.rest.messages.VoteRequest;
+import com.attilapalfi.exceptional.rest.messages.VoteResponse;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;

@@ -1,9 +1,9 @@
-package com.attilapalfi.exceptional.services.rest;
+package com.attilapalfi.exceptional.rest;
 
-import com.attilapalfi.exceptional.services.rest.messages.SubmitRequest;
-import com.attilapalfi.exceptional.services.rest.messages.SubmitResponse;
-import com.attilapalfi.exceptional.services.rest.messages.VoteRequest;
-import com.attilapalfi.exceptional.services.rest.messages.VoteResponse;
+import com.attilapalfi.exceptional.rest.messages.SubmitRequest;
+import com.attilapalfi.exceptional.rest.messages.SubmitResponse;
+import com.attilapalfi.exceptional.rest.messages.VoteRequest;
+import com.attilapalfi.exceptional.rest.messages.VoteResponse;
 import retrofit.Callback;
 import retrofit.http.Body;
 import retrofit.http.POST;

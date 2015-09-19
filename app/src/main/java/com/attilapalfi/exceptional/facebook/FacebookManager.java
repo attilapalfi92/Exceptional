@@ -1,4 +1,4 @@
-package com.attilapalfi.exceptional.services.facebook;
+package com.attilapalfi.exceptional.facebook;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -17,8 +17,8 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Friend;
-import com.attilapalfi.exceptional.services.persistent_stores.*;
-import com.attilapalfi.exceptional.services.rest.AppStartService;
+import com.attilapalfi.exceptional.persistence.*;
+import com.attilapalfi.exceptional.rest.AppStartService;
 import com.facebook.*;
 import com.facebook.login.LoginResult;
 
@@ -37,7 +37,6 @@ public class FacebookManager {
     private AccessTokenTracker tokenTracker;
     private Profile profile;
     private ProfileTracker profileTracker;
-    private BigInteger profileId = new BigInteger( "0" );
     private Friend user;
     private CallbackManager callbackManager;
     private FacebookCallback<LoginResult> facebookCallback;

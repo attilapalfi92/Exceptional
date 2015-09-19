@@ -1,9 +1,9 @@
-package com.attilapalfi.exceptional.services.rest;
+package com.attilapalfi.exceptional.rest;
 
-import com.attilapalfi.exceptional.services.rest.messages.BaseExceptionRequest;
-import com.attilapalfi.exceptional.services.rest.messages.ExceptionInstanceWrapper;
-import com.attilapalfi.exceptional.services.rest.messages.ExceptionRefreshResponse;
-import com.attilapalfi.exceptional.services.rest.messages.ExceptionSentResponse;
+import com.attilapalfi.exceptional.rest.messages.BaseExceptionRequest;
+import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper;
+import com.attilapalfi.exceptional.rest.messages.ExceptionRefreshResponse;
+import com.attilapalfi.exceptional.rest.messages.ExceptionSentResponse;
 import retrofit.Callback;
 import retrofit.http.Body;
 import retrofit.http.POST;

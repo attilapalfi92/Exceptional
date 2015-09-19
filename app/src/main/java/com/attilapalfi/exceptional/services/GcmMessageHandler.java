@@ -20,10 +20,10 @@ import android.support.v4.app.TaskStackBuilder;
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Exception;
-import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
-import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendStore;
-import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
+import com.attilapalfi.exceptional.persistence.ExceptionInstanceManager;
+import com.attilapalfi.exceptional.persistence.ExceptionTypeManager;
+import com.attilapalfi.exceptional.persistence.FriendStore;
+import com.attilapalfi.exceptional.persistence.MetadataStore;
 import com.attilapalfi.exceptional.ui.ShowNotificationActivity;
 import com.attilapalfi.exceptional.ui.main.MainActivity;
 
@@ -37,8 +37,7 @@ public class GcmMessageHandler extends IntentService {
     private static int notificationIdCounter = 0;
     @Inject ExceptionInstanceManager exceptionInstanceManager;
     @Inject ExceptionTypeManager exceptionTypeManager;
-    @Inject
-    FriendStore friendStore;
+    @Inject FriendStore friendStore;
     @Inject MetadataStore metadataStore;
 
     public GcmMessageHandler( ) {
@@ -47,7 +46,6 @@ public class GcmMessageHandler extends IntentService {
 
     @Override
     public void onCreate( ) {
-        // TODO Auto-generated method stub
         super.onCreate();
         Injector.INSTANCE.getApplicationComponent().inject( this );
         handler = new Handler( Looper.getMainLooper() );

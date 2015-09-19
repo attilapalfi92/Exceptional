@@ -11,7 +11,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
-import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
+import com.attilapalfi.exceptional.persistence.ExceptionTypeManager;
 
 /**
  * Created by palfi on 2015-08-30.

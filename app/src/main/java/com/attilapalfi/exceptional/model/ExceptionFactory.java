@@ -1,4 +1,4 @@
-package com.attilapalfi.exceptional.services;
+package com.attilapalfi.exceptional.model;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
@@ -7,10 +7,8 @@ import java.util.Calendar;
 import javax.inject.Inject;
 
 import com.attilapalfi.exceptional.dependency_injection.Injector;
-import com.attilapalfi.exceptional.model.Exception;
-import com.attilapalfi.exceptional.model.ExceptionType;
-import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
-import com.attilapalfi.exceptional.services.rest.messages.ExceptionInstanceWrapper;
+import com.attilapalfi.exceptional.persistence.ExceptionTypeManager;
+import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper;
 
 /**
  * Created by palfi on 2015-08-30.

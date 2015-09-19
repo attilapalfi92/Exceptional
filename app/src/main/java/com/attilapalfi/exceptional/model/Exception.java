@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.Comparator;
 
-import com.attilapalfi.exceptional.services.rest.messages.ExceptionInstanceWrapper;
+import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper;
 import com.google.gson.Gson;
 
 

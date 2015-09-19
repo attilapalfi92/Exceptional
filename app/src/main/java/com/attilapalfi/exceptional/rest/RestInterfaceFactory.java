@@ -1,4 +1,4 @@
-package com.attilapalfi.exceptional.services.rest;
+package com.attilapalfi.exceptional.rest;
 
 import android.content.Context;
 import com.attilapalfi.exceptional.R;

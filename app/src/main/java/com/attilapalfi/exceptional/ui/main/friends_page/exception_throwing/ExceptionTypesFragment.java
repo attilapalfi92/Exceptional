@@ -24,12 +24,12 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.model.ExceptionType;
-import com.attilapalfi.exceptional.services.ExceptionFactory;
+import com.attilapalfi.exceptional.model.ExceptionFactory;
 import com.attilapalfi.exceptional.services.GpsService;
-import com.attilapalfi.exceptional.services.persistent_stores.ExceptionTypeManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendStore;
-import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
-import com.attilapalfi.exceptional.services.rest.ExceptionService;
+import com.attilapalfi.exceptional.persistence.ExceptionTypeManager;
+import com.attilapalfi.exceptional.persistence.FriendStore;
+import com.attilapalfi.exceptional.persistence.MetadataStore;
+import com.attilapalfi.exceptional.rest.ExceptionService;
 import com.attilapalfi.exceptional.ui.main.Constants;
 import com.attilapalfi.exceptional.ui.main.MainActivity;
 

@@ -2,8 +2,6 @@ package com.attilapalfi.exceptional.ui;
 
 import javax.inject.Inject;
 
-import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -13,8 +11,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
-import com.attilapalfi.exceptional.services.facebook.FacebookLoginSuccessHandler;
-import com.attilapalfi.exceptional.services.facebook.FacebookManager;
+import com.attilapalfi.exceptional.facebook.FacebookLoginSuccessHandler;
+import com.attilapalfi.exceptional.facebook.FacebookManager;
 import com.attilapalfi.exceptional.ui.main.MainActivity;
 import com.facebook.Profile;
 import com.facebook.login.LoginResult;
@@ -60,6 +58,7 @@ public class FacebookLoginFragment extends Fragment implements FacebookLoginSucc
     @Override
     public void onLoginSuccess( LoginResult loginResult ) {
         Intent intent = new Intent( getActivity(), MainActivity.class );
+        intent.setFlags( Intent.FLAG_ACTIVITY_CLEAR_TOP );
         startActivity( intent );
     }
 

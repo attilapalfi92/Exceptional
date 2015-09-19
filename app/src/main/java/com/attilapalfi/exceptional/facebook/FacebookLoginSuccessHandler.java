@@ -1,4 +1,4 @@
-package com.attilapalfi.exceptional.services.facebook;
+package com.attilapalfi.exceptional.facebook;
 
 import com.facebook.login.LoginResult;
 

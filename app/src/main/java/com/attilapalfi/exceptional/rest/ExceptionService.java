@@ -1,4 +1,4 @@
-package com.attilapalfi.exceptional.services.rest;
+package com.attilapalfi.exceptional.rest;
 
 import javax.inject.Inject;
 
@@ -9,14 +9,14 @@ import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.interfaces.ExceptionRefreshListener;
 import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.model.Friend;
-import com.attilapalfi.exceptional.services.ExceptionFactory;
-import com.attilapalfi.exceptional.services.persistent_stores.ExceptionInstanceManager;
-import com.attilapalfi.exceptional.services.persistent_stores.FriendStore;
-import com.attilapalfi.exceptional.services.persistent_stores.MetadataStore;
-import com.attilapalfi.exceptional.services.rest.messages.BaseExceptionRequest;
-import com.attilapalfi.exceptional.services.rest.messages.ExceptionInstanceWrapper;
-import com.attilapalfi.exceptional.services.rest.messages.ExceptionRefreshResponse;
-import com.attilapalfi.exceptional.services.rest.messages.ExceptionSentResponse;
+import com.attilapalfi.exceptional.model.ExceptionFactory;
+import com.attilapalfi.exceptional.persistence.ExceptionInstanceManager;
+import com.attilapalfi.exceptional.persistence.FriendStore;
+import com.attilapalfi.exceptional.persistence.MetadataStore;
+import com.attilapalfi.exceptional.rest.messages.BaseExceptionRequest;
+import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper;
+import com.attilapalfi.exceptional.rest.messages.ExceptionRefreshResponse;
+import com.attilapalfi.exceptional.rest.messages.ExceptionSentResponse;
 import java8.util.stream.Collectors;
 import retrofit.Callback;
 import retrofit.RetrofitError;
