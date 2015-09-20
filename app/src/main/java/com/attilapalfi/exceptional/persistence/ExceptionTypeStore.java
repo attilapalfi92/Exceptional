@@ -100,10 +100,6 @@ public class ExceptionTypeStore {
         return exceptionTypeStore.keySet();
     }
 
-    public boolean isInitialized( ) {
-        return exceptionTypeStore != null;
-    }
-
     public List<ExceptionType> getExceptionTypeListByName( String typeName ) {
         if ( exceptionTypeStore.containsKey( typeName ) ) {
             return new ArrayList<>( exceptionTypeStore.get( typeName ) );

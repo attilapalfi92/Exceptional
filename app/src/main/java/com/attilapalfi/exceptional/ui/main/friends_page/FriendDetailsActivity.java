@@ -16,19 +16,14 @@ import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Friend;
 import com.attilapalfi.exceptional.persistence.FriendStore;
 import com.attilapalfi.exceptional.persistence.ImageCache;
+import com.attilapalfi.exceptional.services.LocationProvider;
 import com.attilapalfi.exceptional.ui.main.Constants;
 import com.attilapalfi.exceptional.ui.main.friends_page.exception_throwing.ExceptionTypeChooserActivity;
 
 public class FriendDetailsActivity extends AppCompatActivity {
     private Friend friend;
-    @Inject
-    FriendStore friendStore;
+    @Inject FriendStore friendStore;
     @Inject ImageCache imageCache;
-
-    @Override
-    protected void onResume( ) {
-        super.onResume();
-    }
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {

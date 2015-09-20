@@ -78,4 +78,8 @@
     <string name="no_exception_types_found">No exception types found.</string>
     <string name="failed_to_connect_to_gcm_servers">"Failed to connect to GCM servers: "</string>
     <string name="cant_get_location_pls_enable">Can\'t get device\'s location.\nPlease enable location services.</string>
+    <string name="enable_location_services_to_throw">Enable location services and restart the application, to throw exceptions.</string>
+    <string name="locaton_service_enabled_but_location_was_null">Location services is enabled, but location was null.</string>
+    <string name="prefix_cant_start_with_dot_error">Prefix can\'t start with \'.\' character.</string>
+    <string name="short_name_cant_start_dot_error">Short name can\'t start with \'.\' character.</string>
 </resources>

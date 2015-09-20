@@ -5,6 +5,7 @@ import javax.inject.Inject;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.StringRes;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -30,23 +31,30 @@ public class MainActivity extends AppCompatActivity {
     private String submitPrefix = "";
     private String submitShortName = "";
     private String submitDescription = "";
-    @Inject VotingService votingService;
-    @Inject MetadataStore metadataStore;
+    @Inject
+    VotingService votingService;
+    @Inject
+    MetadataStore metadataStore;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_main );
         Injector.INSTANCE.getApplicationComponent().inject( this );
-
         setTitle( "Your profile" );
+        initViewPager();
+        setStartPageForViewPager();
+    }
 
+    private void initViewPager( ) {
         adapter = new MainPagerAdapter( getSupportFragmentManager(), this );
         viewPager = (ViewPager) findViewById( R.id.main_pager );
         viewPager.setAdapter( adapter );
         viewPager.addOnPageChangeListener( adapter );
         viewPager.setPageTransformer( true, new ZoomOutPageTransformer() );
+    }
 
+    private void setStartPageForViewPager( ) {
         Bundle bundle = getIntent().getExtras();
         if ( bundle != null ) {
             int startPage = bundle.getInt( "startPage" );
@@ -56,18 +64,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-    // TODO: Check for Google Play Services APK
     @Override
     protected void onResume( ) {
         super.onResume();
-
         if ( !metadataStore.isLoggedIn() ) {
             Intent intent = new Intent( this, LoginActivity.class );
             startActivity( intent );
         }
     }
-
 
     @Override
     protected void onDestroy( ) {
@@ -77,7 +81,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu( Menu menu ) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate( R.menu.main_activity2, menu );
         return true;
     }
@@ -119,7 +122,6 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onPositive( MaterialDialog dialog ) {
                             getSubmitStrings( dialog.getCustomView() );
-
                             if ( prefixIsValid() && shortNameIsValid() && descriptionIsValid() ) {
                                 votingService.submitType( new ExceptionType(
                                         0,
@@ -145,35 +147,44 @@ public class MainActivity extends AppCompatActivity {
 
     private void getSubmitStrings( View submitView ) {
         submitPrefix = ( (EditText) submitView.findViewById( R.id.submit_prefix_input ) )
-                .getText().toString().trim();
+                .getText().toString().trim().replaceAll( "\\s", "" );
         submitShortName = ( (EditText) submitView.findViewById( R.id.submit_shortname_input ) )
-                .getText().toString().trim();
+                .getText().toString().trim().replaceAll( "\\s", "" );
         submitDescription = ( (EditText) submitView.findViewById( R.id.submit_description_input ) )
                 .getText().toString().trim();
     }
 
     private boolean prefixIsValid( ) {
+        if ( submitPrefix.startsWith( "." ) ) {
+            showValidationToast( R.string.prefix_cant_start_with_dot_error );
+            return false;
+        }
         if ( !submitPrefix.endsWith( "." ) ) {
-            Toast.makeText( getApplicationContext(), R.string.prefix_end_with_dot_error, Toast.LENGTH_SHORT ).show();
+            showValidationToast( R.string.prefix_end_with_dot_error );
             return false;
         }
         if ( submitPrefix.length() < 6 ) {
-            Toast.makeText( getApplicationContext(), R.string.prefix_too_short_error, Toast.LENGTH_SHORT ).show();
+            showValidationToast( R.string.prefix_too_short_error );
             return false;
         }
         if ( submitPrefix.length() > 500 ) {
-            Toast.makeText( getApplicationContext(), R.string.prefix_too_long_error, Toast.LENGTH_SHORT ).show();
+            showValidationToast( R.string.prefix_too_long_error );
+            return false;
         }
         return true;
     }
 
     private boolean shortNameIsValid( ) {
+        if ( submitShortName.startsWith( "." ) ) {
+            showValidationToast( R.string.short_name_cant_start_dot_error );
+            return false;
+        }
         if ( submitShortName.length() < 6 ) {
-            Toast.makeText( getApplicationContext(), R.string.short_name_too_short_error, Toast.LENGTH_SHORT ).show();
+            showValidationToast( R.string.short_name_too_short_error );
             return false;
         }
         if ( submitShortName.length() > 200 ) {
-            Toast.makeText( getApplicationContext(), R.string.short_name_too_long_error, Toast.LENGTH_SHORT ).show();
+            showValidationToast( R.string.short_name_too_long_error );
             return false;
         }
         return true;
@@ -181,13 +192,17 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean descriptionIsValid( ) {
         if ( submitDescription.length() < 12 ) {
-            Toast.makeText( getApplicationContext(), R.string.description_too_short_error, Toast.LENGTH_SHORT ).show();
+            showValidationToast( R.string.description_too_short_error );
             return false;
         }
         if ( submitDescription.length() > 3000 ) {
-            Toast.makeText( getApplicationContext(), R.string.description_too_long_error, Toast.LENGTH_SHORT ).show();
+            showValidationToast( R.string.description_too_long_error );
             return false;
         }
         return true;
+    }
+
+    private void showValidationToast( @StringRes int resId ) {
+        Toast.makeText( getApplicationContext(), resId, Toast.LENGTH_SHORT ).show();
     }
 }

@@ -6,7 +6,7 @@ import android.content.Context;
 import com.attilapalfi.exceptional.ExceptionalApplication;
 import com.attilapalfi.exceptional.model.ExceptionFactory;
 import com.attilapalfi.exceptional.persistence.*;
-import com.attilapalfi.exceptional.services.GpsService;
+import com.attilapalfi.exceptional.services.LocationProvider;
 import com.attilapalfi.exceptional.facebook.FacebookManager;
 import com.attilapalfi.exceptional.rest.AppStartService;
 import com.attilapalfi.exceptional.rest.ExceptionService;
@@ -42,8 +42,8 @@ public class AppContextModule {
 
     @Provides
     @Singleton
-    public GpsService gpsService( ) {
-        return new GpsService();
+    public LocationProvider gpsService( ) {
+        return new LocationProvider();
     }
 
     @Provides

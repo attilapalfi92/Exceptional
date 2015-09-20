@@ -35,11 +35,9 @@ public class GcmMessageHandler extends IntentService {
     private Handler handler;
     private Exception exception;
     private static int notificationIdCounter = 0;
+    @Inject ExceptionInstanceStore exceptionInstanceStore;
     @Inject
-    ExceptionInstanceStore exceptionInstanceStore;
-    @Inject
-    ExceptionTypeStore exceptionTypeStore;
-    @Inject FriendStore friendStore;
+    ExceptionTypeStore exceptionTypeStore;@Inject FriendStore friendStore;
     @Inject MetadataStore metadataStore;
 
     public GcmMessageHandler( ) {

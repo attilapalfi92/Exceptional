@@ -6,7 +6,7 @@ import com.attilapalfi.exceptional.ExceptionalApplication;
 import com.attilapalfi.exceptional.model.ExceptionFactory;
 import com.attilapalfi.exceptional.persistence.*;
 import com.attilapalfi.exceptional.services.GcmMessageHandler;
-import com.attilapalfi.exceptional.services.GpsService;
+import com.attilapalfi.exceptional.services.LocationProvider;
 import com.attilapalfi.exceptional.facebook.FacebookManager;
 import com.attilapalfi.exceptional.rest.AppStartService;
 import com.attilapalfi.exceptional.rest.ExceptionService;
@@ -35,7 +35,7 @@ import dagger.Component;
 @Singleton
 @Component( modules = AppContextModule.class )
 public interface ApplicationComponent extends AppContextComponent {
-    void inject( GpsService gpsService );
+    void inject( LocationProvider locationProvider );
     void inject( ExceptionTypeAdapter exceptionTypeAdapter );
     void inject( ExceptionService exceptionService );
     void inject( ExceptionalApplication exceptionalApplication );

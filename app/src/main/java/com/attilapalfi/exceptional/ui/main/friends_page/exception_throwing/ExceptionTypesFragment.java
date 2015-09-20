@@ -19,17 +19,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.model.ExceptionType;
 import com.attilapalfi.exceptional.model.ExceptionFactory;
 import com.attilapalfi.exceptional.persistence.ExceptionTypeStore;
-import com.attilapalfi.exceptional.services.GpsService;
+import com.attilapalfi.exceptional.services.LocationProvider;
 import com.attilapalfi.exceptional.persistence.FriendStore;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
 import com.attilapalfi.exceptional.rest.ExceptionService;
+import com.attilapalfi.exceptional.services.LocationException;
 import com.attilapalfi.exceptional.ui.main.Constants;
 import com.attilapalfi.exceptional.ui.main.MainActivity;
 
@@ -85,7 +85,8 @@ public class ExceptionTypesFragment extends Fragment {
         private RecyclerView recyclerView;
         private Activity activity;
         private List<ExceptionType> values;
-        @Inject GpsService gpsService;
+        @Inject
+        LocationProvider locationProvider;
         @Inject ExceptionFactory exceptionFactory;
         @Inject ExceptionService exceptionService;
         @Inject FriendStore friendStore;
@@ -94,26 +95,31 @@ public class ExceptionTypesFragment extends Fragment {
         private final View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
             public void onClick( View view ) {
-                if ( gpsService.canGetLocation() ) {
-                    Exception exception = createException( view );
+                try {
+                    Location location = locationProvider.getLocation();
+                    Exception exception = createException( view, location );
                     exceptionService.throwException( exception );
-                    navigateToMainPage();
-                } else {
-                    Toast.makeText( activity.getApplicationContext(), R.string.can_throw_location_pls,
-                            Toast.LENGTH_LONG ).show();
+                } catch ( LocationException e ) {
+                    e.printStackTrace();
                 }
+                navigateToMainPage();
             }
 
-            private Exception createException( View view ) {
+            private Exception createException( View view, Location location ) {
                 int itemPosition = recyclerView.getChildPosition( view );
+                Exception exception = createException( itemPosition );
+                exception.setLatitude( location.getLatitude() );
+                exception.setLongitude( location.getLongitude() );
+                return exception;
+            }
+
+            private Exception createException( int itemPosition ) {
                 ExceptionType exceptionType = values.get( itemPosition );
                 BigInteger friendId = new BigInteger( activity.getIntent().getStringExtra( Constants.FRIEND_ID ) );
-                Exception exception = exceptionFactory.createExceptionWithType(
+                return exceptionFactory.createExceptionWithType(
                         exceptionType,
                         metadataStore.getUser().getId(),
                         friendId );
-                setLocationForException( exception );
-                return exception;
             }
 
             private void navigateToMainPage( ) {
@@ -121,12 +127,6 @@ public class ExceptionTypesFragment extends Fragment {
                 intent.setFlags( Intent.FLAG_ACTIVITY_CLEAR_TOP );
                 activity.startActivity( intent );
                 activity.finish();
-            }
-
-            private void setLocationForException( Exception exception ) {
-                Location location = gpsService.getLocation();
-                exception.setLatitude( location.getLatitude() );
-                exception.setLongitude( location.getLongitude() );
             }
         };
 
