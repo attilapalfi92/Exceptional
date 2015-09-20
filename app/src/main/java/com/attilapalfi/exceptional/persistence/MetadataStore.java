@@ -24,7 +24,6 @@ import static java8.util.stream.StreamSupport.stream;
  */
 public class MetadataStore {
     private static final String METADATA_DATABASE = "METADATA_DATABASE";
-    private static final String POINTS = "points";
     private static final String EXCEPTION_VERSION = "exceptionVersion";
     private static final String LOGGED_IN = "loggedIn";
     private static final String FIRST_START_FINISHED = "firstStartFinished";
@@ -36,13 +35,12 @@ public class MetadataStore {
     @Inject ImageCache imageCache;
     private Book database;
     private Handler handler;
-    private int points = 100;
     private int exceptionVersion = 0;
     private boolean loggedIn = false;
     private boolean firstStartFinished = false;
     private boolean votedThisWeek = true;
     private boolean submittedThisWeek = true;
-    private Friend user;
+    private Friend user = EMPTY_USER;
     private Set<FirstStartFinishedListener> firstStartFinishedListeners = new HashSet<>();
     private Set<PointChangeListener> pointChangeListeners = new HashSet<>();
 
@@ -54,7 +52,6 @@ public class MetadataStore {
     }
 
     private void initMetadata( ) {
-        points = database.read( POINTS, points );
         exceptionVersion = database.read( EXCEPTION_VERSION, exceptionVersion );
         loggedIn = database.read( LOGGED_IN, loggedIn );
         firstStartFinished = database.read( FIRST_START_FINISHED, firstStartFinished );
@@ -64,9 +61,9 @@ public class MetadataStore {
     }
 
     public void setPoints( int points ) {
-        if ( this.points != points ) {
-            this.points = points;
-            database.write( POINTS, points );
+        if ( user.getPoints() != points ) {
+            user.setPoints( points );;
+            database.write( USER, user );
             if ( Looper.myLooper() == Looper.getMainLooper() ) {
                 stream( pointChangeListeners ).forEach( PointChangeListener::onPointsChanged );
             } else {
@@ -77,7 +74,7 @@ public class MetadataStore {
     }
 
     public int getPoints( ) {
-        return points;
+        return user.getPoints();
     }
 
     public void setExceptionVersion( int exceptionVersion ) {
@@ -147,7 +144,7 @@ public class MetadataStore {
         return user;
     }
 
-    public void saveUser( Friend user ) {
+    private void saveUser( Friend user ) {
         this.user = user;
         database.write( USER, user );
     }
@@ -165,19 +162,20 @@ public class MetadataStore {
     }
 
     private void lookForChange( Friend newUserState ) {
-        if ( newUserState.equals( user ) ) {
-            if ( !newUserState.getImageUrl().equals( user.getImageUrl() ) ) {
-                saveUser( newUserState );
-                imageCache.updateImageAsync( newUserState, user );
-            }
-            if ( !newUserState.getName().equals( user.getName() ) ) {
-                saveUser( newUserState );
-            }
+        boolean changed = false;
+        if ( !newUserState.getImageUrl().equals( user.getImageUrl() ) ) {
+            changed = true;
+            imageCache.updateImageAsync( newUserState, user );
+        }
+        if ( !newUserState.getName().equals( user.getName() ) ) {
+            changed = true;
+        }
+        if ( changed ) {
+            saveUser( newUserState );
         }
     }
 
     public void wipe( ) {
-        points = 100;
         exceptionVersion = 0;
         loggedIn = false;
         firstStartFinished = false;

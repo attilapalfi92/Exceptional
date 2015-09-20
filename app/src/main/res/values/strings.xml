@@ -19,7 +19,7 @@
     <string name="exception_preferences">com.attilapalfi.exceptional.exception.ExceptionPreferences</string>
     <string name="friends_preferences">com.attilapalfi.exceptional.exception.FriendsPreferences</string>
     <string name="new_exception_text">You got a new Exception!</string>
-    
+
     <string name="project_number">947608408958</string>
     <string name="backend_address">http://188.36.23.85:8090</string>
 
@@ -69,10 +69,13 @@
     <string name="description_too_long_error">Description is too long.</string>
     <string name="failed_to_submit">Lel, I failed to submit, sry</string>
     <string name="exceptions_syncd">Exceptions are synchronized!</string>
-    <string name="failed_to_sync">Failed to synchronize exceptions.\n</string>
+    <string name="failed_to_sync">Failed to synchronize exceptions.\nFuck, I\'m not very good at this.</string>
     <string name="failed_to_connect">Failed to connect to the server. Sry man.\n</string>
     <string name="successfully_thrown">successfully thrown to</string>
     <string name="failed_to_throw_1">Maaan I\'m really sorry, but I wasn\'t able to throw your shit.\n</string>
     <string name="failed_to_throw_2">Lol, your exception didn\'t fly to far away...\n</string>
     <string name="failed_to_connect_3">I did not connect to the server\n\n...for reasons.\n</string>
+    <string name="no_exception_types_found">No exception types found.</string>
+    <string name="failed_to_connect_to_gcm_servers">"Failed to connect to GCM servers: "</string>
+    <string name="cant_get_location_pls_enable">Can\'t get device\'s location.\nPlease enable location services.</string>
 </resources>

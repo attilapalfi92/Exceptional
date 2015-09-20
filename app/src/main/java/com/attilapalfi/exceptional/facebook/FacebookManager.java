@@ -27,12 +27,9 @@ import com.facebook.login.LoginResult;
  */
 public class FacebookManager {
     @Inject AppStartService appStartService;
-    @Inject
-    ExceptionInstanceStore exceptionInstanceStore;
-    @Inject
-    ExceptionTypeStore exceptionTypeStore;
-    @Inject
-    FriendStore friendStore;
+    @Inject ExceptionInstanceStore exceptionInstanceStore;
+    @Inject ExceptionTypeStore exceptionTypeStore;
+    @Inject FriendStore friendStore;
     @Inject ImageCache imageCache;
     @Inject MetadataStore metadataStore;
     private AccessToken accessToken;
@@ -133,6 +130,13 @@ public class FacebookManager {
         executeGraphRequest( request );
     }
 
+    private void executeGraphRequest( GraphRequest request ) {
+        Bundle parameters = new Bundle();
+        parameters.putString( "fields", "id,name,picture" );
+        request.setParameters( parameters );
+        request.executeAsync();
+    }
+
     @NonNull
     private List<Friend> parseFriendsJson( JSONArray jsonArray ) {
         Log.d( "response length: ", Integer.toString( jsonArray.length() ) );
@@ -151,31 +155,14 @@ public class FacebookManager {
     private void continueAppStart( List<Friend> friends ) {
         if ( metadataStore.isLoggedIn() ) {
             initYourself();
+            metadataStore.updateUser( user );
+            friendStore.updateFriendList( friends );
             if ( !metadataStore.isFirstStartFinished() ) {
-                saveData( friends, user );
                 appStartService.onFirstAppStart( friends, user.getId() );
             } else {
-                updateData( friends, user );
                 appStartService.onRegularAppStart( friends, user.getId() );
             }
         }
-    }
-
-    private void saveData( List<Friend> friends, Friend user ) {
-        friendStore.saveFriendList( friends );
-        metadataStore.saveUser( user );
-    }
-
-    private void updateData( List<Friend> friends, Friend user ) {
-        friendStore.updateFriendList( friends );
-        metadataStore.updateUser( user );
-    }
-
-    private void executeGraphRequest( GraphRequest request ) {
-        Bundle parameters = new Bundle();
-        parameters.putString( "fields", "id,name,picture" );
-        request.setParameters( parameters );
-        request.executeAsync();
     }
 
     private void initYourself( ) {

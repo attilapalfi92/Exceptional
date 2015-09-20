@@ -29,11 +29,9 @@ import static java8.util.stream.StreamSupport.stream;
  */
 public class ExceptionService {
     @Inject Context context;
-    @Inject
-    ExceptionInstanceStore exceptionInstanceStore;
+    @Inject ExceptionInstanceStore exceptionInstanceStore;
     @Inject ExceptionFactory exceptionFactory;
-    @Inject
-    FriendStore friendStore;
+    @Inject FriendStore friendStore;
     @Inject MetadataStore metadataStore;
     @Inject RestInterfaceFactory restInterfaceFactory;
     private ExceptionRestInterface exceptionRestInterface;
@@ -62,12 +60,12 @@ public class ExceptionService {
                 @Override
                 public void failure( RetrofitError error ) {
                     Toast.makeText( context, context.getString( R.string.failed_to_throw_1 ) + error.getMessage(),
-                            Toast.LENGTH_SHORT ).show();
+                            Toast.LENGTH_LONG ).show();
                 }
             } );
 
         } catch ( java.lang.Exception e ) {
-            Toast.makeText( context, context.getString( R.string.failed_to_throw_2 ) + e.getMessage(), Toast.LENGTH_SHORT ).show();
+            Toast.makeText( context, context.getString( R.string.failed_to_throw_2 ) + e.getMessage(), Toast.LENGTH_LONG ).show();
         }
     }
 

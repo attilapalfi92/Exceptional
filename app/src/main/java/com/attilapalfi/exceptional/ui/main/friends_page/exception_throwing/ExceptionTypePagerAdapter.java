@@ -19,8 +19,7 @@ import com.attilapalfi.exceptional.persistence.ExceptionTypeStore;
 public class ExceptionTypePagerAdapter extends FragmentPagerAdapter implements ViewPager.OnPageChangeListener {
     private List<String> exceptionTypes = new ArrayList<>();
     private Activity activity;
-    @Inject
-    ExceptionTypeStore exceptionTypeStore;
+    @Inject ExceptionTypeStore exceptionTypeStore;
 
     public ExceptionTypePagerAdapter( FragmentManager fragmentManager, Activity activity ) {
         super( fragmentManager );

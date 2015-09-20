@@ -22,10 +22,8 @@ public class ExceptionTypeChooserActivity extends AppCompatActivity {
     private ExceptionTypePagerAdapter pagerAdapter;
     private ViewPager viewPager;
     private static Friend friend;
-    @Inject
-    ExceptionTypeStore exceptionTypeStore;
-    @Inject
-    FriendStore friendStore;
+    @Inject ExceptionTypeStore exceptionTypeStore;
+    @Inject FriendStore friendStore;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
@@ -56,7 +54,11 @@ public class ExceptionTypeChooserActivity extends AppCompatActivity {
 
     private void setTitle( ) {
         List<String> exceptionTypeList = new ArrayList<>( exceptionTypeStore.getExceptionTypes() );
-        setTitle( exceptionTypeList.get( 0 ) );
+        if ( exceptionTypeList.isEmpty() ) {
+            setTitle( getString( R.string.no_exception_types_found) );
+        } else {
+            setTitle( exceptionTypeList.get( 0 ) );
+        }
     }
 
     private void initFriend( ) {

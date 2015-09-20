@@ -8,8 +8,6 @@ import com.google.gson.Gson;
  * Created by Attila on 2015-06-14.
  */
 public class ExceptionType {
-    private static Gson gson = new Gson();
-
     private int id;
     private int version;
     private int voteCount;
@@ -26,30 +24,12 @@ public class ExceptionType {
         }
     }
 
-    public static class IdComparator implements Comparator<ExceptionType> {
-        @Override
-        public int compare( ExceptionType lhs, ExceptionType rhs ) {
-            return lhs.getId() < rhs.getId() ? -1 :
-                    ( lhs.getId() == rhs.getId() ? 0 : 1 );
-        }
-
-    }
-
     public static class ShortNameComparator implements Comparator<ExceptionType> {
         @Override
         public int compare( ExceptionType lhs, ExceptionType rhs ) {
             return lhs.getShortName().compareTo( rhs.getShortName() );
         }
 
-    }
-
-    @Override
-    public String toString( ) {
-        return gson.toJson( this );
-    }
-
-    public static ExceptionType fromString( String json ) {
-        return gson.fromJson( json, ExceptionType.class );
     }
 
     public ExceptionType( ) {

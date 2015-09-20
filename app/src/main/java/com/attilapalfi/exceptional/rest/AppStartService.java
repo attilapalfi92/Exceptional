@@ -33,8 +33,7 @@ import static java8.util.stream.StreamSupport.stream;
 public class AppStartService {
     @Inject Context context;
     @Inject ExceptionInstanceStore exceptionInstanceStore;
-    @Inject
-    ExceptionTypeStore exceptionTypeStore;
+    @Inject ExceptionTypeStore exceptionTypeStore;
     @Inject FriendStore friendStore;
     @Inject MetadataStore metadataStore;
     @Inject RestInterfaceFactory restInterfaceFactory;
@@ -74,7 +73,7 @@ public class AppStartService {
                 @Override
                 public void failure( RetrofitError error ) {
                     Toast.makeText( context, context.getString( R.string.failed_to_connect ) + error.getMessage(),
-                            Toast.LENGTH_SHORT ).show();
+                            Toast.LENGTH_LONG ).show();
                 }
             } );
 
@@ -96,15 +95,13 @@ public class AppStartService {
         new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground( Void... params ) {
-                String message;
                 googleCloudMessaging = GoogleCloudMessaging.getInstance( context );
                 try {
                     registrationId = googleCloudMessaging.register( projectNumber );
-                    message = "Device registered, ID: " + registrationId;
+                    return null;
                 } catch ( IOException e ) {
-                    message = "Error: " + e.getMessage();
+                    return "Error: " + e.getMessage();
                 }
-                return message;
             }
 
             @Override
@@ -113,7 +110,10 @@ public class AppStartService {
                     requestBody.setGcmId( registrationId );
                     backendFirstAppStart();
                 }
-                Toast.makeText( context, message, Toast.LENGTH_SHORT ).show();
+                if ( message != null ) {
+                    Toast.makeText( context, context.getString( R.string.failed_to_connect_to_gcm_servers)
+                            + message, Toast.LENGTH_LONG ).show();
+                }
             }
 
         }.execute();
@@ -131,7 +131,7 @@ public class AppStartService {
                 @Override
                 public void failure( RetrofitError error ) {
                     Toast.makeText( context, context.getString( R.string.failed_to_connect_3 ) + error.getMessage(),
-                            Toast.LENGTH_SHORT ).show();
+                            Toast.LENGTH_LONG ).show();
                 }
             } );
         } catch ( java.lang.Exception e ) {

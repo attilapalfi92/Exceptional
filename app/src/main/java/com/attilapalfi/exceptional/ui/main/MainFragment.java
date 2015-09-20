@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
+import com.attilapalfi.exceptional.facebook.FacebookManager;
 import com.attilapalfi.exceptional.interfaces.FirstStartFinishedListener;
 import com.attilapalfi.exceptional.interfaces.PointChangeListener;
 import com.attilapalfi.exceptional.persistence.FriendStore;
@@ -22,10 +23,10 @@ import com.attilapalfi.exceptional.persistence.MetadataStore;
  */
 public class MainFragment extends Fragment implements FirstStartFinishedListener, PointChangeListener {
     private View view;
-    @Inject
-    FriendStore friendStore;
+    @Inject FriendStore friendStore;
     @Inject ImageCache imageCache;
     @Inject MetadataStore metadataStore;
+    @Inject FacebookManager facebookManager;
 
     @Override
     public void onCreate( @Nullable Bundle savedInstanceState ) {
@@ -46,9 +47,7 @@ public class MainFragment extends Fragment implements FirstStartFinishedListener
     @Override
     public void onResume( ) {
         super.onResume();
-        if ( metadataStore.isFirstStartFinished() ) {
-            setViews();
-        }
+        setViews();
     }
 
     @Override

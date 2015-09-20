@@ -53,30 +53,6 @@ public class FriendStore {
         new AsyncFriendOrganizer().execute();
     }
 
-    public void saveFriendList( List<Friend> friendList ) {
-        storedFriends.addAll( friendList );
-        imageCache.loadImagesInitially( friendList );
-        new AsyncTask<Void, Void, Void>() {
-
-            @Override
-            protected Void doInBackground( Void... params ) {
-                stream( friendList ).forEach( friend -> {
-                    idList.add( friend.getId() );
-                    database.write( friend.getId().toString(), friend );
-                } );
-                database.write( FRIEND_IDS, idList );
-                Collections.sort( storedFriends );
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute( Void aVoid ) {
-                notifyChangeListeners();
-            }
-
-        }.execute();
-    }
-
     public void updateFriendList( List<Friend> friendList ) {
         saveNewFriends( friendList );
         updateOldFriends( friendList );
@@ -107,24 +83,6 @@ public class FriendStore {
         handler.post( this::notifyChangeListeners );
     }
 
-    public void updatePointsOfFriendsAsync( Map<BigInteger, Integer> points ) {
-        new AsyncTask<Void, Void, Void>() {
-
-            @Override
-            protected Void doInBackground( Void... params ) {
-                stream( points.keySet() ).forEach( id -> updatePointsById( id, points.get( id ) ) );
-                Collections.sort( storedFriends );
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute( Void aVoid ) {
-                notifyChangeListeners();
-            }
-
-        }.execute();
-    }
-
     private void updatePointsById( BigInteger id, int point ) {
         Friend friend = findFriendById( id );
         if ( point != friend.getPoints() ) {
@@ -142,57 +100,25 @@ public class FriendStore {
         return new Friend( new BigInteger( "0" ), "", "", "" );
     }
 
-    public void wipe( ) {
-        storedFriends.clear();
-        idList.clear();
-        database.destroy();
-        notifyChangeListeners();
-    }
-
     private void saveNewFriends( List<Friend> friendList ) {
         List<Friend> workList = new ArrayList<>( friendList );
         workList.removeAll( storedFriends );
         saveFriendList( workList );
     }
 
-    private void updateOldFriends( List<Friend> friendList ) {
-        List<Friend> knownCurrentFriends = new ArrayList<>( friendList.size() );
-        knownCurrentFriends.addAll( friendList );
-        for ( Friend f1 : knownCurrentFriends ) {
-            for ( Friend f2 : storedFriends ) {
-                checkFriendChange( f1, f2 );
-            }
-        }
-    }
-
-    private void removeDeletedFriends( List<Friend> friendList ) {
-        List<Friend> deletedFriends = new ArrayList<>();
-        deletedFriends.addAll( storedFriends );
-        deletedFriends.removeAll( friendList );
-        deleteFriends( deletedFriends );
-    }
-
-    private void checkFriendChange( Friend newFriendState, Friend oldFriendState ) {
-        if ( newFriendState.equals( oldFriendState ) ) {
-            if ( !newFriendState.getImageUrl().equals( oldFriendState.getImageUrl() ) ) {
-                updateFriend( newFriendState, oldFriendState );
-                imageCache.updateImageAsync( newFriendState, oldFriendState );
-            }
-            if ( !newFriendState.getName().equals( oldFriendState.getName() ) ) {
-                updateFriend( newFriendState, oldFriendState );
-            }
-        }
-    }
-
-    private void updateFriend( Friend newState, Friend oldInstance ) {
+    private void saveFriendList( List<Friend> friendList ) {
+        storedFriends.addAll( friendList );
+        imageCache.loadImagesInitially( friendList );
         new AsyncTask<Void, Void, Void>() {
 
             @Override
             protected Void doInBackground( Void... params ) {
-                oldInstance.setFirstName( newState.getFirstName() );
-                oldInstance.setLastName( newState.getLastName() );
-                oldInstance.setImageUrl( newState.getImageUrl() );
-                database.write( oldInstance.getId().toString(), oldInstance );
+                stream( friendList ).forEach( friend -> {
+                    idList.add( friend.getId() );
+                    database.write( friend.getId().toString(), friend );
+                } );
+                database.write( FRIEND_IDS, idList );
+                Collections.sort( storedFriends );
                 return null;
             }
 
@@ -202,7 +128,54 @@ public class FriendStore {
             }
 
         }.execute();
+    }
 
+    private void updateOldFriends( List<Friend> friendList ) {
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground( Void... params ) {
+                List<Friend> knownCurrentFriends = new ArrayList<>( friendList.size() );
+                knownCurrentFriends.addAll( friendList );
+                for ( Friend f1 : knownCurrentFriends ) {
+                    for ( Friend f2 : storedFriends ) {
+                        checkFriendChange( f1, f2 );
+                    }
+                }
+                return null;
+            }
+
+            private void checkFriendChange( Friend newFriendState, Friend oldFriendState ) {
+                if ( newFriendState.equals( oldFriendState ) ) {
+                    if ( !newFriendState.getImageUrl().equals( oldFriendState.getImageUrl() ) ) {
+                        updateFriend( newFriendState, oldFriendState );
+                        imageCache.updateImageAsync( newFriendState, oldFriendState );
+                    }
+                    if ( !newFriendState.getName().equals( oldFriendState.getName() ) ) {
+                        updateFriend( newFriendState, oldFriendState );
+                    }
+                }
+            }
+
+            private void updateFriend( Friend newState, Friend oldInstance ) {
+                oldInstance.setFirstName( newState.getFirstName() );
+                oldInstance.setLastName( newState.getLastName() );
+                oldInstance.setImageUrl( newState.getImageUrl() );
+                database.write( oldInstance.getId().toString(), oldInstance );
+            }
+
+            @Override
+            protected void onPostExecute( Void aVoid ) {
+                notifyChangeListeners();
+            }
+        }.execute();
+    }
+
+    private void removeDeletedFriends( List<Friend> friendList ) {
+        List<Friend> deletedFriends = new ArrayList<>();
+        deletedFriends.addAll( storedFriends );
+        deletedFriends.removeAll( friendList );
+        deleteFriends( deletedFriends );
     }
 
     private void deleteFriends( List<Friend> toBeDeleted ) {
@@ -231,6 +204,31 @@ public class FriendStore {
         if ( Looper.myLooper() == Looper.getMainLooper() ) {
             stream( friendChangeListeners ).forEach( FriendChangeListener::onFriendsChanged );
         }
+    }
+
+    public void updatePointsOfFriendsAsync( Map<BigInteger, Integer> points ) {
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground( Void... params ) {
+                stream( points.keySet() ).forEach( id -> updatePointsById( id, points.get( id ) ) );
+                Collections.sort( storedFriends );
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute( Void aVoid ) {
+                notifyChangeListeners();
+            }
+
+        }.execute();
+    }
+
+    public void wipe( ) {
+        storedFriends.clear();
+        idList.clear();
+        database.destroy();
+        notifyChangeListeners();
     }
 
     private class AsyncFriendOrganizer extends AsyncTask<Void, Void, Void> {

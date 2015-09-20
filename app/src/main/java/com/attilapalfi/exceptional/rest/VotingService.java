@@ -24,10 +24,8 @@ import retrofit.client.Response;
 public class VotingService {
     @Inject Context context;
     @Inject MetadataStore metadataStore;
-    @Inject
-    FriendStore friendStore;
-    @Inject
-    ExceptionTypeStore exceptionTypeStore;
+    @Inject FriendStore friendStore;
+    @Inject ExceptionTypeStore exceptionTypeStore;
     @Inject RestInterfaceFactory restInterfaceFactory;
     private VotingRestInterface votingRestInterface;
 
@@ -49,7 +47,7 @@ public class VotingService {
 
             @Override
             public void failure( RetrofitError error ) {
-                Toast.makeText( context, R.string.failed_to_vote, Toast.LENGTH_SHORT ).show();
+                Toast.makeText( context, R.string.failed_to_vote, Toast.LENGTH_LONG ).show();
             }
         } );
     }
@@ -67,7 +65,7 @@ public class VotingService {
 
             @Override
             public void failure( RetrofitError error ) {
-                Toast.makeText( context, R.string.failed_to_submit, Toast.LENGTH_SHORT ).show();
+                Toast.makeText( context, R.string.failed_to_submit, Toast.LENGTH_LONG ).show();
             }
         } );
     }
