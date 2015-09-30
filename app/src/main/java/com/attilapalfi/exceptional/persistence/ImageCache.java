@@ -8,20 +8,22 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import javax.inject.Inject;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.util.LruCache;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Friend;
@@ -34,7 +36,7 @@ import static java8.util.stream.StreamSupport.stream;
 public class ImageCache {
     private LruCache<BigInteger, Bitmap> imageWarehouse;
     private String filePath;
-    private Set<Friend> currentlyLoading = Collections.synchronizedSet( new HashSet<>() );
+    private Map<Friend, ImageView> viewRefreshMap = Collections.synchronizedMap( new HashMap<>() );
     @Inject Context context;
 
     public ImageCache( ) {
@@ -65,18 +67,36 @@ public class ImageCache {
         if ( bitmap != null ) {
             view.setImageBitmap( bitmap );
         } else {
-            new AsyncImageLoader( friend, view ).execute();
+            if ( friend.isImageLoaded() ) {
+                new AsyncImageLoader( friend, view ).execute();
+            } else {
+                viewRefreshMap.put( friend, view );
+            }
         }
     }
 
     public void loadImagesInitially( List<Friend> friendList ) {
-        currentlyLoading.addAll( friendList );
-        new Thread( () -> {
-            stream( friendList ).forEach( friend -> {
-                getImageForFriend( friend );
-                currentlyLoading.remove( friend );
-            } );
-        }).start();
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground( Void... params ) {
+                stream( friendList ).forEach( ImageCache.this::getImageForFriend );
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute( Void aVoid ) {
+                stream( friendList ).forEach( friend -> {
+                    Bitmap bitmap = imageWarehouse.get( friend.getId() );
+                    ImageView view = viewRefreshMap.get( friend );
+                    if ( view != null ) {
+                        view.setImageBitmap( bitmap );
+                    }
+                    viewRefreshMap.remove( friend );
+                } );
+            }
+
+        }.execute();
     }
 
     public void updateImageAsync( Friend newFriendState, Friend oldFriendState ) {
@@ -106,14 +126,6 @@ public class ImageCache {
 
         @Override
         protected Bitmap doInBackground( Void... params ) {
-            while ( currentlyLoading.contains( friend ) ) {
-                try {
-                    Thread.sleep( 150 );
-                } catch ( InterruptedException e ) {
-                    e.printStackTrace();
-                }
-            }
-
             return getImageForFriend( friend );
         }
 

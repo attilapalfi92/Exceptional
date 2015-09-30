@@ -24,6 +24,7 @@ import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.model.ExceptionType;
 import com.attilapalfi.exceptional.model.ExceptionFactory;
+import com.attilapalfi.exceptional.model.Submitter;
 import com.attilapalfi.exceptional.persistence.ExceptionTypeStore;
 import com.attilapalfi.exceptional.services.LocationProvider;
 import com.attilapalfi.exceptional.persistence.FriendStore;
@@ -39,8 +40,7 @@ public class ExceptionTypesFragment extends Fragment {
     private List<ExceptionType> exceptionTypes;
     private RecyclerView recyclerView;
     private ExceptionTypeAdapter typeAdapter;
-    @Inject
-    ExceptionTypeStore exceptionTypeStore;
+    @Inject ExceptionTypeStore exceptionTypeStore;
 
     @Override
     public void onCreate( Bundle savedInstanceState ) {
@@ -85,8 +85,7 @@ public class ExceptionTypesFragment extends Fragment {
         private RecyclerView recyclerView;
         private Activity activity;
         private List<ExceptionType> values;
-        @Inject
-        LocationProvider locationProvider;
+        @Inject LocationProvider locationProvider;
         @Inject ExceptionFactory exceptionFactory;
         @Inject ExceptionService exceptionService;
         @Inject FriendStore friendStore;
@@ -182,7 +181,7 @@ public class ExceptionTypesFragment extends Fragment {
             }
 
             private void bindSubmitter( ExceptionType exceptionType ) {
-                ExceptionType.Submitter submitter = exceptionType.getSubmitter();
+                Submitter submitter = exceptionType.getSubmitter();
                 String submitterString = context.getResources().getString( R.string.submitter_text );
                 if ( submitter != null ) {
                     submitterString += submitter.getFirstName() + " " + submitter.getLastName();

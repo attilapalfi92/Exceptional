@@ -23,6 +23,7 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.interfaces.VotedTypeListener;
 import com.attilapalfi.exceptional.model.ExceptionType;
+import com.attilapalfi.exceptional.model.Submitter;
 import com.attilapalfi.exceptional.persistence.ExceptionTypeStore;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
 import com.attilapalfi.exceptional.rest.VotingService;
@@ -185,7 +186,7 @@ public class VotedExceptionsFragment extends Fragment implements VotedTypeListen
             }
 
             private void bindSubmitter( ExceptionType exceptionType ) {
-                ExceptionType.Submitter submitter = exceptionType.getSubmitter();
+                Submitter submitter = exceptionType.getSubmitter();
                 String submitterString = context.getResources().getString( R.string.submitter_text );
                 if ( submitter != null ) {
                     submitterString += submitter.getFirstName() + " " + submitter.getLastName();

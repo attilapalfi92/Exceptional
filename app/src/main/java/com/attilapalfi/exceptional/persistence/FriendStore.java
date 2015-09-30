@@ -115,6 +115,7 @@ public class FriendStore {
             protected Void doInBackground( Void... params ) {
                 stream( friendList ).forEach( friend -> {
                     idList.add( friend.getId() );
+                    friend.setImageLoaded( true );
                     database.write( friend.getId().toString(), friend );
                 } );
                 database.write( FRIEND_IDS, idList );

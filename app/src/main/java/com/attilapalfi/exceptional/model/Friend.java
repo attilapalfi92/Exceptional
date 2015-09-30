@@ -14,6 +14,7 @@ public class Friend implements Comparable<Friend> {
     private String lastName;
     private String imageUrl;
     private int points = 100;
+    private boolean imageLoaded = false;
 
     @Override
     public int compareTo( Friend another ) {
@@ -79,5 +80,13 @@ public class Friend implements Comparable<Friend> {
 
     public void setPoints( int points ) {
         this.points = points;
+    }
+
+    public boolean isImageLoaded( ) {
+        return imageLoaded;
+    }
+
+    public void setImageLoaded( boolean imageLoaded ) {
+        this.imageLoaded = imageLoaded;
     }
 }
