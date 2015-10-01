@@ -25,7 +25,7 @@ import com.attilapalfi.exceptional.persistence.ExceptionTypeStore;
 import com.attilapalfi.exceptional.persistence.FriendStore;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
 import com.attilapalfi.exceptional.ui.ShowNotificationActivity;
-import com.attilapalfi.exceptional.ui.main.MainActivity;
+import com.attilapalfi.exceptional.ui.main.main_page.MainActivity;
 
 
 /**

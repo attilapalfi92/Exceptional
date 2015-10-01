@@ -1,66 +1,92 @@
 <RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" 
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.attilapalfi.exceptional.ui.main.MainFragment"
-    android:id="@+id/main_fragment_view">
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.attilapalfi.exceptional.ui.main.MainFragment"
+        android:id="@+id/main_fragment_view">
 
     <!-- TODO: Update blank fragment layout -->
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/main_text"
-        android:id="@+id/mainText"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="1dp" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/main_text"
+            android:id="@+id/mainText"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="1dp"/>
 
     <ImageView
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:id="@+id/myMainImageView"
-        android:layout_below="@+id/mainText"
-        android:layout_marginStart="0dp"
-        android:layout_marginLeft="0dp"
-        android:layout_marginTop="5dp"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:id="@+id/myMainImageView"
+            android:layout_below="@+id/mainText"
+            android:layout_marginStart="0dp"
+            android:layout_marginLeft="0dp"
+            android:layout_marginTop="5dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"/>
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text=""
-        android:textSize="20sp"
-        android:id="@+id/mainNameTextView"
-        android:layout_alignTop="@+id/myMainImageView"
-        android:layout_marginStart="5dp"
-        android:layout_marginLeft="5dp"
-        android:layout_toRightOf="@+id/myMainImageView"
-        android:layout_toEndOf="@+id/myMainImageView" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text=""
+            android:textSize="20sp"
+            android:id="@+id/mainNameTextView"
+            android:layout_alignTop="@+id/myMainImageView"
+            android:layout_marginStart="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@+id/myMainImageView"
+            android:layout_toEndOf="@+id/myMainImageView"/>
 
     <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text=""
-        android:textSize="20sp"
-        android:id="@+id/mainPointTextView"
-        android:layout_below="@+id/mainNameTextView"
-        android:layout_alignLeft="@+id/mainNameTextView"
-        android:layout_alignStart="@+id/mainNameTextView" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text=""
+            android:textSize="20sp"
+            android:id="@+id/mainPointTextView"
+            android:layout_below="@+id/mainNameTextView"
+            android:layout_alignLeft="@+id/mainNameTextView"
+            android:layout_alignStart="@+id/mainNameTextView"/>
 
     <Button
-        android:layout_width="300dp"
-        android:layout_height="60dp"
-        android:onClick="exceptionHistoryClicked"
-        android:text="@string/fragment_main_exception_history"
-        android:id="@+id/exceptionHistory"
-        android:layout_below="@+id/myMainImageView"
-        android:layout_centerHorizontal="true" />
+            android:layout_width="300dp"
+            android:layout_height="60dp"
+            android:onClick="exceptionHistoryClicked"
+            android:text="@string/fragment_main_exception_history"
+            android:id="@+id/exceptionHistory"
+            android:layout_below="@+id/myMainImageView"
+            android:layout_centerHorizontal="true"/>
+
+    <Button
+            android:id="@+id/mapButton"
+            android:layout_width="300dp"
+            android:layout_height="60dp"
+            android:onClick="exceptionMapClicked"
+            android:text="@string/exception_map"
+            android:layout_below="@+id/exceptionHistory"
+            android:layout_alignLeft="@+id/exceptionHistory"
+            android:layout_alignStart="@+id/exceptionHistory"/>
+
+    <!--<FrameLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="300dp"-->
+            <!--android:layout_alignParentLeft="true"-->
+            <!--android:layout_alignParentStart="true"-->
+            <!--android:layout_below="@+id/mapButton"-->
+            <!--android:layout_alignParentBottom="true">-->
+
+        <!--<com.google.android.maps.MapView-->
+                <!--android:id="@+id/map_button_background"-->
+                <!--android:layout_width="fill_parent"-->
+                <!--android:layout_height="fill_parent"-->
+                <!--android:apiKey="@string/google_maps_key"/>-->
+
+    <!--</FrameLayout>-->
 
 
 </RelativeLayout>

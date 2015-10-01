@@ -15,7 +15,7 @@ import com.attilapalfi.exceptional.ui.FacebookLoginFragment;
 import com.attilapalfi.exceptional.ui.OptionsActivity;
 import com.attilapalfi.exceptional.ui.ShowNotificationActivity;
 import com.attilapalfi.exceptional.ui.main.ExceptionInstancesFragment;
-import com.attilapalfi.exceptional.ui.main.MainActivity;
+import com.attilapalfi.exceptional.ui.main.main_page.MainActivity;
 import com.attilapalfi.exceptional.ui.main.MainFragment;
 import com.attilapalfi.exceptional.ui.main.VotedExceptionsFragment;
 import com.attilapalfi.exceptional.ui.main.VotedExceptionsFragment.VotedExceptionAdapter;
@@ -25,6 +25,7 @@ import com.attilapalfi.exceptional.ui.main.friends_page.exception_throwing.Excep
 import com.attilapalfi.exceptional.ui.main.friends_page.exception_throwing.ExceptionTypePagerAdapter;
 import com.attilapalfi.exceptional.ui.main.friends_page.exception_throwing.ExceptionTypesFragment;
 import com.attilapalfi.exceptional.ui.main.friends_page.exception_throwing.ExceptionTypesFragment.ExceptionTypeAdapter;
+import com.attilapalfi.exceptional.ui.main.main_page.MapsActivity;
 import dagger.Component;
 
 /**
@@ -63,4 +64,5 @@ public interface ApplicationComponent extends AppContextComponent {
     void inject( OptionsActivity optionsActivity );
     void inject( VotingService votingService );
     void inject( ExceptionInstancesFragment.ExceptionInstanceAdapter exceptionInstanceAdapter );
+    void inject( MapsActivity mapsActivity );
 }

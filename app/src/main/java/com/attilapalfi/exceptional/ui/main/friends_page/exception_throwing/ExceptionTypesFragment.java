@@ -32,7 +32,7 @@ import com.attilapalfi.exceptional.persistence.MetadataStore;
 import com.attilapalfi.exceptional.rest.ExceptionService;
 import com.attilapalfi.exceptional.services.LocationException;
 import com.attilapalfi.exceptional.ui.main.Constants;
-import com.attilapalfi.exceptional.ui.main.MainActivity;
+import com.attilapalfi.exceptional.ui.main.main_page.MainActivity;
 
 public class ExceptionTypesFragment extends Fragment {
     private static int instanceCounter = 0;

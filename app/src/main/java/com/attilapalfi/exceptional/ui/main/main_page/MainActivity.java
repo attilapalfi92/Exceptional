@@ -1,4 +1,4 @@
-package com.attilapalfi.exceptional.ui.main;
+package com.attilapalfi.exceptional.ui.main.main_page;
 
 
 import javax.inject.Inject;
@@ -22,6 +22,7 @@ import com.attilapalfi.exceptional.rest.VotingService;
 import com.attilapalfi.exceptional.ui.ExceptionHistoryActivity;
 import com.attilapalfi.exceptional.ui.LoginActivity;
 import com.attilapalfi.exceptional.ui.OptionsActivity;
+import com.attilapalfi.exceptional.ui.main.MainPagerAdapter;
 import com.attilapalfi.exceptional.ui.main.page_transformers.ZoomOutPageTransformer;
 
 public class MainActivity extends AppCompatActivity {
@@ -31,10 +32,8 @@ public class MainActivity extends AppCompatActivity {
     private String submitPrefix = "";
     private String submitShortName = "";
     private String submitDescription = "";
-    @Inject
-    VotingService votingService;
-    @Inject
-    MetadataStore metadataStore;
+    @Inject VotingService votingService;
+    @Inject MetadataStore metadataStore;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
@@ -106,6 +105,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void exceptionHistoryClicked( View view ) {
         Intent intent = new Intent( this, ExceptionHistoryActivity.class );
+        startActivity( intent );
+    }
+
+
+    public void exceptionMapClicked( View view ) {
+        Intent intent = new Intent( this, MapsActivity.class );
         startActivity( intent );
     }
 
