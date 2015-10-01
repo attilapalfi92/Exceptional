@@ -9,7 +9,7 @@
     <Button
         android:layout_marginTop="5dp"
         android:layout_gravity="center_horizontal"
-        android:layout_width="200dp"
+        android:layout_width="match_parent"
         android:layout_height="50dp"
         android:text="@string/submit_voted_button_text"
         android:onClick="submitClicked"

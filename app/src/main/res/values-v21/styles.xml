@@ -5,8 +5,33 @@
         <!--   your app branding color for the app bar -->
         <item name="android:colorPrimary">#0060ae</item>
         <!--   darker variant for the status bar and contextual app bars -->
-        <item name="android:colorPrimaryDark">#002b4c</item>
+        <item name="android:colorPrimaryDark">@color/status_bar</item>
         <!--   theme UI controls like checkboxes and text fields -->
         <item name="android:colorAccent">#0060ae</item>
+        <item name="android:actionBarStyle">@style/MyActionBar2</item>
+        <!--<item name="android:buttonStyle">@style/MyButtonStyle</item>-->
+        <!--<item name="android:background">@color/primary_material_dark</item>-->
+        <!--<item name="android:textColor">@color/white</item>-->
     </style>
+
+    <style name="MyActionBar" parent="Base.Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:background">@color/status_bar</item>
+    </style>
+
+    <style name="MyActionBar2" parent="Base.Widget.AppCompat.Light.ActionBar.TabBar">
+        <item name="android:background">@color/status_bar</item>
+    </style>
+
+    <style name="MyButtonStyle" parent="Widget.AppCompat.Button" >
+        <item name="android:background">@color/status_bar</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <color name="exceptional_blue">#0000ee</color>
+    <color name="exceptional_purple">#ca00ae</color>
+    <color name="exceptional_red">#c60600</color>
+    <color name="exceptional_green">#00ff00</color>
+    <color name="status_bar">#002b4c</color>
+    <color name="white">#FFFFFF</color>
+
 </resources>

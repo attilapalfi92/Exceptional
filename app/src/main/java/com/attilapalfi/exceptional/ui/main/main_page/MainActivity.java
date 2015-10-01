@@ -121,8 +121,8 @@ public class MainActivity extends AppCompatActivity {
             MaterialDialog materialDialog = new MaterialDialog.Builder( this )
                     .title( R.string.exception_submitment )
                     .customView( R.layout.submit_layout, true )
-                    .positiveText( "Submit" )
-                    .negativeText( "Cancel" )
+                    .positiveText( R.string.submit )
+                    .negativeText( R.string.cancel )
                     .callback( new MaterialDialog.ButtonCallback() {
                         @Override
                         public void onPositive( MaterialDialog dialog ) {

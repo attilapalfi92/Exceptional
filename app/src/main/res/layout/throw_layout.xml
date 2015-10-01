@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/double_or_nothing_layout">
+
+    <Switch
+            android:id="@+id/double_or_nothing_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/double_or_nothing"
+            android:textSize="18sp"
+            android:checked="false"
+            android:textColor="@color/exceptional_blue"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"/>
+
+    <TextView
+            android:id="@+id/double_or_nothing_question"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            android:text="@string/question"
+            android:layout_below="@+id/double_or_nothing_switch"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"/>
+
+    <EditText
+            android:id="@+id/double_or_nothing_question_edit_text"
+            android:hint="@string/double_nothing_question_hint"
+            android:textSize="18sp"
+            android:enabled="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/double_or_nothing_question"/>
+
+    <TextView
+            android:id="@+id/double_or_nothing_correct_answ"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#000000"
+            android:text="@string/correct_answer"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/double_or_nothing_question_edit_text"/>
+
+    <RadioButton
+            android:id="@+id/double_or_nothing_no_radio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:enabled="false"
+            android:text="@string/no"
+            android:layout_below="@+id/double_or_nothing_correct_answ"
+            android:layout_alignLeft="@+id/double_or_nothing_correct_answ"
+            android:layout_alignStart="@+id/double_or_nothing_correct_answ"/>
+
+    <RadioButton
+            android:id="@+id/double_or_nothing_yes_radio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:enabled="false"
+            android:text="@string/yes"
+            android:layout_alignTop="@+id/double_or_nothing_no_radio"
+            android:layout_alignRight="@+id/double_or_nothing_correct_answ"
+            android:layout_alignEnd="@+id/double_or_nothing_correct_answ"/>
+
+</RelativeLayout>

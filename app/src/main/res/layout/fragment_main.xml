@@ -54,7 +54,7 @@
             android:layout_alignStart="@+id/mainNameTextView"/>
 
     <Button
-            android:layout_width="300dp"
+            android:layout_width="match_parent"
             android:layout_height="60dp"
             android:onClick="exceptionHistoryClicked"
             android:text="@string/fragment_main_exception_history"
@@ -64,7 +64,7 @@
 
     <Button
             android:id="@+id/mapButton"
-            android:layout_width="300dp"
+            android:layout_width="match_parent"
             android:layout_height="60dp"
             android:onClick="exceptionMapClicked"
             android:text="@string/exception_map"

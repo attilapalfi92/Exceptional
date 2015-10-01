@@ -18,19 +18,23 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.Switch;
 import android.widget.TextView;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Exception;
-import com.attilapalfi.exceptional.model.ExceptionType;
 import com.attilapalfi.exceptional.model.ExceptionFactory;
+import com.attilapalfi.exceptional.model.ExceptionType;
 import com.attilapalfi.exceptional.model.Submitter;
 import com.attilapalfi.exceptional.persistence.ExceptionTypeStore;
-import com.attilapalfi.exceptional.services.LocationProvider;
 import com.attilapalfi.exceptional.persistence.FriendStore;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
 import com.attilapalfi.exceptional.rest.ExceptionService;
 import com.attilapalfi.exceptional.services.LocationException;
+import com.attilapalfi.exceptional.services.LocationProvider;
 import com.attilapalfi.exceptional.ui.main.Constants;
 import com.attilapalfi.exceptional.ui.main.main_page.MainActivity;
 
@@ -40,7 +44,8 @@ public class ExceptionTypesFragment extends Fragment {
     private List<ExceptionType> exceptionTypes;
     private RecyclerView recyclerView;
     private ExceptionTypeAdapter typeAdapter;
-    @Inject ExceptionTypeStore exceptionTypeStore;
+    @Inject
+    ExceptionTypeStore exceptionTypeStore;
 
     @Override
     public void onCreate( Bundle savedInstanceState ) {
@@ -85,34 +90,118 @@ public class ExceptionTypesFragment extends Fragment {
         private RecyclerView recyclerView;
         private Activity activity;
         private List<ExceptionType> values;
-        @Inject LocationProvider locationProvider;
-        @Inject ExceptionFactory exceptionFactory;
-        @Inject ExceptionService exceptionService;
-        @Inject FriendStore friendStore;
-        @Inject MetadataStore metadataStore;
+        @Inject
+        LocationProvider locationProvider;
+        @Inject
+        ExceptionFactory exceptionFactory;
+        @Inject
+        ExceptionService exceptionService;
+        @Inject
+        FriendStore friendStore;
+        @Inject
+        MetadataStore metadataStore;
 
         private final View.OnClickListener onClickListener = new View.OnClickListener() {
+            private Switch switchView;
+            private EditText questionView;
+            private RadioButton noRadioView;
+            private RadioButton yesRadioView;
+
             @Override
             public void onClick( View view ) {
                 try {
                     Location location = locationProvider.getLocation();
                     Exception exception = createException( view, location );
-                    exceptionService.throwException( exception );
+                    buildDoubleNothingDialog( exception );
                 } catch ( LocationException e ) {
                     e.printStackTrace();
                 }
-                navigateToMainPage();
+            }
+
+            private void buildDoubleNothingDialog( Exception exception ) {
+                MaterialDialog.Builder builder = createMaterialDialog( exception );
+                setCallbacks( builder, exception );
+                MaterialDialog dialog = builder.build();
+                setListeners( dialog );
+                dialog.show();
+            }
+
+            private MaterialDialog.Builder createMaterialDialog( final Exception exception ) {
+                return new MaterialDialog.Builder( activity )
+                        .title( activity.getString( R.string.throw_question ) + " " + exception.getShortName() + "?" )
+                        .customView( R.layout.throw_layout, true )
+                        .positiveText( R.string.throwException )
+                        .negativeText( R.string.cancel );
+            }
+
+            private void setCallbacks( MaterialDialog.Builder builder, Exception exception ) {
+                builder.callback( new MaterialDialog.ButtonCallback() {
+                    @Override
+                    public void onPositive( MaterialDialog dialog ) {
+                        if ( inputIsValid() ) {
+                            exceptionService.throwException( exception );
+                            navigateToMainPage();
+                        }
+                    }
+
+                    @Override
+                    public void onNegative( MaterialDialog dialog ) {
+                    }
+                } );
+            }
+
+            private boolean inputIsValid( ) {
+                return false;
+            }
+
+            private void setListeners( MaterialDialog dialog ) {
+                View throwView = dialog.getCustomView();
+                if ( throwView != null ) {
+                    switchView = (Switch) throwView.findViewById( R.id.double_or_nothing_switch );
+                    switchView.setOnClickListener( this::switchListener );
+                    noRadioView = (RadioButton) throwView.findViewById( R.id.double_or_nothing_no_radio );
+                    noRadioView.setOnClickListener( this::radioNoListener );
+                    yesRadioView = (RadioButton) throwView.findViewById( R.id.double_or_nothing_yes_radio );
+                    yesRadioView.setOnClickListener( this::radioYesListener );
+                    questionView = (EditText) throwView.findViewById( R.id.double_or_nothing_question_edit_text );
+                }
+            }
+
+            private void switchListener( View view ) {
+                if ( switchView.isChecked() ) {
+                    setViewsEnabled( true );
+                } else {
+                    setViewsEnabled( false );
+                }
+            }
+
+            private void setViewsEnabled( boolean state ) {
+                noRadioView.setEnabled( state );
+                yesRadioView.setEnabled( state );
+                questionView.setEnabled( state );
+            }
+
+            private void radioNoListener( View view ) {
+                if ( noRadioView.isChecked() ) {
+                    yesRadioView.setChecked( false );
+                }
+            }
+
+            private void radioYesListener( View view ) {
+                if ( yesRadioView.isChecked() ) {
+                    noRadioView.setChecked( false );
+                }
             }
 
             private Exception createException( View view, Location location ) {
                 int itemPosition = recyclerView.getChildPosition( view );
-                Exception exception = createException( itemPosition );
+                Exception exception = createExceptionFromPosition( itemPosition );
                 exception.setLatitude( location.getLatitude() );
                 exception.setLongitude( location.getLongitude() );
                 return exception;
             }
 
-            private Exception createException( int itemPosition ) {
+            private Exception createExceptionFromPosition( int itemPosition ) {
                 ExceptionType exceptionType = values.get( itemPosition );
                 BigInteger friendId = new BigInteger( activity.getIntent().getStringExtra( Constants.FRIEND_ID ) );
                 return exceptionFactory.createExceptionWithType(

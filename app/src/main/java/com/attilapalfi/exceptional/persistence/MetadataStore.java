@@ -29,7 +29,7 @@ public class MetadataStore {
     private static final String FIRST_START_FINISHED = "firstStartFinished";
     private static final String VOTED_THIS_WEEK = "votedThisWeek";
     private static final String SUBMITTED_THIS_WEEK = "submittedThisWeek";
-    public static final String USER = "user";
+    private static final String USER = "user";
     private static final Friend EMPTY_USER = new Friend( new BigInteger( "0" ), "", "", "" );
 
     @Inject ImageCache imageCache;

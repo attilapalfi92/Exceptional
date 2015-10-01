@@ -85,4 +85,13 @@
     <string name="title_activity_maps">Exception Map</string>
     <string name="exception_map">Exception Map</string>
     <string name="google_maps_key">AIzaSyCSwgwKHOuqBozM-JhhKYp6xnwFKs8xJrU</string>
+    <string name="double_or_nothing">Double or nothing</string>
+    <string name="question">Question:</string>
+    <string name="correct_answer">Correct answer:</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="double_nothing_question_hint">like: Is Kotlin 100% interoperable with Java?</string>
+    <string name="submit">Submit</string>
+    <string name="throwException">Throw!</string>
+    <string name="throw_question">Throw</string>
 </resources>
