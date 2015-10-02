@@ -1,8 +1,8 @@
 package com.attilapalfi.exceptional.persistence;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.inject.Inject;
 
@@ -11,6 +11,7 @@ import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
+import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.interfaces.ExceptionChangeListener;
 import com.attilapalfi.exceptional.model.Exception;
@@ -32,13 +33,16 @@ public class ExceptionInstanceStore {
     private static final String INSTANCE_IDs = "INSTANCE_IDs";
     private static final Exception EMPTY_EXCEPTION = new Exception();
 
-    @Inject Context context;
-    @Inject ExceptionTypeStore exceptionTypeStore;
-    @Inject ExceptionFactory exceptionFactory;
+    @Inject
+    Context context;
+    @Inject
+    ExceptionTypeStore exceptionTypeStore;
+    @Inject
+    ExceptionFactory exceptionFactory;
     private Book database;
     private Set<ExceptionChangeListener> exceptionChangeListeners = new HashSet<>();
-    private List<Exception> storedExceptions = Collections.synchronizedList( new LinkedList<>() );
-    private List<BigInteger> idList;
+    private final CopyOnWriteArrayList<Exception> storedExceptions = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<BigInteger> idList = new CopyOnWriteArrayList<>();
     private Geocoder geocoder;
     private Handler handler;
 
@@ -52,21 +56,23 @@ public class ExceptionInstanceStore {
 
 
     private void loadExceptionInstances( ) {
-        idList = Collections.synchronizedList( database.read( INSTANCE_IDs, new LinkedList<>() ) );
+        idList.addAll( database.read( INSTANCE_IDs, new LinkedList<>() ) );
 
         new AsyncTask<Void, Void, Void>() {
 
             @Override
             protected Void doInBackground( Void... params ) {
+                List<Exception> tempList = new LinkedList<>();
                 stream( idList ).forEach( id -> {
                     Exception e = database.read( id.toString(), EMPTY_EXCEPTION );
                     e.setExceptionType( exceptionTypeStore.findById( e.getExceptionTypeId() ) );
                     int index = Collections.binarySearch( storedExceptions, e );
                     if ( index < 0 ) {
                         index = -index - 1;
-                        storedExceptions.add( index, e );
+                        tempList.add( index, e );
                     }
                 } );
+                storedExceptions.addAll( tempList );
                 return null;
             }
 
@@ -105,25 +111,10 @@ public class ExceptionInstanceStore {
 
     public void saveExceptionList( List<ExceptionInstanceWrapper> wrapperList ) {
         if ( !wrapperList.isEmpty() ) {
-            List<Exception> toBeStored = wrapperListToExceptions( wrapperList );
-            storeEachIfNotContained( toBeStored );
-            database.write( INSTANCE_IDs, idList );
+            saveListToStore( wrapperList );
             handler.post( this::notifyListeners );
         }
     }
-
-    private List<Exception> wrapperListToExceptions( List<ExceptionInstanceWrapper> wrappers ) {
-        return stream( wrappers ).map( exceptionFactory::createFromWrapper ).collect( Collectors.toList() );
-    }
-
-    private void storeEachIfNotContained( List<Exception> toBeStored ) {
-        stream( toBeStored ).forEach( e -> {
-            if ( !storedExceptions.contains( e ) ) {
-                saveWithoutIdListWrite( e );
-            }
-        } );
-    }
-
 
     public void saveExceptionListAsync( List<ExceptionInstanceWrapper> wrapperList ) {
         if ( !wrapperList.isEmpty() ) {
@@ -131,9 +122,7 @@ public class ExceptionInstanceStore {
 
                 @Override
                 protected Void doInBackground( Void... params ) {
-                    List<Exception> toBeStored = wrapperListToExceptions( wrapperList );
-                    storeEachIfNotContained( toBeStored );
-                    database.write( INSTANCE_IDs, idList );
+                    saveListToStore( wrapperList );
                     return null;
                 }
 
@@ -148,53 +137,72 @@ public class ExceptionInstanceStore {
 
     private void saveToStore( Exception e ) {
         if ( !storedExceptions.contains( e ) ) {
-            saveWithoutIdListWrite( e );
+            saveWithCity( e );
             database.write( INSTANCE_IDs, idList );
         }
     }
 
-    private void saveWithoutIdListWrite( Exception e ) {
-        setCityForException( e );
-        addToListInOrder( e );
+    private void saveListToStore( List<ExceptionInstanceWrapper> wrapperList ) {
+        List<Exception> toBeStored = wrapperListToExceptions( wrapperList );
+        storeEachIfNotContained( toBeStored );
     }
 
-    private void addToListInOrder( Exception e ) {
-        int index = Collections.binarySearch( storedExceptions, e );
+    private List<Exception> wrapperListToExceptions( List<ExceptionInstanceWrapper> wrappers ) {
+        return stream( wrappers ).map( exceptionFactory::createFromWrapper ).collect( Collectors.toList() );
+    }
+
+    private void storeEachIfNotContained( List<Exception> toBeStored ) {
+        stream( toBeStored ).forEach( e -> {
+            if ( !storedExceptions.contains( e ) ) {
+                saveWithCity( e );
+            }
+        } );
+    }
+
+    private void saveWithCity( Exception e ) {
+        setCityForException( e );
+        addToListInOrder( storedExceptions, e );
+    }
+
+    private void addToListInOrder( List<Exception> list, Exception e ) {
+        int index = Collections.binarySearch( list, e );
         if ( index < 0 ) {
-            index = - index - 1;
-            if ( storedExceptions.size() >= STORE_SIZE ) {
-                addNewOrKeepOld( e, index );
+            index = -index - 1;
+            if ( list.size() >= STORE_SIZE ) {
+                addNewOrKeepOld( list, e, index );
             } else {
-                addTheNewOne( e, index );
+                addTheNewOne( list, e, index );
             }
         }
     }
 
-    private void addNewOrKeepOld( Exception e, int index ) {
-        Exception removeCandidate = storedExceptions.get( storedExceptions.size() - 1 );
+    private void addNewOrKeepOld( List<Exception> list, Exception e, int index ) {
+        Exception removeCandidate = list.get( list.size() - 1 );
         if ( removeCandidate.compareTo( e ) > 0 ) {
-            removeTheCandidate();
-            addTheNewOne( e, index );
+            removeTheCandidate( list );
+            addTheNewOne( list, e, index );
         }
     }
 
-    private void removeTheCandidate( ) {
-        Exception removed = storedExceptions.remove( storedExceptions.size() - 1 );
+    private void removeTheCandidate( List<Exception> list ) {
+        Exception removed = list.remove( list.size() - 1 );
         idList.remove( idList.size() - 1 );
         database.delete( removed.getInstanceId().toString() );
     }
 
-    private void addTheNewOne( Exception e, int index ) {
-        storedExceptions.add( index, e );
+    private void addTheNewOne( List<Exception> list, Exception e, int index ) {
+        list.add( index, e );
         idList.add( index, e.getInstanceId() );
         database.write( e.getInstanceId().toString(), e );
+        database.write( INSTANCE_IDs, idList );
     }
 
     private void setCityForException( Exception e ) {
         try {
             e.setCity( geocoder.getFromLocation( e.getLatitude(), e.getLongitude(), 1 ).get( 0 ).getLocality() );
-        } catch ( IOException ioe ) {
-            ioe.printStackTrace();
+        } catch ( java.lang.Exception exception ) {
+            e.setCity( context.getString( R.string.unknown ) );
+            exception.printStackTrace();
         }
     }
 

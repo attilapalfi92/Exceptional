@@ -8,12 +8,14 @@ import android.view.View
 import android.widget.EditText
 import android.widget.RadioButton
 import android.widget.Switch
+import android.widget.Toast
 import com.afollestad.materialdialogs.MaterialDialog
 import com.attilapalfi.exceptional.R
 import com.attilapalfi.exceptional.dependency_injection.Injector
 import com.attilapalfi.exceptional.model.Exception
 import com.attilapalfi.exceptional.model.ExceptionFactory
 import com.attilapalfi.exceptional.model.ExceptionType
+import com.attilapalfi.exceptional.model.Question
 import com.attilapalfi.exceptional.persistence.MetadataStore
 import com.attilapalfi.exceptional.rest.ExceptionService
 import com.attilapalfi.exceptional.services.LocationException
@@ -33,6 +35,7 @@ public class ExceptionTypeClickListener(private val values: List<ExceptionType>,
     private var questionView: EditText? = null
     private var noRadioView: RadioButton? = null
     private var yesRadioView: RadioButton? = null
+    private var questionText = ""
     @Inject lateinit var locationProvider: LocationProvider
     @Inject lateinit var exceptionService: ExceptionService
     @Inject lateinit var exceptionFactory: ExceptionFactory
@@ -69,7 +72,7 @@ public class ExceptionTypeClickListener(private val values: List<ExceptionType>,
         builder.callback(object : MaterialDialog.ButtonCallback() {
             override fun onPositive(dialog: MaterialDialog?) {
                 if (inputIsValid()) {
-                    exceptionService.throwException(exception)
+                    exceptionService.throwException(exception, getQuestion())
                     navigateToMainPage()
                 }
             }
@@ -80,6 +83,35 @@ public class ExceptionTypeClickListener(private val values: List<ExceptionType>,
     }
 
     private fun inputIsValid(): Boolean {
+        if ( switchView?.isChecked == true ) {
+            questionText = questionView?.text.toString().trim()
+            if (isTooShort()) return false
+            if (isNotWellFormatted()) return false
+        }
+        return true
+    }
+
+    private fun getQuestion(): Question {
+        return Question(
+                questionText,
+                yesRadioView?.isChecked == true,
+                switchView?.isChecked == true
+        )
+    }
+
+    private fun isNotWellFormatted(): Boolean {
+        if ( !questionText.endsWith('?') ) {
+            Toast.makeText(activity, "Questions end with question mark.", Toast.LENGTH_SHORT).show();
+            return true
+        }
+        return false
+    }
+
+    private fun isTooShort(): Boolean {
+        if ( questionText.length() < 12 ) {
+            Toast.makeText(activity, "Too short question.", Toast.LENGTH_SHORT).show();
+            return true
+        }
         return false
     }
 

@@ -43,6 +43,7 @@ public class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap?) {
         googleMap?.let {
+            it
             exceptionInstanceStore.exceptionList.forEach({
                 e ->
                 val markerOptions = MarkerOptions()

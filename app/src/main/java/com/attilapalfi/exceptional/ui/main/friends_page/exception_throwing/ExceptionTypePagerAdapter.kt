@@ -17,10 +17,11 @@ public class ExceptionTypePagerAdapter(fragmentManager: FragmentManager, private
         FragmentPagerAdapter(fragmentManager), ViewPager.OnPageChangeListener {
 
     private val exceptionTypes = ArrayList<String>()
+    private val positionsToTypes = HashMap<Int, String>()
     public var exceptionTypeStore: ExceptionTypeStore? = null
         @Inject
-        public set
-        public get
+        set
+        get
 
     init {
         Injector.INSTANCE.applicationComponent.inject(this)
@@ -28,7 +29,10 @@ public class ExceptionTypePagerAdapter(fragmentManager: FragmentManager, private
     }
 
     override fun getItem(position: Int): Fragment {
-        return ExceptionTypesFragment()
+        val fragment = ExceptionTypesFragment()
+        fragment.position = position;
+        positionsToTypes.put( position, fragment.typeName )
+        return fragment
     }
 
     override fun getCount(): Int {
@@ -40,9 +44,7 @@ public class ExceptionTypePagerAdapter(fragmentManager: FragmentManager, private
     }
 
     override fun onPageSelected(position: Int) {
-        if (position < exceptionTypes.size()) {
-            activity.title = exceptionTypes.get(position)
-        }
+        activity.title = positionsToTypes[position]
     }
 
     override fun onPageScrollStateChanged(state: Int) {

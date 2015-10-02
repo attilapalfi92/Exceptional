@@ -10,7 +10,7 @@ import android.os.Handler;
 import android.os.Looper;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.interfaces.FriendChangeListener;
-import com.attilapalfi.exceptional.model.*;
+import com.attilapalfi.exceptional.model.Friend;
 import io.paperdb.Book;
 import io.paperdb.Paper;
 
@@ -25,11 +25,12 @@ public class FriendStore {
     private static final String FRIEND_IDS = "FRIEND_IDS";
     private static final Friend EMPTY_FRIEND = new Friend( new BigInteger( "0" ), "", "", "" );
 
-    @Inject ImageCache imageCache;
+    @Inject
+    ImageCache imageCache;
     private final Book database;
     private Handler handler;
     private final List<Friend> storedFriends = Collections.synchronizedList( new LinkedList<>() );
-    private List<BigInteger> idList;
+    private final List<BigInteger> idList = Collections.synchronizedList( new LinkedList<>() );
     private Set<FriendChangeListener> friendChangeListeners = new HashSet<>();
 
     public void addFriendChangeListener( FriendChangeListener listener ) {
@@ -48,7 +49,7 @@ public class FriendStore {
         Injector.INSTANCE.getApplicationComponent().inject( this );
         database = Paper.book( FRIEND_DATABASE );
         handler = new Handler( Looper.getMainLooper() );
-        idList = Collections.synchronizedList( database.read( FRIEND_IDS, new LinkedList<>() ) );
+        idList.addAll( database.read( FRIEND_IDS, new LinkedList<>() ) );
         stream( idList ).forEach( id -> ( storedFriends ).add( database.read( id.toString(), EMPTY_FRIEND ) ) );
         new AsyncFriendOrganizer().execute();
     }

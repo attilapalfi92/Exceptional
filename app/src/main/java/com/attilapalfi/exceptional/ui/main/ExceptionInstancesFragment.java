@@ -125,12 +125,13 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
     }
 
     private void initExceptionAdapter( ) {
-        List<Exception> values = generateValues( exceptionInstanceStore.getExceptionList() );
+        List<Exception> values = generateValues();
         exceptionInstanceAdapter = new ExceptionInstanceAdapter( values, getActivity().getApplicationContext() );
         onExceptionsChanged();
     }
 
-    private List<Exception> generateValues( List<Exception> allValues ) {
+    private List<Exception> generateValues( ) {
+        List<Exception> allValues = exceptionInstanceStore.getExceptionList();
         if ( friend != null ) {
             List<Exception> filteredValues = new ArrayList<>();
             for ( Exception exception : allValues ) {
@@ -201,7 +202,6 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
         public void setRecyclerView( RecyclerView recyclerView ) {
             this.recyclerView = recyclerView;
         }
-
 
         public static class RowViewHolder extends RecyclerView.ViewHolder {
             private Context context;

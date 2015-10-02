@@ -94,4 +94,6 @@
     <string name="submit">Submit</string>
     <string name="throwException">Throw!</string>
     <string name="throw_question">Throw</string>
+    <string name="exceptions_loading">Exceptions still loading...</string>
+    <string name="unknown">Unknown</string>
 </resources>

@@ -23,13 +23,12 @@ public class ExceptionTypeStore {
 
     private Book database;
     private Handler handler;
-    private Map<String, List<ExceptionType>> exceptionTypeStore;
-    private List<ExceptionType> votedExceptionTypeList;
+    private final Map<String, List<ExceptionType>> exceptionTypeStore = Collections.synchronizedMap( new HashMap<>() );
+    private final List<ExceptionType> votedExceptionTypeList = Collections.synchronizedList( new LinkedList<>() );
     private Set<VotedTypeListener> votedTypeListeners = new HashSet<>();
 
     public ExceptionTypeStore( ) {
         Injector.INSTANCE.getApplicationComponent().inject( this );
-        exceptionTypeStore = Collections.synchronizedMap( new HashMap<>() );
         database = Paper.book( TYPE_DATABASE );
         handler = new Handler( Looper.getMainLooper() );
         if ( database.read( HAS_DATA, false ) ) {
@@ -47,7 +46,7 @@ public class ExceptionTypeStore {
         int maxId = 0;
         for ( ExceptionType exception : exceptionTypes ) {
             if ( !exceptionTypeStore.containsKey( exception.getType() ) ) {
-                exceptionTypeStore.put( exception.getType(), new ArrayList<>() );
+                exceptionTypeStore.put( exception.getType(), Collections.synchronizedList( new LinkedList<>() ) );
             }
             exceptionTypeStore.get( exception.getType() ).add( exception );
             database.write( Integer.toString( exception.getId() ), exception );
@@ -58,7 +57,8 @@ public class ExceptionTypeStore {
     }
 
     public void setVotedExceptionTypes( List<ExceptionType> exceptionTypes ) {
-        votedExceptionTypeList = Collections.synchronizedList( exceptionTypes );
+        votedExceptionTypeList.clear();
+        votedExceptionTypeList.addAll( exceptionTypes );
         sortVotedExceptionList();
         handler.post( this::notifyVotedTypeListeners );
     }
@@ -69,7 +69,7 @@ public class ExceptionTypeStore {
         for ( int i = minId; i <= maxId; i++ ) {
             ExceptionType exceptionType = database.read( Integer.toString( i ), EMPTY_TYPE );
             if ( !exceptionTypeStore.containsKey( exceptionType.getType() ) ) {
-                exceptionTypeStore.put( exceptionType.getType(), new LinkedList<>() );
+                exceptionTypeStore.put( exceptionType.getType(), Collections.synchronizedList( new LinkedList<>() ) );
             }
             exceptionTypeStore.get( exceptionType.getType() ).add( exceptionType );
         }

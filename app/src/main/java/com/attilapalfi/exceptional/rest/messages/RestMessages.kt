@@ -2,6 +2,7 @@ package com.attilapalfi.exceptional.rest.messages
 
 import com.attilapalfi.exceptional.model.Exception
 import com.attilapalfi.exceptional.model.ExceptionType
+import com.attilapalfi.exceptional.model.Question
 import java.math.BigInteger
 
 /**
@@ -34,15 +35,17 @@ public data class ExceptionInstanceWrapper(var fromWho: BigInteger = BigInteger(
                                            var longitude: Double = 0.0,
                                            var latitude: Double = 0.0,
                                            var exceptionTypeId: Int = 0,
-                                           var instanceId: BigInteger = BigInteger("0")) {
-    constructor(e: Exception) : this(
-            e.getFromWho(),
-            e.getToWho(),
-            e.getDate().getTime(),
-            e.getLongitude(),
-            e.getLatitude(),
-            e.getExceptionTypeId(),
-            e.getInstanceId()
+                                           var instanceId: BigInteger = BigInteger("0"),
+                                           var question: Question = Question()) {
+    constructor(e: Exception, question: Question) : this(
+            e.fromWho,
+            e.toWho,
+            e.date.time,
+            e.longitude,
+            e.latitude,
+            e.exceptionTypeId,
+            e.instanceId,
+            question
     )
 };
 

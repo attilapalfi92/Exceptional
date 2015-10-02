@@ -31,7 +31,7 @@ public class ExceptionTypeChooserActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_exception_type_chooser)
         Injector.INSTANCE.applicationComponent.inject(this)
-        setTitle()
+        initTitle()
         initFriend()
         initViewPager()
     }
@@ -51,7 +51,7 @@ public class ExceptionTypeChooserActivity : AppCompatActivity() {
         }
     }
 
-    private fun setTitle() {
+    private fun initTitle() {
         val exceptionTypeList = ArrayList(exceptionTypeStore.exceptionTypes)
         if (exceptionTypeList.isEmpty()) {
             title = getString(R.string.no_exception_types_found)

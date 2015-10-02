@@ -10,6 +10,7 @@ import com.attilapalfi.exceptional.interfaces.ExceptionRefreshListener;
 import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.model.Friend;
 import com.attilapalfi.exceptional.model.ExceptionFactory;
+import com.attilapalfi.exceptional.model.Question;
 import com.attilapalfi.exceptional.persistence.ExceptionInstanceStore;
 import com.attilapalfi.exceptional.persistence.FriendStore;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
@@ -41,8 +42,8 @@ public class ExceptionService {
         exceptionRestInterface = restInterfaceFactory.create( context, ExceptionRestInterface.class );
     }
 
-    public void throwException( Exception exception ) {
-        ExceptionInstanceWrapper exceptionInstanceWrapper = new ExceptionInstanceWrapper( exception );
+    public void throwException( Exception exception, Question question ) {
+        ExceptionInstanceWrapper exceptionInstanceWrapper = new ExceptionInstanceWrapper( exception, question );
         try {
             exceptionRestInterface.throwException( exceptionInstanceWrapper, new Callback<ExceptionSentResponse>() {
                 @Override
@@ -51,6 +52,10 @@ public class ExceptionService {
                     metadataStore.setPoints( e.getYourPoints() );
                     friendStore.updateFriendPoints( e.getInstanceWrapper().getToWho(), e.getFriendsPoints() );
                     exceptionInstanceStore.addExceptionAsync( exceptionFactory.createFromWrapper( e.getInstanceWrapper() ) );
+                    printSuccess( e, toWho );
+                }
+
+                private void printSuccess( ExceptionSentResponse e, Friend toWho ) {
                     Toast.makeText( context, e.getExceptionShortName() + " "
                                     + context.getString( R.string.successfully_thrown )
                                     + " " + toWho.getName(),
