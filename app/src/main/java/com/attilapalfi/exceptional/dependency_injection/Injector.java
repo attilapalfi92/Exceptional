@@ -16,10 +16,9 @@ public enum Injector {
     }
 
     public void initializeApplicationComponent( ExceptionalApplication application ) {
-        ApplicationComponent applicationComponent = DaggerApplicationComponent.builder()
+        this.applicationComponent = DaggerApplicationComponent.builder()
                 .appContextModule( new AppContextModule( application ) )
                 .build();
-        this.applicationComponent = applicationComponent;
     }
 
     public ApplicationComponent getApplicationComponent( ) {

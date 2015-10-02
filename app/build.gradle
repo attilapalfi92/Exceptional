@@ -27,9 +27,11 @@ android {
     }
     sourceSets.main {
         java.srcDirs = ['src/main/java', 'gen']
+        java.srcDirs = ['src/main/kotlin', 'gen']
     }
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
+        main.java.srcDirs += 'src/main/java'
     }
     dexOptions {
         incremental true

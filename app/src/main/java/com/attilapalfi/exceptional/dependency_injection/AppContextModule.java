@@ -4,14 +4,14 @@ import javax.inject.Singleton;
 
 import android.content.Context;
 import com.attilapalfi.exceptional.ExceptionalApplication;
+import com.attilapalfi.exceptional.facebook.FacebookManager;
 import com.attilapalfi.exceptional.model.ExceptionFactory;
 import com.attilapalfi.exceptional.persistence.*;
-import com.attilapalfi.exceptional.services.LocationProvider;
-import com.attilapalfi.exceptional.facebook.FacebookManager;
 import com.attilapalfi.exceptional.rest.AppStartService;
 import com.attilapalfi.exceptional.rest.ExceptionService;
 import com.attilapalfi.exceptional.rest.RestInterfaceFactory;
 import com.attilapalfi.exceptional.rest.VotingService;
+import com.attilapalfi.exceptional.services.LocationProvider;
 import dagger.Module;
 import dagger.Provides;
 
