@@ -1,4 +1,4 @@
-package com.attilapalfi.exceptional.ui.main.main_page;
+package com.attilapalfi.exceptional.ui.main;
 
 
 import javax.inject.Inject;
@@ -19,11 +19,12 @@ import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.ExceptionType;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
 import com.attilapalfi.exceptional.rest.VotingService;
+import com.attilapalfi.exceptional.ui.AnswerExceptionActivity;
 import com.attilapalfi.exceptional.ui.ExceptionHistoryActivity;
 import com.attilapalfi.exceptional.ui.LoginActivity;
 import com.attilapalfi.exceptional.ui.OptionsActivity;
-import com.attilapalfi.exceptional.ui.main.MainPagerAdapter;
-import com.attilapalfi.exceptional.ui.main.page_transformers.ZoomOutPageTransformer;
+import com.attilapalfi.exceptional.ui.main.main_page.MapsActivity;
+import com.attilapalfi.exceptional.ui.page_transformers.ZoomOutPageTransformer;
 
 public class MainActivity extends AppCompatActivity {
     private MainPagerAdapter adapter;
@@ -209,5 +210,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void showValidationToast( @StringRes int resId ) {
         Toast.makeText( getApplicationContext(), resId, Toast.LENGTH_SHORT ).show();
+    }
+
+    public void testButtonClicked( View view ) {
+        Intent intent = new Intent( this, AnswerExceptionActivity.class );
+        startActivity( intent );
     }
 }

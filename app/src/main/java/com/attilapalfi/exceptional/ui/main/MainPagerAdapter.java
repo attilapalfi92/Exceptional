@@ -6,6 +6,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import com.attilapalfi.exceptional.ui.main.friends_page.FriendsFragment;
+import com.attilapalfi.exceptional.ui.main.main_page.MainFragment;
+import com.attilapalfi.exceptional.ui.main.voted_page.VotedExceptionsFragment;
 
 /**
  * Created by Attila on 2015-06-07.

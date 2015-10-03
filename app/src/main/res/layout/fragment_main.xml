@@ -3,7 +3,7 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.attilapalfi.exceptional.ui.main.MainFragment"
+        tools:context="com.attilapalfi.exceptional.ui.main.main_page.MainFragment"
         android:id="@+id/main_fragment_view">
 
     <!-- TODO: Update blank fragment layout -->
@@ -72,7 +72,17 @@
             android:layout_alignLeft="@+id/exceptionHistory"
             android:layout_alignStart="@+id/exceptionHistory"/>
 
-    <!--<FrameLayout-->
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Test Button"
+                android:onClick="testButtonClicked"
+                android:id="@+id/test_button"
+                android:layout_below="@+id/mapButton"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="31dp"/>
+
+        <!--<FrameLayout-->
             <!--android:layout_width="match_parent"-->
             <!--android:layout_height="300dp"-->
             <!--android:layout_alignParentLeft="true"-->

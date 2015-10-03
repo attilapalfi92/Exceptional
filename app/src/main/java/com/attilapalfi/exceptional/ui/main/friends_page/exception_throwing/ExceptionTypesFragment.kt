@@ -23,7 +23,7 @@ public class ExceptionTypesFragment : Fragment() {
     private var recyclerView: RecyclerView? = null
     private var typeAdapter: ExceptionTypeAdapter? = null
     @Inject
-    lateinit var exceptionTypeStore: ExceptionTypeStore
+    lateinit val exceptionTypeStore: ExceptionTypeStore
 
     init {
         Injector.INSTANCE.applicationComponent.inject(this)

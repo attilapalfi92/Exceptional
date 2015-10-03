@@ -1,4 +1,4 @@
-package com.attilapalfi.exceptional.ui.main;
+package com.attilapalfi.exceptional.ui.main.main_page;
 
 import javax.inject.Inject;
 
@@ -23,10 +23,8 @@ import com.attilapalfi.exceptional.persistence.MetadataStore;
  */
 public class MainFragment extends Fragment implements FirstStartFinishedListener, PointChangeListener {
     private View view;
-    @Inject FriendStore friendStore;
     @Inject ImageCache imageCache;
     @Inject MetadataStore metadataStore;
-    @Inject FacebookManager facebookManager;
 
     @Override
     public void onCreate( @Nullable Bundle savedInstanceState ) {

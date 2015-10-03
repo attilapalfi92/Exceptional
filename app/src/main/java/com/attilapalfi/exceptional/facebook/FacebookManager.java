@@ -172,7 +172,8 @@ public class FacebookManager {
                     new BigInteger( profile.getId() ),
                     profile.getFirstName() + " " + profile.getMiddleName(),
                     profile.getLastName(),
-                    profile.getProfilePictureUri( 200, 200 ).toString() );
+                    profile.getProfilePictureUri( 200, 200 ).toString(),
+                    100, false);
         }
     }
 
@@ -183,7 +184,7 @@ public class FacebookManager {
         String id = user.getString( "id" );
         JSONObject imageData = user.getJSONObject( "picture" ).getJSONObject( "data" );
         String imageUrl = imageData.getString( "url" );
-        return new Friend( new BigInteger( id ), names[0], names[1], imageUrl );
+        return new Friend( new BigInteger( id ), names[0], names[1], imageUrl, 100, false );
     }
 
     private String[] parseFirstAndLastName( String name ) {

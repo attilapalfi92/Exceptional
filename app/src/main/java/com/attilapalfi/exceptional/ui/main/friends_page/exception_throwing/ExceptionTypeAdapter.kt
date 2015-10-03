@@ -24,15 +24,15 @@ public class ExceptionTypeAdapter(private val activity: Activity,
                                   private val values: List<ExceptionType>) : RecyclerView.Adapter<ExceptionTypeRowViewHolder>() {
     private val onClickListener: View.OnClickListener
     @Inject
-    lateinit var locationProvider: LocationProvider
+    lateinit val locationProvider: LocationProvider
     @Inject
-    lateinit var exceptionFactory: ExceptionFactory
+    lateinit val exceptionFactory: ExceptionFactory
     @Inject
-    lateinit var exceptionService: ExceptionService
+    lateinit val exceptionService: ExceptionService
     @Inject
-    lateinit var friendStore: FriendStore
+    lateinit val friendStore: FriendStore
     @Inject
-    lateinit var metadataStore: MetadataStore
+    lateinit val metadataStore: MetadataStore
 
     init {
         this.onClickListener = ExceptionTypeClickListener(values, recyclerView, activity)

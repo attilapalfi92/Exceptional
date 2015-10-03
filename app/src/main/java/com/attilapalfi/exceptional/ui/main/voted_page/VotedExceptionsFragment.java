@@ -1,4 +1,4 @@
-package com.attilapalfi.exceptional.ui.main;
+package com.attilapalfi.exceptional.ui.main.voted_page;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -21,7 +21,7 @@ import com.attilapalfi.exceptional.rest.ExceptionService
 import com.attilapalfi.exceptional.services.LocationException
 import com.attilapalfi.exceptional.services.LocationProvider
 import com.attilapalfi.exceptional.ui.main.Constants
-import com.attilapalfi.exceptional.ui.main.main_page.MainActivity
+import com.attilapalfi.exceptional.ui.main.MainActivity
 import java.math.BigInteger
 import javax.inject.Inject
 
@@ -36,10 +36,10 @@ public class ExceptionTypeClickListener(private val values: List<ExceptionType>,
     private var noRadioView: RadioButton? = null
     private var yesRadioView: RadioButton? = null
     private var questionText = ""
-    @Inject lateinit var locationProvider: LocationProvider
-    @Inject lateinit var exceptionService: ExceptionService
-    @Inject lateinit var exceptionFactory: ExceptionFactory
-    @Inject lateinit var metadataStore: MetadataStore
+    @Inject lateinit val locationProvider: LocationProvider
+    @Inject lateinit val exceptionService: ExceptionService
+    @Inject lateinit val exceptionFactory: ExceptionFactory
+    @Inject lateinit val metadataStore: MetadataStore
 
     init {
         Injector.INSTANCE.applicationComponent.inject(this)

@@ -13,7 +13,7 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.facebook.FacebookLoginSuccessHandler;
 import com.attilapalfi.exceptional.facebook.FacebookManager;
-import com.attilapalfi.exceptional.ui.main.main_page.MainActivity;
+import com.attilapalfi.exceptional.ui.main.MainActivity;
 import com.facebook.Profile;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;

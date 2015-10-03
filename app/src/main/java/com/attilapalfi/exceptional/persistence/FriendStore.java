@@ -23,7 +23,7 @@ import static java8.util.stream.StreamSupport.stream;
 public class FriendStore {
     private static final String FRIEND_DATABASE = "FRIEND_DATABASE";
     private static final String FRIEND_IDS = "FRIEND_IDS";
-    private static final Friend EMPTY_FRIEND = new Friend( new BigInteger( "0" ), "", "", "" );
+    private static final Friend EMPTY_FRIEND = new Friend();
 
     @Inject
     ImageCache imageCache;
@@ -98,7 +98,7 @@ public class FriendStore {
                 return friend;
             }
         }
-        return new Friend( new BigInteger( "0" ), "", "", "" );
+        return new Friend();
     }
 
     private void saveNewFriends( List<Friend> friendList ) {

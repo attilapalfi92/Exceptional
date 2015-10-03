@@ -111,4 +111,10 @@ public class AppContextModule {
     public RestInterfaceFactory restAdapterFactory( ) {
         return new RestInterfaceFactory();
     }
+
+    @Provides
+    @Singleton
+    public QuestionStore kotlinInjectionTest( ) {
+        return new QuestionStore();
+    }
 }

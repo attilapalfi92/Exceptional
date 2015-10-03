@@ -28,7 +28,7 @@ import static java8.util.stream.StreamSupport.stream;
  * Created by Attila on 2015-06-08.
  */
 public class ExceptionInstanceStore {
-    public final int STORE_SIZE = 1000;
+    private final int STORE_SIZE = 1000;
     private static final String INSTANCE_DATABASE = "INSTANCE_DATABASE";
     private static final String INSTANCE_IDs = "INSTANCE_IDs";
     private static final Exception EMPTY_EXCEPTION = new Exception();

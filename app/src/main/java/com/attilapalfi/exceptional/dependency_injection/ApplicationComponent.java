@@ -11,17 +11,18 @@ import com.attilapalfi.exceptional.rest.ExceptionService;
 import com.attilapalfi.exceptional.rest.VotingService;
 import com.attilapalfi.exceptional.services.GcmMessageHandler;
 import com.attilapalfi.exceptional.services.LocationProvider;
+import com.attilapalfi.exceptional.ui.AnswerExceptionActivity;
 import com.attilapalfi.exceptional.ui.FacebookLoginFragment;
 import com.attilapalfi.exceptional.ui.OptionsActivity;
 import com.attilapalfi.exceptional.ui.ShowNotificationActivity;
 import com.attilapalfi.exceptional.ui.main.ExceptionInstancesFragment;
-import com.attilapalfi.exceptional.ui.main.MainFragment;
-import com.attilapalfi.exceptional.ui.main.VotedExceptionsFragment;
-import com.attilapalfi.exceptional.ui.main.VotedExceptionsFragment.VotedExceptionAdapter;
+import com.attilapalfi.exceptional.ui.main.main_page.MainFragment;
+import com.attilapalfi.exceptional.ui.main.voted_page.VotedExceptionsFragment;
+import com.attilapalfi.exceptional.ui.main.voted_page.VotedExceptionsFragment.VotedExceptionAdapter;
 import com.attilapalfi.exceptional.ui.main.friends_page.FriendDetailsActivity;
 import com.attilapalfi.exceptional.ui.main.friends_page.FriendsFragment;
 import com.attilapalfi.exceptional.ui.main.friends_page.exception_throwing.*;
-import com.attilapalfi.exceptional.ui.main.main_page.MainActivity;
+import com.attilapalfi.exceptional.ui.main.MainActivity;
 import com.attilapalfi.exceptional.ui.main.main_page.MapsActivity;
 import dagger.Component;
 
@@ -63,4 +64,6 @@ public interface ApplicationComponent extends AppContextComponent {
     void inject( ExceptionInstancesFragment.ExceptionInstanceAdapter exceptionInstanceAdapter );
     void inject( MapsActivity mapsActivity );
     void inject( ExceptionTypeClickListener exceptionTypeClickListener );
+    void inject( QuestionStore questionStore );
+    void inject( AnswerExceptionActivity answerExceptionActivity );
 }
