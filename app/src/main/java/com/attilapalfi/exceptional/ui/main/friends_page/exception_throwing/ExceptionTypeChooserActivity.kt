@@ -17,7 +17,7 @@ import com.attilapalfi.exceptional.model.Friend
 import com.attilapalfi.exceptional.persistence.ExceptionTypeStore
 import com.attilapalfi.exceptional.persistence.FriendStore
 import com.attilapalfi.exceptional.ui.main.Constants
-import com.attilapalfi.exceptional.ui.page_transformers.ZoomOutPageTransformer
+import com.attilapalfi.exceptional.ui.helpers.page_transformers.ZoomOutPageTransformer
 
 public class ExceptionTypeChooserActivity : AppCompatActivity() {
     private var pagerAdapter: ExceptionTypePagerAdapter? = null
@@ -38,7 +38,7 @@ public class ExceptionTypeChooserActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        viewPager!!.removeOnPageChangeListener(pagerAdapter)
+        viewPager?.removeOnPageChangeListener(pagerAdapter)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -68,9 +68,9 @@ public class ExceptionTypeChooserActivity : AppCompatActivity() {
     private fun initViewPager() {
         pagerAdapter = ExceptionTypePagerAdapter(supportFragmentManager, this)
         viewPager = findViewById(R.id.exception_type_pager) as ViewPager
-        viewPager!!.adapter = pagerAdapter
-        viewPager!!.addOnPageChangeListener(pagerAdapter)
-        viewPager!!.setPageTransformer(true, ZoomOutPageTransformer())
+        viewPager?.adapter = pagerAdapter
+        viewPager?.addOnPageChangeListener(pagerAdapter)
+        viewPager?.setPageTransformer(true, ZoomOutPageTransformer())
     }
 
     companion object {

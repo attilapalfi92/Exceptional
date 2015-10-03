@@ -13,7 +13,7 @@ public data class Friend(
         public var points: Int = 100,
         public var imageLoaded: Boolean = false) : Comparable<Friend> {
 
-    override fun compareTo(other: Friend) = other.points.compareTo(points)
+    override fun compareTo(o: Friend) = o.points.compareTo(points)
 
     override fun equals(o: Any?): Boolean {
         if (this === o) return true

@@ -16,12 +16,12 @@ import javax.inject.Inject
 public class ExceptionTypePagerAdapter(fragmentManager: FragmentManager, private val activity: Activity) :
         FragmentPagerAdapter(fragmentManager), ViewPager.OnPageChangeListener {
 
-    private val exceptionTypes = ArrayList<String>()
-    private val positionsToTypes = HashMap<Int, String>()
     public var exceptionTypeStore: ExceptionTypeStore? = null
         @Inject
-        set
-        get
+        public set
+        public get
+    private val exceptionTypes = ArrayList<String>()
+    private val positionsToTypes = HashMap<Int, String>()
 
     init {
         Injector.INSTANCE.applicationComponent.inject(this)
@@ -31,7 +31,7 @@ public class ExceptionTypePagerAdapter(fragmentManager: FragmentManager, private
     override fun getItem(position: Int): Fragment {
         val fragment = ExceptionTypesFragment()
         fragment.position = position;
-        positionsToTypes.put( position, fragment.typeName )
+        positionsToTypes.put(position, fragment.typeName)
         return fragment
     }
 

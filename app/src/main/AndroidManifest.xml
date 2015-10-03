@@ -107,7 +107,7 @@
                 android:value=".ui.main.MainActivity" />
         </activity>
         <activity
-            android:name=".ui.AnswerExceptionActivity"
+            android:name=".ui.question_views.AnswerExceptionActivity"
             android:label="@string/title_activity_answer_exception" >
         </activity>
     </application>

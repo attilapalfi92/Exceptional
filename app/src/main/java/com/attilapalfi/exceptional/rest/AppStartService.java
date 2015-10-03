@@ -13,10 +13,7 @@ import android.widget.Toast;
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Friend;
-import com.attilapalfi.exceptional.persistence.ExceptionInstanceStore;
-import com.attilapalfi.exceptional.persistence.ExceptionTypeStore;
-import com.attilapalfi.exceptional.persistence.FriendStore;
-import com.attilapalfi.exceptional.persistence.MetadataStore;
+import com.attilapalfi.exceptional.persistence.*;
 import com.attilapalfi.exceptional.rest.messages.AppStartRequest;
 import com.attilapalfi.exceptional.rest.messages.AppStartResponse;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -37,6 +34,7 @@ public class AppStartService {
     @Inject FriendStore friendStore;
     @Inject MetadataStore metadataStore;
     @Inject RestInterfaceFactory restInterfaceFactory;
+    @Inject QuestionStore questionStore;
     private String projectNumber;
     private AppStartRestInterface appStartRestInterface;
     private GoogleCloudMessaging googleCloudMessaging;
@@ -111,7 +109,7 @@ public class AppStartService {
                     backendFirstAppStart();
                 }
                 if ( message != null ) {
-                    Toast.makeText( context, context.getString( R.string.failed_to_connect_to_gcm_servers)
+                    Toast.makeText( context, context.getString( R.string.failed_to_connect_to_gcm_servers )
                             + message, Toast.LENGTH_LONG ).show();
                 }
             }
@@ -140,7 +138,7 @@ public class AppStartService {
     }
 
     private void saveCommonData( AppStartResponse responseBody ) {
-        new Thread( () -> {
+        new Thread( ( ) -> {
             if ( responseBody.getExceptionVersion() > metadataStore.getExceptionVersion() ) {
                 exceptionTypeStore.addExceptionTypes( responseBody.getExceptionTypes() );
             }
@@ -150,6 +148,7 @@ public class AppStartService {
             metadataStore.setVotedThisWeek( responseBody.getVotedThisWeek() );
             metadataStore.setExceptionVersion( responseBody.getExceptionVersion() );
             exceptionTypeStore.setVotedExceptionTypes( responseBody.getBeingVotedTypes() );
+            questionStore.addQuestionList( responseBody.getQuestionExceptions() );
             exceptionInstanceStore.saveExceptionList( responseBody.getMyExceptions() );
         } ).start();
     }

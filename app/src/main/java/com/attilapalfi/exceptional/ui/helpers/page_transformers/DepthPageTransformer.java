@@ -1,4 +1,4 @@
-package com.attilapalfi.exceptional.ui.page_transformers;
+package com.attilapalfi.exceptional.ui.helpers.page_transformers;
 
 import android.support.v4.view.ViewPager;
 import android.view.View;

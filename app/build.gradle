@@ -59,6 +59,7 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:23.0.0'
     compile 'io.paperdb:paperdb:1.0'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    //compile 'nl.komponents.kovenant:kovenant:2.7.+'
 }
 buildscript {
     ext.kotlin_version = '0.13.1514'

@@ -31,14 +31,18 @@ public class ExceptionTypeStore {
         Injector.INSTANCE.getApplicationComponent().inject( this );
         database = Paper.book( TYPE_DATABASE );
         handler = new Handler( Looper.getMainLooper() );
-        if ( database.read( HAS_DATA, false ) ) {
-            initExceptionTypeStore();
-            sortExceptionStore();
+        synchronized ( exceptionTypeStore ) {
+            if ( database.read( HAS_DATA, false ) ) {
+                initExceptionTypeStore();
+                sortExceptionStore();
+            }
         }
     }
 
     public void addExceptionTypes( List<ExceptionType> exceptionTypes ) {
-        saveExceptionTypeStore( exceptionTypes );
+        synchronized ( exceptionTypeStore ) {
+            saveExceptionTypeStore( exceptionTypes );
+        }
         database.write( HAS_DATA, true );
     }
 
@@ -57,9 +61,11 @@ public class ExceptionTypeStore {
     }
 
     public void setVotedExceptionTypes( List<ExceptionType> exceptionTypes ) {
-        votedExceptionTypeList.clear();
-        votedExceptionTypeList.addAll( exceptionTypes );
-        sortVotedExceptionList();
+        synchronized ( votedExceptionTypeList ) {
+            votedExceptionTypeList.clear();
+            votedExceptionTypeList.addAll( exceptionTypes );
+            sortVotedExceptionList();
+        }
         handler.post( this::notifyVotedTypeListeners );
     }
 
@@ -86,7 +92,8 @@ public class ExceptionTypeStore {
     }
 
     public ExceptionType findById( int id ) {
-        for ( List<ExceptionType> exceptionTypeList : exceptionTypeStore.values() ) {
+        Map<String, List<ExceptionType>> tempMap = new HashMap<>( exceptionTypeStore );
+        for ( List<ExceptionType> exceptionTypeList : new ArrayList<>( tempMap.values() ) ) {
             for ( ExceptionType exceptionType : exceptionTypeList ) {
                 if ( id == exceptionType.getId() ) {
                     return exceptionType;
@@ -97,12 +104,14 @@ public class ExceptionTypeStore {
     }
 
     public Set<String> getExceptionTypes( ) {
-        return exceptionTypeStore.keySet();
+        Map<String, List<ExceptionType>> tempMap = new HashMap<>( exceptionTypeStore );
+        return new HashSet<>( tempMap.keySet() );
     }
 
     public List<ExceptionType> getExceptionTypeListByName( String typeName ) {
-        if ( exceptionTypeStore.containsKey( typeName ) ) {
-            return new ArrayList<>( exceptionTypeStore.get( typeName ) );
+        Map<String, List<ExceptionType>> tempMap = new HashMap<>( exceptionTypeStore );
+        if ( tempMap.containsKey( typeName ) ) {
+            return new ArrayList<>( tempMap.get( typeName ) );
         }
         return new ArrayList<>();
     }
@@ -114,18 +123,22 @@ public class ExceptionTypeStore {
     }
 
     public List<ExceptionType> getVotedExceptionTypeList( ) {
-        return votedExceptionTypeList;
+        return new ArrayList<>( votedExceptionTypeList );
     }
 
     public void updateVotedType( ExceptionType votedType ) {
-        int index = votedExceptionTypeList.indexOf( votedType );
-        ExceptionType listElementException = votedExceptionTypeList.get( index );
-        listElementException.setVoteCount( votedType.getVoteCount() );
+        synchronized ( votedExceptionTypeList ) {
+            int index = votedExceptionTypeList.indexOf( votedType );
+            ExceptionType listElementException = votedExceptionTypeList.get( index );
+            listElementException.setVoteCount( votedType.getVoteCount() );
+        }
         notifyVotedTypeListeners();
     }
 
     public void addVotedType( ExceptionType submittedType ) {
-        votedExceptionTypeList.add( submittedType );
+        synchronized ( votedExceptionTypeList ) {
+            votedExceptionTypeList.add( submittedType );
+        }
         notifyVotedTypeListeners();
     }
 

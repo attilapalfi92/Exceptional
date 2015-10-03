@@ -44,7 +44,7 @@ public class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap?) {
         googleMap?.let {
             it
-            exceptionInstanceStore.exceptionList.forEach({
+            exceptionInstanceStore.getExceptionList().forEach({
                 e ->
                 val markerOptions = MarkerOptions()
                         .position(LatLng(e.latitude, e.longitude))

@@ -4,6 +4,8 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.Comparator;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper;
 import com.google.gson.Gson;
 
@@ -20,6 +22,7 @@ public class Exception implements Comparable<Exception> {
     private Timestamp date;
     private BigInteger fromWho;
     private BigInteger toWho;
+    @NotNull
     private String city = "";
 
     public Exception( ExceptionInstanceWrapper wrapper, ExceptionType exceptionType ) {
@@ -128,6 +131,7 @@ public class Exception implements Comparable<Exception> {
         this.exceptionTypeId = exceptionTypeId;
     }
 
+    @NotNull
     public String getCity( ) {
         return city;
     }

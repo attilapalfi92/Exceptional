@@ -3,6 +3,7 @@ package com.attilapalfi.exceptional.rest.messages
 import com.attilapalfi.exceptional.model.Exception
 import com.attilapalfi.exceptional.model.ExceptionType
 import com.attilapalfi.exceptional.model.Question
+import com.attilapalfi.exceptional.model.QuestionException
 import java.math.BigInteger
 
 /**
@@ -25,7 +26,8 @@ public data class AppStartResponse(var myExceptions: List<ExceptionInstanceWrapp
                                    var points: Int,
                                    var exceptionVersion: Int,
                                    var submittedThisWeek: Boolean,
-                                   var votedThisWeek: Boolean);
+                                   var votedThisWeek: Boolean,
+                                   var questionExceptions: List<QuestionException>);
 
 public data class BaseExceptionRequest(var userFacebookId: BigInteger, var knownExceptionIds: List<BigInteger>);
 
@@ -49,7 +51,8 @@ public data class ExceptionInstanceWrapper(var fromWho: BigInteger = BigInteger(
     )
 };
 
-public data class ExceptionRefreshResponse(var exceptionList: List<ExceptionInstanceWrapper>);
+public data class ExceptionRefreshResponse(var exceptionList: List<ExceptionInstanceWrapper>,
+                                           var questionExceptions: List<QuestionException>);
 
 public data class ExceptionSentResponse(var exceptionShortName: String, var yourPoints: Int, var friendsPoints: Int,
                                         var instanceWrapper: ExceptionInstanceWrapper);

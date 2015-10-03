@@ -10,7 +10,7 @@
     tools:context="com.attilapalfi.exceptional.ui.ExceptionHistoryActivity" >
 
     <fragment
-        android:name="com.attilapalfi.exceptional.ui.main.ExceptionInstancesFragment"
+        android:name="com.attilapalfi.exceptional.ui.main.exception_instance_views.ExceptionInstancesFragment"
         android:id="@+id/friend_details_exceptions"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

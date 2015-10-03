@@ -10,6 +10,8 @@ import com.attilapalfi.exceptional.rest.ExceptionService;
 import com.attilapalfi.exceptional.rest.RestInterfaceFactory;
 import com.attilapalfi.exceptional.rest.VotingService;
 import com.attilapalfi.exceptional.services.LocationProvider;
+import com.attilapalfi.exceptional.ui.helpers.Converter;
+import com.attilapalfi.exceptional.ui.helpers.QuestionNavigator;
 
 /**
  * Created by palfi on 2015-09-12.
@@ -45,5 +47,9 @@ public interface AppContextComponent {
 
     RestInterfaceFactory restAdapterFactory( );
 
-    QuestionStore kotlinInjectionTest( );
+    QuestionStore questionStore( );
+
+    QuestionNavigator questionNavigator( );
+
+    Converter converter8( );
 }

@@ -31,8 +31,7 @@ import com.attilapalfi.exceptional.ui.main.Constants;
 public class FriendsFragment extends Fragment implements FriendChangeListener {
     private RecyclerView recyclerView;
     private FriendAdapter friendAdapter;
-    @Inject
-    FriendStore friendStore;
+    @Inject FriendStore friendStore;
     @Inject ImageCache imageCache;
 
     @Override
@@ -84,6 +83,7 @@ public class FriendsFragment extends Fragment implements FriendChangeListener {
 
     @Override
     public void onFriendsChanged( ) {
+        friendAdapter.setValues( friendStore.getStoredFriends() );
         friendAdapter.notifyDataSetChanged();
     }
 
@@ -108,6 +108,10 @@ public class FriendsFragment extends Fragment implements FriendChangeListener {
             this.values = values;
             this.activity = activity;
             this.imageCache = imageCache;
+        }
+
+        public void setValues( List<Friend> values ) {
+            this.values = values;
         }
 
         @Override

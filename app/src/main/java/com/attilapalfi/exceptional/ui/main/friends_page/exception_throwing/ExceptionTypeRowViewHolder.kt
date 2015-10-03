@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.TextView
 import com.attilapalfi.exceptional.R
 import com.attilapalfi.exceptional.model.ExceptionType
-import com.attilapalfi.exceptional.model.Submitter
 
 /**
  * Created by palfi on 2015-10-02.

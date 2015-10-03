@@ -19,12 +19,11 @@ import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.ExceptionType;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
 import com.attilapalfi.exceptional.rest.VotingService;
-import com.attilapalfi.exceptional.ui.AnswerExceptionActivity;
-import com.attilapalfi.exceptional.ui.ExceptionHistoryActivity;
-import com.attilapalfi.exceptional.ui.LoginActivity;
-import com.attilapalfi.exceptional.ui.OptionsActivity;
+import com.attilapalfi.exceptional.ui.*;
 import com.attilapalfi.exceptional.ui.main.main_page.MapsActivity;
-import com.attilapalfi.exceptional.ui.page_transformers.ZoomOutPageTransformer;
+import com.attilapalfi.exceptional.ui.helpers.page_transformers.ZoomOutPageTransformer;
+import com.attilapalfi.exceptional.ui.question_views.AnswerExceptionActivity;
+import com.attilapalfi.exceptional.ui.helpers.QuestionNavigator;
 
 public class MainActivity extends AppCompatActivity {
     private MainPagerAdapter adapter;
@@ -35,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
     private String submitDescription = "";
     @Inject VotingService votingService;
     @Inject MetadataStore metadataStore;
+    @Inject
+    QuestionNavigator questionNavigator;
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
@@ -67,6 +68,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume( ) {
         super.onResume();
+        GoToLoginIfNotLoggedIn();
+        questionNavigator.navigateIfHasQuestion( this );
+    }
+
+    private void GoToLoginIfNotLoggedIn( ) {
         if ( !metadataStore.isLoggedIn() ) {
             Intent intent = new Intent( this, LoginActivity.class );
             startActivity( intent );

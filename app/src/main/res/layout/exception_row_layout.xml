@@ -23,7 +23,7 @@
             android:layout_alignParentStart="true" />
 
         <TextView
-            android:id="@+id/exc_row_name"
+            android:id="@+id/question_exception_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingLeft="8dp"
@@ -44,8 +44,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingLeft="8dp"
+            android:paddingRight="8dp"
             android:paddingTop="3dp"
-            android:text="Disz iz de tekszt of or diszkripsön of en ikszcepsön"
+            android:paddingBottom="3dp"
+            android:text="This is the description of the exception. This is the description of the exception."
             android:textSize="15sp"
             android:textColor="#548600"
             android:layout_below="@+id/exc_row_image"
@@ -67,7 +69,7 @@
             android:id="@+id/exc_row_city_and_friend"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Budapest"
+            android:text="Péla Palás, Budapest"
             android:textColor="#e3002b4c"
             android:layout_below="@+id/exc_row_description"
             android:layout_toRightOf="@+id/from_text"
@@ -99,7 +101,7 @@
             android:id="@+id/exc_row_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="2015-03-14 18:49:23.732"
+            android:text="@string/example_date"
             android:textColor="#e3002b4c"
             android:layout_below="@+id/to_text"
             android:layout_alignParentLeft="true"

@@ -15,10 +15,9 @@ import android.support.v4.content.WakefulBroadcastReceiver
 import com.attilapalfi.exceptional.R
 import com.attilapalfi.exceptional.dependency_injection.Injector
 import com.attilapalfi.exceptional.model.Exception
-import com.attilapalfi.exceptional.persistence.ExceptionInstanceStore
-import com.attilapalfi.exceptional.persistence.ExceptionTypeStore
-import com.attilapalfi.exceptional.persistence.FriendStore
-import com.attilapalfi.exceptional.persistence.MetadataStore
+import com.attilapalfi.exceptional.model.Question
+import com.attilapalfi.exceptional.model.QuestionException
+import com.attilapalfi.exceptional.persistence.*
 import com.attilapalfi.exceptional.ui.ShowNotificationActivity
 import com.attilapalfi.exceptional.ui.main.MainActivity
 import java.math.BigInteger
@@ -31,7 +30,7 @@ import javax.inject.Inject
  */
 public class GcmMessageHandler : IntentService("GcmMessageHandler") {
     private var handler: Handler? = null
-    private var exception: Exception? = null
+    private var exception: Exception = Exception()
     @Inject
     lateinit val exceptionInstanceStore: ExceptionInstanceStore
     @Inject
@@ -40,6 +39,8 @@ public class GcmMessageHandler : IntentService("GcmMessageHandler") {
     lateinit val friendStore: FriendStore
     @Inject
     lateinit val metadataStore: MetadataStore
+    @Inject
+    lateinit val questionStore: QuestionStore
 
     override fun onCreate() {
         super.onCreate()
@@ -79,34 +80,41 @@ public class GcmMessageHandler : IntentService("GcmMessageHandler") {
     }
 
     private fun parseNotificationToException(extras: Bundle) {
-        initException()
+        exception = Exception()
         val typeId = Integer.parseInt(extras.getString("typeId"))
-        exception!!.exceptionType = exceptionTypeStore.findById(typeId)
-        exception!!.instanceId = BigInteger(extras.getString("instanceId"))
-        exception!!.fromWho = BigInteger(extras.getString("fromWho"))
-        exception!!.toWho = BigInteger(extras.getString("toWho"))
-        exception!!.longitude = java.lang.Double.parseDouble(extras.getString("longitude"))
-        exception!!.latitude = java.lang.Double.parseDouble(extras.getString("latitude"))
-        exception!!.date = Timestamp(java.lang.Long.parseLong(extras.getString("timeInMillis")))
+        exception.exceptionType = exceptionTypeStore.findById(typeId)
+        exception.instanceId = BigInteger(extras.getString("instanceId"))
+        exception.fromWho = BigInteger(extras.getString("fromWho"))
+        exception.toWho = BigInteger(extras.getString("toWho"))
+        exception.longitude = java.lang.Double.parseDouble(extras.getString("longitude"))
+        exception.latitude = java.lang.Double.parseDouble(extras.getString("latitude"))
+        exception.date = Timestamp(java.lang.Long.parseLong(extras.getString("timeInMillis")))
+        parseAndSaveQuestion(extras, exception)
     }
 
-    private fun initException() {
-        exception = Exception()
+    private fun parseAndSaveQuestion(extras: Bundle, exception: Exception) {
+        if ( extras.getString("hasQuestion").toBoolean()) {
+            val questionText = extras.getString("questionText")
+            val yesIsCorrect = extras.getString("yesIsCorrect").toBoolean()
+            questionStore.addQuestion(QuestionException(Question(questionText, yesIsCorrect), exception))
+        }
     }
 
     private fun createBundle(): Bundle {
         val bundle = Bundle()
-        bundle.putInt("typeId", exception!!.exceptionTypeId)
-        bundle.putString("fromWho", exception!!.fromWho.toString())
-        bundle.putDouble("longitude", exception!!.longitude)
-        bundle.putDouble("latitude", exception!!.latitude)
-        bundle.putLong("timeInMillis", exception!!.date.time)
+        exception.let {
+            bundle.putInt("typeId", it.exceptionTypeId)
+            bundle.putString("fromWho", it.fromWho.toString())
+            bundle.putDouble("longitude", it.longitude)
+            bundle.putDouble("latitude", it.latitude)
+            bundle.putLong("timeInMillis", it.date.time)
+        }
         return bundle
     }
 
     private fun saveDataOnMainThread(extras: Bundle) {
-        handler!!.post {
-            exceptionInstanceStore.addExceptionAsync(exception)
+        handler?.post {
+            exception.let { exceptionInstanceStore.addExceptionAsync(it) }
             savePoints(extras)
         }
     }
@@ -118,7 +126,7 @@ public class GcmMessageHandler : IntentService("GcmMessageHandler") {
         }
         val friendPointsString = extras.getString("friendPoints")
         if (friendPointsString != null) {
-            friendStore.updateFriendPoints(exception!!.fromWho, Integer.parseInt(friendPointsString))
+            friendStore.updateFriendPoints(exception.fromWho, Integer.parseInt(friendPointsString))
         }
 
     }
@@ -176,5 +184,4 @@ public class GcmMessageHandler : IntentService("GcmMessageHandler") {
     companion object {
         private var notificationIdCounter = 0
     }
-
 }
