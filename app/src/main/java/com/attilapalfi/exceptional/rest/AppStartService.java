@@ -140,7 +140,7 @@ public class AppStartService {
             metadataStore.setVotedThisWeek( responseBody.getVotedThisWeek() );
             metadataStore.setExceptionVersion( responseBody.getExceptionVersion() );
             exceptionTypeStore.setVotedExceptionTypes( responseBody.getBeingVotedTypes() );
-            questionStore.addQuestionList( responseBody.getQuestionExceptions() );
+            questionStore.addQuestionList( responseBody.getExceptionQuestions() );
             exceptionInstanceStore.saveExceptionList( responseBody.getMyExceptions() );
         } ).start();
     }

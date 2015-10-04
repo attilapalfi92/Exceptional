@@ -15,8 +15,8 @@ import android.support.v4.content.WakefulBroadcastReceiver
 import com.attilapalfi.exceptional.R
 import com.attilapalfi.exceptional.dependency_injection.Injector
 import com.attilapalfi.exceptional.model.Exception
+import com.attilapalfi.exceptional.model.ExceptionQuestion
 import com.attilapalfi.exceptional.model.Question
-import com.attilapalfi.exceptional.model.QuestionException
 import com.attilapalfi.exceptional.persistence.*
 import com.attilapalfi.exceptional.ui.ShowNotificationActivity
 import com.attilapalfi.exceptional.ui.main.MainActivity
@@ -96,7 +96,7 @@ public class GcmMessageHandler : IntentService("GcmMessageHandler") {
         if ( extras.getString("hasQuestion").toBoolean()) {
             val questionText = extras.getString("questionText")
             val yesIsCorrect = extras.getString("yesIsCorrect").toBoolean()
-            questionStore.addQuestion(QuestionException(Question(questionText, yesIsCorrect), exception))
+            questionStore.addQuestion(ExceptionQuestion(Question(questionText, yesIsCorrect), exception))
         }
     }
 

@@ -82,7 +82,7 @@ public class ExceptionService {
             override fun success(responseData: ExceptionRefreshResponse, response: Response) {
                 if ( exceptionTypeStore.hasData() ) {
                     exceptionInstanceStore.saveExceptionListAsync(responseData.exceptionList)
-                    questionStore.addQuestionListAsync(responseData.questionExceptions)
+                    questionStore.addQuestionListAsync(responseData.exceptionQuestions)
                     Toast.makeText(context, R.string.exceptions_syncd, Toast.LENGTH_SHORT).show()
                 }
                 refreshListener.onExceptionRefreshFinished()

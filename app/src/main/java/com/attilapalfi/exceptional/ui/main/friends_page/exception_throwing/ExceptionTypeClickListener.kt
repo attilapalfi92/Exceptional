@@ -126,11 +126,11 @@ public class ExceptionTypeClickListener(private val values: List<ExceptionType>,
         val throwView = dialog.customView
         throwView?.let {
             switchView = throwView.findViewById(R.id.double_or_nothing_switch) as Switch
-            switchView?.setOnClickListener(View.OnClickListener { switchListener(it) })
+            switchView?.setOnClickListener({ switchListener(it) })
             noRadioView = throwView.findViewById(R.id.double_or_nothing_no_radio) as RadioButton
-            noRadioView?.setOnClickListener(View.OnClickListener { radioNoListener(it) })
+            noRadioView?.setOnClickListener({ radioNoListener(it) })
             yesRadioView = throwView.findViewById(R.id.double_or_nothing_yes_radio) as RadioButton
-            yesRadioView?.setOnClickListener(View.OnClickListener { radioYesListener(it) })
+            yesRadioView?.setOnClickListener({ radioYesListener(it) })
             questionView = throwView.findViewById(R.id.double_or_nothing_question_edit_text) as EditText
         }
     }

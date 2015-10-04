@@ -204,7 +204,7 @@ public class ExceptionInstanceStore {
     }
 
     private fun notifyListeners() {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        if (Looper.myLooper() === Looper.getMainLooper()) {
             exceptionChangeListeners.forEach { it.onExceptionsChanged() }
         }
     }

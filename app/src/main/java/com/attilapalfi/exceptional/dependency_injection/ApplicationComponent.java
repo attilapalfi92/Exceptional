@@ -11,21 +11,25 @@ import com.attilapalfi.exceptional.rest.ExceptionService;
 import com.attilapalfi.exceptional.rest.VotingService;
 import com.attilapalfi.exceptional.services.GcmMessageHandler;
 import com.attilapalfi.exceptional.services.LocationProvider;
-import com.attilapalfi.exceptional.ui.*;
-import com.attilapalfi.exceptional.ui.helpers.Converter;
+import com.attilapalfi.exceptional.ui.FacebookLoginFragment;
+import com.attilapalfi.exceptional.ui.OptionsActivity;
+import com.attilapalfi.exceptional.ui.ShowNotificationActivity;
+import com.attilapalfi.exceptional.ui.helpers.QuestionNavigator;
+import com.attilapalfi.exceptional.ui.helpers.ViewHelper;
+import com.attilapalfi.exceptional.ui.main.MainActivity;
 import com.attilapalfi.exceptional.ui.main.exception_instance_views.ExceptionInstanceAdapter;
 import com.attilapalfi.exceptional.ui.main.exception_instance_views.ExceptionInstanceViewHolder;
 import com.attilapalfi.exceptional.ui.main.exception_instance_views.ExceptionInstancesFragment;
-import com.attilapalfi.exceptional.ui.main.main_page.MainFragment;
-import com.attilapalfi.exceptional.ui.main.voted_page.VotedExceptionsFragment;
-import com.attilapalfi.exceptional.ui.main.voted_page.VotedExceptionsFragment.VotedExceptionAdapter;
 import com.attilapalfi.exceptional.ui.main.friends_page.FriendDetailsActivity;
 import com.attilapalfi.exceptional.ui.main.friends_page.FriendsFragment;
 import com.attilapalfi.exceptional.ui.main.friends_page.exception_throwing.*;
-import com.attilapalfi.exceptional.ui.main.MainActivity;
+import com.attilapalfi.exceptional.ui.main.main_page.MainFragment;
 import com.attilapalfi.exceptional.ui.main.main_page.MapsActivity;
+import com.attilapalfi.exceptional.ui.main.voted_page.VotedExceptionsFragment;
+import com.attilapalfi.exceptional.ui.main.voted_page.VotedExceptionsFragment.VotedExceptionAdapter;
 import com.attilapalfi.exceptional.ui.question_views.AnswerExceptionActivity;
-import com.attilapalfi.exceptional.ui.helpers.QuestionNavigator;
+import com.attilapalfi.exceptional.ui.question_views.QuestionViewHolder;
+import com.attilapalfi.exceptional.ui.question_views.QuestionsFragment;
 import dagger.Component;
 
 /**
@@ -37,38 +41,76 @@ import dagger.Component;
 @Component( modules = AppContextModule.class )
 public interface ApplicationComponent extends AppContextComponent {
     void inject( LocationProvider locationProvider );
+
     void inject( ExceptionTypeAdapter exceptionTypeAdapter );
+
     void inject( ExceptionService exceptionService );
+
     void inject( ExceptionalApplication exceptionalApplication );
+
     void inject( FacebookManager facebookManager );
+
     void inject( FacebookLoginFragment facebookLoginFragment );
+
     void inject( MainActivity mainActivity );
+
     void inject( VotedExceptionsFragment votedExceptionsFragment );
+
     void inject( VotedExceptionAdapter votedExceptionAdapter );
+
     void inject( AppStartService appStartService );
+
     void inject( ExceptionInstanceStore exceptionInstanceStore );
+
     void inject( GcmMessageHandler gcmMessageHandler );
+
     void inject( ExceptionInstancesFragment exceptionInstancesFragment );
+
     void inject( ExceptionTypeStore exceptionTypeStore );
+
     void inject( ExceptionFactory exceptionFactory );
+
     void inject( ExceptionTypesFragment exceptionTypesFragment );
+
     void inject( ShowNotificationActivity showNotificationActivity );
+
     void inject( ExceptionTypeChooserActivity exceptionTypeChooserActivity );
+
     void inject( ExceptionTypePagerAdapter exceptionTypePagerAdapter );
+
     void inject( FriendStore friendStore );
+
     void inject( ImageCache imageCache );
+
     void inject( MainFragment mainFragment );
+
     void inject( FriendDetailsActivity friendDetailsActivity );
+
     void inject( FriendsFragment friendsFragment );
+
     void inject( MetadataStore metadataStore );
+
     void inject( OptionsActivity optionsActivity );
+
     void inject( VotingService votingService );
+
     void inject( ExceptionInstanceAdapter exceptionInstanceAdapter );
+
     void inject( MapsActivity mapsActivity );
+
     void inject( ExceptionTypeClickListener exceptionTypeClickListener );
+
     void inject( QuestionStore questionStore );
+
     void inject( AnswerExceptionActivity answerExceptionActivity );
+
     void inject( QuestionNavigator questionNavigator );
-    void inject( Converter converter );
+
+    void inject( ViewHelper viewHelper );
+
     void inject( ExceptionInstanceViewHolder exceptionInstanceViewHolder );
+
+    void inject( QuestionViewHolder questionViewHolder );
+
+    void inject( QuestionsFragment questionsFragment );
 }

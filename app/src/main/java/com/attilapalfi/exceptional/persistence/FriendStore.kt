@@ -91,14 +91,6 @@ public class FriendStore {
         handler.post { this.notifyChangeListeners() }
     }
 
-    private fun updatePointsById(id: BigInteger, point: Int) {
-        val friend = findFriendById(id)
-        if (point != friend.points) {
-            friend.points = point
-            database.write(id.toString(), friend)
-        }
-    }
-
     public fun findFriendById(friendId: BigInteger): Friend {
         for (friend in getStoredFriends()) {
             if (friend.id == friendId) {
@@ -106,6 +98,14 @@ public class FriendStore {
             }
         }
         return Friend()
+    }
+
+    private fun updatePointsById(id: BigInteger, point: Int) {
+        val friend = findFriendById(id)
+        if (point != friend.points) {
+            friend.points = point
+            database.write(id.toString(), friend)
+        }
     }
 
     private fun saveNewFriends(friendList: List<Friend>) {
@@ -180,7 +180,7 @@ public class FriendStore {
     }
 
     private fun notifyChangeListeners() {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
+        if (Looper.myLooper() === Looper.getMainLooper()) {
             friendChangeListeners.forEach { it.onFriendsChanged() }
         }
     }

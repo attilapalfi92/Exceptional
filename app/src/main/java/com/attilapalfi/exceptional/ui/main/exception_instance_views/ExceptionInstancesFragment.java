@@ -1,12 +1,10 @@
 package com.attilapalfi.exceptional.ui.main.exception_instance_views;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -14,12 +12,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
@@ -28,8 +23,6 @@ import com.attilapalfi.exceptional.interfaces.ExceptionRefreshListener;
 import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.model.Friend;
 import com.attilapalfi.exceptional.persistence.ExceptionInstanceStore;
-import com.attilapalfi.exceptional.persistence.FriendStore;
-import com.attilapalfi.exceptional.persistence.ImageCache;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
 import com.attilapalfi.exceptional.rest.ExceptionService;
 import com.attilapalfi.exceptional.ui.main.friends_page.FriendDetailsActivity;
@@ -99,6 +92,7 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
 
     @Override
     public void onExceptionsChanged( ) {
+        exceptionInstanceAdapter.setValues(generateValues());
         exceptionInstanceAdapter.notifyDataSetChanged();
     }
 
@@ -132,7 +126,7 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
     private void initExceptionAdapter( ) {
         List<Exception> values = generateValues();
         exceptionInstanceAdapter = new ExceptionInstanceAdapter( values );
-        onExceptionsChanged();
+        exceptionInstanceAdapter.notifyDataSetChanged();
     }
 
     private List<Exception> generateValues( ) {

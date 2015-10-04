@@ -54,4 +54,7 @@ public class ExceptionInstanceAdapter extends RecyclerView.Adapter<ExceptionInst
     }
 
 
+    public void setValues( List<Exception> values ) {
+        this.values = values;
+    }
 }

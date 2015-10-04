@@ -14,7 +14,6 @@ import com.google.gson.Gson;
  * Created by Attila on 2015-06-08.
  */
 public class Exception implements Comparable<Exception> {
-    private transient ExceptionType exceptionType;
     private BigInteger instanceId = new BigInteger( "0" );
     private int exceptionTypeId = 0;
     private double longitude;
@@ -24,6 +23,9 @@ public class Exception implements Comparable<Exception> {
     private BigInteger toWho;
     @NotNull
     private volatile String city = "";
+    private transient ExceptionType exceptionType;
+    private transient Friend sender;
+    private transient Friend receiver;
 
     public Exception( ExceptionInstanceWrapper wrapper, ExceptionType exceptionType ) {
         this.exceptionTypeId = wrapper.getExceptionTypeId();
@@ -129,6 +131,22 @@ public class Exception implements Comparable<Exception> {
 
     public void setExceptionTypeId( int exceptionTypeId ) {
         this.exceptionTypeId = exceptionTypeId;
+    }
+
+    public Friend getSender( ) {
+        return sender;
+    }
+
+    public void setSender( Friend sender ) {
+        this.sender = sender;
+    }
+
+    public Friend getReceiver( ) {
+        return receiver;
+    }
+
+    public void setReceiver( Friend receiver ) {
+        this.receiver = receiver;
     }
 
     @NotNull

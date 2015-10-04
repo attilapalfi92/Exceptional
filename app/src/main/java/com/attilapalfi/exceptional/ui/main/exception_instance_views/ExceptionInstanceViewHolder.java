@@ -1,7 +1,5 @@
 package com.attilapalfi.exceptional.ui.main.exception_instance_views;
 
-import java.math.BigInteger;
-
 import javax.inject.Inject;
 
 import android.content.Context;
@@ -14,20 +12,16 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.*;
 import com.attilapalfi.exceptional.model.Exception;
-import com.attilapalfi.exceptional.persistence.FriendStore;
-import com.attilapalfi.exceptional.persistence.ImageCache;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
-import com.attilapalfi.exceptional.ui.helpers.Converter;
+import com.attilapalfi.exceptional.ui.helpers.ViewHelper;
 
 /**
  * Created by palfi on 2015-10-03.
  */
 public class ExceptionInstanceViewHolder extends RecyclerView.ViewHolder {
     @Inject Context context;
-    @Inject FriendStore friendStore;
     @Inject MetadataStore metadataStore;
-    @Inject ImageCache imageCache;
-    @Inject Converter converter;
+    @Inject ViewHelper viewHelper;
     private ImageView friendImage;
     private TextView exceptionNameView;
     private TextView descriptionView;
@@ -61,57 +55,26 @@ public class ExceptionInstanceViewHolder extends RecyclerView.ViewHolder {
     }
 
     private void initBinding( Exception model ) {
-        initFromWho( model );
-        initToWho( model );
+        fromWho = viewHelper.initExceptionSender( model );
+        toWho = viewHelper.initExceptionReceiver( model );
         user = metadataStore.getUser();
-    }
-
-    private void initFromWho( Exception model ) {
-        fromWho = friendStore.findFriendById( model.getFromWho() );
-        if ( fromWho.getId().equals( new BigInteger( "0" ) ) ) {
-            fromWho = metadataStore.getUser();
-        }
-    }
-
-    private void initToWho( Exception model ) {
-        toWho = friendStore.findFriendById( model.getToWho() );
-        if ( toWho.getId().equals( new BigInteger( "0" ) ) ) {
-            toWho = metadataStore.getUser();
-        }
     }
 
     private void bindUserInfo( Exception model ) {
         toNameView.setText( toWho.getName() );
-        bindImage();
+        viewHelper.bindExceptionImage( fromWho, toWho, friendImage );
         setFromWhoNameAndCity( model );
     }
 
-    private void bindImage( ) {
-        if ( user.equals( fromWho ) ) {
-            if ( user.equals( toWho ) ) {
-                imageCache.setImageToView( user, friendImage );
-            } else {
-                if ( toWho.getId().longValue() != 0 ) {
-                    imageCache.setImageToView( toWho, friendImage );
-                }
-            }
-        } else {
-            if ( fromWho.getId().longValue() != 0 ) {
-                imageCache.setImageToView( fromWho, friendImage );
-            }
-        }
-    }
-
     private void setFromWhoNameAndCity( Exception model ) {
-        String nameAndCity = converter.getNameAndCity( model, fromWho );
+        String nameAndCity = viewHelper.getNameAndCity( model, fromWho );
         friendNameAndCityView.setText( nameAndCity );
     }
 
-    // TODO: get type information from exceptionTypeStore or what to remove redundant strings
     private void bindExceptionInfo( Exception model ) {
         exceptionNameView.setText( model.getShortName() );
         descriptionView.setText( model.getDescription() );
-        dateView.setText( DateFormat.format( "yyyy-MM-dd HH:mm:ss", model.getDate().getTime() ) );
+        dateView.setText( viewHelper.formattedExceptionDate( model ) );
     }
 
     private void setDirectionImages( ) {

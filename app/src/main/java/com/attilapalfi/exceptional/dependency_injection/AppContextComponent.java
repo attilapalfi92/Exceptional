@@ -10,8 +10,8 @@ import com.attilapalfi.exceptional.rest.ExceptionService;
 import com.attilapalfi.exceptional.rest.RestInterfaceFactory;
 import com.attilapalfi.exceptional.rest.VotingService;
 import com.attilapalfi.exceptional.services.LocationProvider;
-import com.attilapalfi.exceptional.ui.helpers.Converter;
 import com.attilapalfi.exceptional.ui.helpers.QuestionNavigator;
+import com.attilapalfi.exceptional.ui.helpers.ViewHelper;
 
 /**
  * Created by palfi on 2015-09-12.
@@ -51,5 +51,5 @@ public interface AppContextComponent {
 
     QuestionNavigator questionNavigator( );
 
-    Converter converter8( );
+    ViewHelper viewHelper( );
 }

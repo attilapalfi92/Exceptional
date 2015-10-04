@@ -12,8 +12,8 @@ import com.attilapalfi.exceptional.rest.ExceptionService;
 import com.attilapalfi.exceptional.rest.RestInterfaceFactory;
 import com.attilapalfi.exceptional.rest.VotingService;
 import com.attilapalfi.exceptional.services.LocationProvider;
-import com.attilapalfi.exceptional.ui.helpers.Converter;
 import com.attilapalfi.exceptional.ui.helpers.QuestionNavigator;
+import com.attilapalfi.exceptional.ui.helpers.ViewHelper;
 import dagger.Module;
 import dagger.Provides;
 
@@ -128,7 +128,7 @@ public class AppContextModule {
 
     @Provides
     @Singleton
-    public Converter converter( ) {
-        return new Converter();
+    public ViewHelper converter( ) {
+        return new ViewHelper();
     }
 }

@@ -19,7 +19,7 @@ import com.attilapalfi.exceptional.persistence.ExceptionTypeStore
 public class ExceptionTypesFragment : Fragment() {
     public var position: Int = 0
     public var typeName = ""
-    private var exceptionTypes: List<ExceptionType> = ArrayList<ExceptionType>()
+    private var exceptionTypes: List<ExceptionType> = ArrayList()
     private var recyclerView: RecyclerView? = null
     private var typeAdapter: ExceptionTypeAdapter? = null
     @Inject
@@ -30,15 +30,9 @@ public class ExceptionTypesFragment : Fragment() {
         initExceptionTypes()
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
-
     private fun initExceptionTypes() {
         val index = instanceCounter++ % exceptionTypeStore.exceptionTypes.size()
-        val types = ArrayList(exceptionTypeStore.exceptionTypes)
-        typeName = types.get(index)
+        typeName = ArrayList(exceptionTypeStore.exceptionTypes).get(index)
         exceptionTypes = exceptionTypeStore.getExceptionTypeListByName(typeName)
     }
 

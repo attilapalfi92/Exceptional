@@ -96,7 +96,7 @@
     <string name="throw_question">Throw</string>
     <string name="exceptions_loading">Exceptions still loading...</string>
     <string name="unknown">Unknown</string>
-    <string name="title_activity_answer_exception">AnswerExceptionActivity</string>
+    <string name="title_activity_answer_exception">Double or nothing</string>
     <string name="example_date">2015-03-14 18:49:23.732</string>
     <string name="too_long_question">Too long question.</string>
     <string name="too_short_question">Too short question.</string>

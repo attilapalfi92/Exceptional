@@ -10,7 +10,7 @@ import com.attilapalfi.exceptional.model.ExceptionType
 /**
  * Created by palfi on 2015-10-02.
  */
-public class ExceptionTypeRowViewHolder(itemView: View, private val context: Context) : RecyclerView.ViewHolder(itemView) {
+public class ExceptionTypeViewHolder(itemView: View, private val context: Context) : RecyclerView.ViewHolder(itemView) {
     private val shortNameView: TextView
     private val fullNameView: TextView
     private val descriptionView: TextView
