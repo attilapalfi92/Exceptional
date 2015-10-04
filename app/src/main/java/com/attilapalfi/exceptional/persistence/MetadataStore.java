@@ -150,17 +150,10 @@ public class MetadataStore {
         database.write( USER, user );
     }
 
+
     public void updateUser( Friend newUserState ) {
         newUserState.setImageLoaded( true );
-        if ( newUserState != null ) {
-            if ( this.user == null ) {
-                this.user = newUserState;
-                saveUser( newUserState );
-
-            } else {
-                lookForChange( newUserState );
-            }
-        }
+        lookForChange( newUserState );
     }
 
     private void lookForChange( Friend newUserState ) {

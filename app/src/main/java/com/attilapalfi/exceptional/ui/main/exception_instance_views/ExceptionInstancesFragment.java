@@ -52,6 +52,7 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
     private RecyclerView recyclerView;
     private ExceptionInstanceAdapter exceptionInstanceAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private boolean refreshing = false;
 
     @Override
     public void onCreate( @Nullable Bundle savedInstanceState ) {
@@ -103,11 +104,14 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
 
     @Override
     public void onRefresh( ) {
-        long currentTime = System.currentTimeMillis();
-        if ( currentTime > lastSyncTime + 10000 ) {
-            lastSyncTime = currentTime;
+        if ( !refreshing ) {
+            refreshing = true;
+            long currentTime = System.currentTimeMillis();
+            if ( currentTime > lastSyncTime + 10000 ) {
+                lastSyncTime = currentTime;
+            }
+            actualRefresh();
         }
-        actualRefresh();
     }
 
     private void actualRefresh( ) {
@@ -122,11 +126,12 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
     @Override
     public void onExceptionRefreshFinished( ) {
         swipeRefreshLayout.setRefreshing( false );
+        refreshing = false;
     }
 
     private void initExceptionAdapter( ) {
         List<Exception> values = generateValues();
-        exceptionInstanceAdapter = new ExceptionInstanceAdapter( values, getActivity().getApplicationContext() );
+        exceptionInstanceAdapter = new ExceptionInstanceAdapter( values );
         onExceptionsChanged();
     }
 

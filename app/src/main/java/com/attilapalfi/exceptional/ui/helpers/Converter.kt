@@ -2,6 +2,7 @@ package com.attilapalfi.exceptional.ui.helpers
 
 import com.attilapalfi.exceptional.dependency_injection.Injector
 import com.attilapalfi.exceptional.model.Exception
+import com.attilapalfi.exceptional.model.Friend
 import com.attilapalfi.exceptional.persistence.FriendStore
 import java.math.BigInteger
 import javax.inject.Inject
@@ -17,8 +18,8 @@ public class Converter {
         Injector.INSTANCE.applicationComponent.inject(this)
     }
 
-    public fun nameAndCityFromException(exception: Exception): String {
-        var senderName = getSenderName(exception)
+    public fun getNameAndCity(exception: Exception, fromWho: Friend): String {
+        var senderName = fromWho.getName()
         return addCity(senderName, exception.city)
     }
 

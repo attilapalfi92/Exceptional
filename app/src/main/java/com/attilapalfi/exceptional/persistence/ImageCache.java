@@ -17,13 +17,13 @@ import javax.inject.Inject;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.util.LruCache;
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageView;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Friend;
@@ -37,10 +37,13 @@ public class ImageCache {
     private LruCache<BigInteger, Bitmap> imageWarehouse;
     private String filePath;
     private Map<Friend, ImageView> viewRefreshMap = Collections.synchronizedMap( new HashMap<>() );
-    @Inject Context context;
+    private Handler handler;
+    @Inject
+    Context context;
 
     public ImageCache( ) {
         Injector.INSTANCE.getApplicationComponent().inject( this );
+        handler = new Handler( Looper.getMainLooper() );
         try {
             filePath =
                     Environment.MEDIA_MOUNTED.equals( Environment.getExternalStorageState() ) ||
@@ -76,27 +79,18 @@ public class ImageCache {
     }
 
     public void loadImagesInitially( List<Friend> friendList ) {
-        new AsyncTask<Void, Void, Void>() {
+        stream( friendList ).forEach( ImageCache.this::getImageForFriend );
 
-            @Override
-            protected Void doInBackground( Void... params ) {
-                stream( friendList ).forEach( ImageCache.this::getImageForFriend );
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute( Void aVoid ) {
-                stream( friendList ).forEach( friend -> {
-                    Bitmap bitmap = imageWarehouse.get( friend.getId() );
-                    ImageView view = viewRefreshMap.get( friend );
-                    if ( view != null ) {
-                        view.setImageBitmap( bitmap );
-                    }
-                    viewRefreshMap.remove( friend );
-                } );
-            }
-
-        }.execute();
+        handler.post( () -> {
+            stream( friendList ).forEach( friend -> {
+                Bitmap bitmap = imageWarehouse.get( friend.getId() );
+                ImageView view = viewRefreshMap.get( friend );
+                if ( view != null ) {
+                    view.setImageBitmap( bitmap );
+                }
+                viewRefreshMap.remove( friend );
+            } );
+        });
     }
 
     public void updateImageAsync( Friend newFriendState, Friend oldFriendState ) {

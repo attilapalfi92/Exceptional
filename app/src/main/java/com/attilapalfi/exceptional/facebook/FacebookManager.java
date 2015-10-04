@@ -26,17 +26,24 @@ import com.facebook.login.LoginResult;
  * Created by Attila on 2015-06-06.
  */
 public class FacebookManager {
-    @Inject AppStartService appStartService;
-    @Inject ExceptionInstanceStore exceptionInstanceStore;
-    @Inject ExceptionTypeStore exceptionTypeStore;
-    @Inject FriendStore friendStore;
-    @Inject ImageCache imageCache;
-    @Inject MetadataStore metadataStore;
+    @Inject
+    AppStartService appStartService;
+    @Inject
+    ExceptionInstanceStore exceptionInstanceStore;
+    @Inject
+    ExceptionTypeStore exceptionTypeStore;
+    @Inject
+    FriendStore friendStore;
+    @Inject
+    ImageCache imageCache;
+    @Inject
+    MetadataStore metadataStore;
     private AccessToken accessToken;
     private AccessTokenTracker tokenTracker;
     private Profile profile;
     private ProfileTracker profileTracker;
-    private Friend user;
+    @NonNull
+    private final Friend user = new Friend();
     private CallbackManager callbackManager;
     private FacebookCallback<LoginResult> facebookCallback;
     private FacebookLoginSuccessHandler loginSuccessHandler;
@@ -168,12 +175,12 @@ public class FacebookManager {
     private void initYourself( ) {
         profile = Profile.getCurrentProfile();
         if ( profile != null ) {
-            user = new Friend(
-                    new BigInteger( profile.getId() ),
-                    profile.getFirstName() + " " + profile.getMiddleName(),
-                    profile.getLastName(),
-                    profile.getProfilePictureUri( 200, 200 ).toString(),
-                    100, false);
+            user.setId( new BigInteger( profile.getId() ) );
+            user.setFirstName( ( profile.getFirstName().trim() + " " + profile.getMiddleName().trim() ).trim() );
+            user.setLastName( profile.getLastName() );
+            user.setImageUrl( profile.getProfilePictureUri( 200, 200 ).toString() );
+            user.setPoints( 100 );
+            user.setImageLoaded( false );
         }
     }
 

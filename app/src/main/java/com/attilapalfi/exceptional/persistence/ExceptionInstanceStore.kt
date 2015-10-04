@@ -13,7 +13,6 @@ import com.attilapalfi.exceptional.model.ExceptionFactory
 import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper
 import io.paperdb.Book
 import io.paperdb.Paper
-import java8.util.stream.StreamSupport.stream
 import java.math.BigInteger
 import java.util.*
 import javax.inject.Inject
@@ -60,10 +59,10 @@ public class ExceptionInstanceStore {
         object : AsyncTask<Void?, Void?, Void?>() {
 
             override fun doInBackground(vararg params: Void?): Void? {
-                synchronized (storedExceptions) {
-                    stream(idList).forEach { id ->
-                        val e = database.read(id.toString(), EMPTY_EXCEPTION)
-                        e.exceptionType = exceptionTypeStore.findById(e.exceptionTypeId)
+                idList.forEach {
+                    val e = database.read(it.toString(), EMPTY_EXCEPTION)
+                    e.exceptionType = exceptionTypeStore.findById(e.exceptionTypeId)
+                    synchronized(storedExceptions) {
                         var index = Collections.binarySearch(storedExceptions, e)
                         if (index < 0) {
                             index = -index - 1
@@ -71,6 +70,7 @@ public class ExceptionInstanceStore {
                         }
                     }
                 }
+
                 return null
             }
 
@@ -92,9 +92,7 @@ public class ExceptionInstanceStore {
             object : AsyncTask<Void?, Void?, Void?>() {
 
                 override fun doInBackground(vararg params: Void?): Void? {
-                    synchronized (storedExceptions) {
-                        saveToStore(exception)
-                    }
+                    saveToStore(exception)
                     return null
                 }
 
@@ -108,9 +106,7 @@ public class ExceptionInstanceStore {
 
     public fun saveExceptionList(wrapperList: List<ExceptionInstanceWrapper>) {
         if (!wrapperList.isEmpty()) {
-            synchronized (storedExceptions) {
-                saveListToStore(wrapperList)
-            }
+            saveListToStore(wrapperList)
             handler.post { this.notifyListeners() }
         }
     }
@@ -120,9 +116,7 @@ public class ExceptionInstanceStore {
             object : AsyncTask<Void?, Void?, Void?>() {
 
                 override fun doInBackground(vararg params: Void?): Void? {
-                    synchronized (storedExceptions) {
-                        saveListToStore(wrapperList)
-                    }
+                    saveListToStore(wrapperList)
                     return null
                 }
 
@@ -150,7 +144,7 @@ public class ExceptionInstanceStore {
             wrappers.map { exceptionFactory.createFromWrapper(it) }
 
     private fun storeEachIfNotContained(toBeStored: List<Exception>) {
-        stream(toBeStored).forEach { e ->
+        toBeStored.forEach { e ->
             if (!storedExceptions.contains(e)) {
                 saveWithCity(e)
             }
@@ -159,26 +153,28 @@ public class ExceptionInstanceStore {
 
     private fun saveWithCity(e: Exception) {
         setCityForException(e)
-        addToListInOrder(storedExceptions, e)
+        addToListInOrder(e)
     }
 
-    private fun addToListInOrder(list: MutableList<Exception>, e: Exception) {
-        var index = Collections.binarySearch(list, e)
-        if (index < 0) {
-            index = -index - 1
-            if (list.size() >= STORE_SIZE) {
-                addNewOrKeepOld(list, e, index)
-            } else {
-                addTheNewOne(list, e, index)
+    private fun addToListInOrder(e: Exception) {
+        synchronized(storedExceptions) {
+            var index = Collections.binarySearch(storedExceptions, e)
+            if (index < 0) {
+                index = -index - 1
+                if (storedExceptions.size() >= STORE_SIZE) {
+                    addNewOrKeepOld(e, index)
+                } else {
+                    addTheNewOne(e, index)
+                }
             }
         }
     }
 
-    private fun addNewOrKeepOld(list: MutableList<Exception>, e: Exception, index: Int) {
-        val removeCandidate = list.get(list.size() - 1)
+    private fun addNewOrKeepOld(e: Exception, index: Int) {
+        val removeCandidate = storedExceptions.get(storedExceptions.size() - 1)
         if (removeCandidate.compareTo(e) > 0) {
-            removeTheCandidate(list)
-            addTheNewOne(list, e, index)
+            removeTheCandidate(storedExceptions)
+            addTheNewOne(e, index)
         }
     }
 
@@ -188,8 +184,8 @@ public class ExceptionInstanceStore {
         database.delete(removed.instanceId.toString())
     }
 
-    private fun addTheNewOne(list: MutableList<Exception>, e: Exception, index: Int) {
-        list.add(index, e)
+    private fun addTheNewOne(e: Exception, index: Int) {
+        storedExceptions.add(index, e)
         idList.add(index, e.instanceId)
         database.write(e.instanceId.toString(), e)
         database.write(INSTANCE_IDs, idList)
@@ -202,7 +198,6 @@ public class ExceptionInstanceStore {
             e.city = context!!.getString(R.string.unknown)
             exception.printStackTrace()
         }
-
     }
 
     private fun notifyListeners() {
@@ -211,7 +206,7 @@ public class ExceptionInstanceStore {
         }
     }
 
-    public fun getExceptionList() = ArrayList(storedExceptions)
+    public fun getExceptionList() = synchronized(storedExceptions) { ArrayList(storedExceptions) }
 
     public fun addExceptionChangeListener(listener: ExceptionChangeListener): Boolean {
         return exceptionChangeListeners.add(listener)

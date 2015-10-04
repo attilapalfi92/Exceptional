@@ -15,7 +15,6 @@ import com.attilapalfi.exceptional.model.Exception;
  * Created by palfi on 2015-10-03.
  */
 public class ExceptionInstanceAdapter extends RecyclerView.Adapter<ExceptionInstanceViewHolder> {
-    private Context context;
     private List<Exception> values;
     private RecyclerView recyclerView;
 
@@ -28,10 +27,9 @@ public class ExceptionInstanceAdapter extends RecyclerView.Adapter<ExceptionInst
         }
     };
 
-    public ExceptionInstanceAdapter( List<Exception> values, Context context ) {
+    public ExceptionInstanceAdapter( List<Exception> values ) {
         Injector.INSTANCE.getApplicationComponent().inject( this );
         this.values = values;
-        this.context = context;
     }
 
     @Override

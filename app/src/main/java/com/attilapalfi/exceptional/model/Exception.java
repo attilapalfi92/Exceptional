@@ -23,7 +23,7 @@ public class Exception implements Comparable<Exception> {
     private BigInteger fromWho;
     private BigInteger toWho;
     @NotNull
-    private String city = "";
+    private volatile String city = "";
 
     public Exception( ExceptionInstanceWrapper wrapper, ExceptionType exceptionType ) {
         this.exceptionTypeId = wrapper.getExceptionTypeId();
@@ -137,7 +137,9 @@ public class Exception implements Comparable<Exception> {
     }
 
     public void setCity( String city ) {
-        this.city = city;
+        if ( city != null ) {
+            this.city = city;
+        }
     }
 
     @Override

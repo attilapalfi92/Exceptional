@@ -103,7 +103,7 @@ public class ExceptionInstanceViewHolder extends RecyclerView.ViewHolder {
     }
 
     private void setFromWhoNameAndCity( Exception model ) {
-        String nameAndCity = converter.nameAndCityFromException( model );
+        String nameAndCity = converter.getNameAndCity( model, fromWho );
         friendNameAndCityView.setText( nameAndCity );
     }
 

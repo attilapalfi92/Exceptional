@@ -22,7 +22,7 @@ public class FriendStore {
     lateinit val imageCache: ImageCache
     private val database: Book
     private val handler: Handler
-    private val storedFriends = Collections.synchronizedList(LinkedList<Friend>())
+    private val storedFriends = LinkedList<Friend>()
     private val idList = Collections.synchronizedList(LinkedList<BigInteger>())
     private val friendChangeListeners = HashSet<FriendChangeListener>()
 
@@ -40,7 +40,7 @@ public class FriendStore {
         friendChangeListeners.remove(listener)
     }
 
-    public fun getStoredFriends() = ArrayList(storedFriends)
+    public fun getStoredFriends() = synchronized(storedFriends) { ArrayList(storedFriends) }
 
     init {
         Injector.INSTANCE.applicationComponent.inject(this)
@@ -54,11 +54,18 @@ public class FriendStore {
     }
 
     public fun updateFriendList(friendList: List<Friend>) {
-        synchronized(storedFriends) {
-            saveNewFriends(friendList)
-            updateOldFriends(friendList)
-            removeDeletedFriends(friendList)
-        }
+        object : AsyncTask<Void?, Void?, Void?>() {
+            override fun doInBackground(vararg params: Void?): Void? {
+                saveNewFriends(friendList)
+                updateOldFriends(friendList)
+                removeDeletedFriends(friendList)
+                return null
+            }
+
+            override fun onPostExecute(result: Void?) {
+                notifyChangeListeners()
+            }
+        }.execute()
     }
 
     public fun updateFriendPoints(id: BigInteger, points: Int) {
@@ -96,7 +103,7 @@ public class FriendStore {
     }
 
     public fun findFriendById(friendId: BigInteger): Friend {
-        for (friend in ArrayList(storedFriends)) {
+        for (friend in getStoredFriends()) {
             if (friend.id == friendId) {
                 return friend
             }
@@ -106,97 +113,73 @@ public class FriendStore {
 
     private fun saveNewFriends(friendList: List<Friend>) {
         val workList = ArrayList(friendList)
-        workList.removeAll(storedFriends)
+        synchronized(storedFriends) {
+            workList.removeAll(storedFriends)
+        }
         saveFriendList(workList)
     }
 
     private fun saveFriendList(friendList: List<Friend>) {
-        storedFriends.addAll(friendList)
         imageCache.loadImagesInitially(friendList)
-        object : AsyncTask<Void?, Void?, Void?>() {
 
-            override fun doInBackground(vararg params: Void?): Void? {
-                friendList.forEach {
-                    idList.add(it.id)
-                    it.imageLoaded = true
-                    database.write(it.id.toString(), it)
-                }
-                database.write(FRIEND_IDS, idList)
-                Collections.sort(storedFriends)
-                return null
-            }
-
-            override fun onPostExecute(aVoid: Void?) {
-                notifyChangeListeners()
-            }
-
-        }.execute()
+        friendList.forEach {
+            idList.add(it.id)
+            it.imageLoaded = true
+            database.write(it.id.toString(), it)
+        }
+        database.write(FRIEND_IDS, idList)
+        synchronized(storedFriends) {
+            storedFriends.addAll(friendList)
+            Collections.sort(storedFriends)
+        }
     }
 
     private fun updateOldFriends(friendList: List<Friend>) {
-        object : AsyncTask<Void?, Void?, Void?>() {
-
-            override fun doInBackground(vararg params: Void?): Void? {
-                val knownCurrentFriends = ArrayList<Friend>(friendList.size())
-                knownCurrentFriends.addAll(friendList)
-                for (f1 in knownCurrentFriends) {
-                    for (f2 in storedFriends) {
-                        checkFriendChange(f1, f2)
-                    }
-                }
-                return null
+        val knownCurrentFriends = ArrayList<Friend>(friendList.size())
+        knownCurrentFriends.addAll(friendList)
+        var storedFriendsCopy = getStoredFriends()
+        for (f1 in knownCurrentFriends) {
+            for (f2 in storedFriendsCopy) {
+                checkFriendChange(f1, f2)
             }
+        }
+    }
 
-            private fun checkFriendChange(newFriendState: Friend, oldFriendState: Friend) {
-                if (newFriendState == oldFriendState) {
-                    if (newFriendState.imageUrl != oldFriendState.imageUrl) {
-                        updateFriend(newFriendState, oldFriendState)
-                        imageCache.updateImageAsync(newFriendState, oldFriendState)
-                    }
-                    if (newFriendState.getName() != oldFriendState.getName()) {
-                        updateFriend(newFriendState, oldFriendState)
-                    }
-                }
+    private fun checkFriendChange(newFriendState: Friend, oldFriendState: Friend) {
+        if (newFriendState == oldFriendState) {
+            if (newFriendState.imageUrl != oldFriendState.imageUrl) {
+                updateFriendInDatabase(newFriendState, oldFriendState)
+                imageCache.updateImageAsync(newFriendState, oldFriendState)
             }
+            if (newFriendState.getName() != oldFriendState.getName()) {
+                updateFriendInDatabase(newFriendState, oldFriendState)
+            }
+        }
+    }
 
-            private fun updateFriend(newState: Friend, oldInstance: Friend) {
-                oldInstance.firstName = newState.firstName
-                oldInstance.lastName = newState.lastName
-                oldInstance.imageUrl = newState.imageUrl
-                database.write(oldInstance.id.toString(), oldInstance)
-            }
-
-            override fun onPostExecute(aVoid: Void?) {
-                notifyChangeListeners()
-            }
-        }.execute()
+    private fun updateFriendInDatabase(newState: Friend, oldInstance: Friend) {
+        oldInstance.firstName = newState.firstName
+        oldInstance.lastName = newState.lastName
+        oldInstance.imageUrl = newState.imageUrl
+        database.write(oldInstance.id.toString(), oldInstance)
     }
 
     private fun removeDeletedFriends(friendList: List<Friend>) {
         val deletedFriends = ArrayList<Friend>()
-        deletedFriends.addAll(storedFriends)
+        deletedFriends.addAll(getStoredFriends())
         deletedFriends.removeAll(friendList)
         deleteFriends(deletedFriends)
     }
 
     private fun deleteFriends(toBeDeleted: List<Friend>) {
-        object : AsyncTask<Void?, Void?, Void?>() {
-
-            override fun doInBackground(vararg params: Void?): Void? {
-                toBeDeleted.forEach {
-                    storedFriends.remove(it)
-                    database.delete(it.id.toString())
-                    idList.remove(it.id)
-                }
-                database.write(FRIEND_IDS, idList)
-                return null
+        toBeDeleted.forEach {
+            synchronized(storedFriends) {
+                storedFriends.remove(it)
             }
-
-            override fun onPostExecute(aVoid: Void?) {
-                notifyChangeListeners()
-            }
-
-        }.execute()
+            database.delete(it.id.toString())
+            idList.remove(it.id)
+        }
+        database.write(FRIEND_IDS, idList)
     }
 
     private fun notifyChangeListeners() {
@@ -231,7 +214,7 @@ public class FriendStore {
     }
 
     public fun organizeAsync() {
-        object: AsyncTask<Void?, Void?, Void?>() {
+        object : AsyncTask<Void?, Void?, Void?>() {
             override fun doInBackground(vararg params: Void?): Void? {
                 synchronized(storedFriends) {
                     Collections.sort(storedFriends)

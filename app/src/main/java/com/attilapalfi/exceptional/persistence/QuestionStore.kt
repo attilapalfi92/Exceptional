@@ -31,9 +31,7 @@ public class QuestionStore {
     public fun hasQuestions() = storedQuestions.isNotEmpty()
 
     public fun addQuestion(question: QuestionException) {
-        synchronized(storedQuestions) {
-            addToStore(question)
-        }
+        addToStore(question)
         database.write(QUESTION_LIST, storedQuestions)
     }
 
@@ -47,10 +45,12 @@ public class QuestionStore {
     }
 
     private fun addToStore(question: QuestionException) {
-        var index = Collections.binarySearch(storedQuestions, question)
-        if (index < 0) {
-            index = -index - 1
-            storedQuestions.add(index, question)
+        synchronized(storedQuestions) {
+            var index = Collections.binarySearch(storedQuestions, question)
+            if (index < 0) {
+                index = -index - 1
+                storedQuestions.add(index, question)
+            }
         }
     }
 
