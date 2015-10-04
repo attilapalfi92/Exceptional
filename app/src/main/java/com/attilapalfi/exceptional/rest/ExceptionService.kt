@@ -9,10 +9,7 @@ import com.attilapalfi.exceptional.model.Exception
 import com.attilapalfi.exceptional.model.ExceptionFactory
 import com.attilapalfi.exceptional.model.Friend
 import com.attilapalfi.exceptional.model.Question
-import com.attilapalfi.exceptional.persistence.ExceptionInstanceStore
-import com.attilapalfi.exceptional.persistence.FriendStore
-import com.attilapalfi.exceptional.persistence.MetadataStore
-import com.attilapalfi.exceptional.persistence.QuestionStore
+import com.attilapalfi.exceptional.persistence.*
 import com.attilapalfi.exceptional.rest.messages.BaseExceptionRequest
 import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper
 import com.attilapalfi.exceptional.rest.messages.ExceptionRefreshResponse
@@ -39,6 +36,7 @@ public class ExceptionService {
     @Inject lateinit val friendStore: FriendStore
     @Inject lateinit val metadataStore: MetadataStore
     @Inject lateinit val questionStore: QuestionStore
+    @Inject lateinit val exceptionTypeStore: ExceptionTypeStore
     private var exceptionRestInterface: ExceptionRestInterface? = null
 
     init {
@@ -82,9 +80,11 @@ public class ExceptionService {
 
         exceptionRestInterface?.refreshExceptions(requestBody, object : Callback<ExceptionRefreshResponse> {
             override fun success(responseData: ExceptionRefreshResponse, response: Response) {
-                exceptionInstanceStore.saveExceptionListAsync(responseData.exceptionList)
-                questionStore.addQuestionListAsync(responseData.questionExceptions)
-                Toast.makeText(context, R.string.exceptions_syncd, Toast.LENGTH_SHORT).show()
+                if ( exceptionTypeStore.hasData() ) {
+                    exceptionInstanceStore.saveExceptionListAsync(responseData.exceptionList)
+                    questionStore.addQuestionListAsync(responseData.questionExceptions)
+                    Toast.makeText(context, R.string.exceptions_syncd, Toast.LENGTH_SHORT).show()
+                }
                 refreshListener.onExceptionRefreshFinished()
             }
 

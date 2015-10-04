@@ -78,19 +78,25 @@ public class ImageCache {
         }
     }
 
-    public void loadImagesInitially( List<Friend> friendList ) {
-        stream( friendList ).forEach( ImageCache.this::getImageForFriend );
+    public void loadImagesInitiallyAsync( List<Friend> friendList ) {
+        new Thread( ( ) -> {
+            stream( friendList ).forEach( ImageCache.this::getImageForFriend );
 
-        handler.post( () -> {
-            stream( friendList ).forEach( friend -> {
-                Bitmap bitmap = imageWarehouse.get( friend.getId() );
-                ImageView view = viewRefreshMap.get( friend );
-                if ( view != null ) {
-                    view.setImageBitmap( bitmap );
-                }
-                viewRefreshMap.remove( friend );
+            handler.post( ( ) -> {
+                setBitmapsToViews( friendList );
             } );
-        });
+        } ).start();
+    }
+
+    private void setBitmapsToViews( List<Friend> friendList ) {
+        stream( friendList ).forEach( friend -> {
+            Bitmap bitmap = imageWarehouse.get( friend.getId() );
+            ImageView view = viewRefreshMap.get( friend );
+            if ( view != null ) {
+                view.setImageBitmap( bitmap );
+            }
+            viewRefreshMap.remove( friend );
+        } );
     }
 
     public void updateImageAsync( Friend newFriendState, Friend oldFriendState ) {

@@ -20,6 +20,7 @@ public class ExceptionTypeStore {
     private static final ExceptionType EMPTY_TYPE = new ExceptionType( 0, "", "", "" );
     private final String MAX_ID = "maxId";
     private final String HAS_DATA = "hasData";
+    private volatile boolean hasData = false;
 
     private Book database;
     private Handler handler;
@@ -35,6 +36,7 @@ public class ExceptionTypeStore {
             if ( database.read( HAS_DATA, false ) ) {
                 initExceptionTypeStore();
                 sortExceptionStore();
+                hasData = true;
             }
         }
     }
@@ -43,6 +45,7 @@ public class ExceptionTypeStore {
         synchronized ( exceptionTypeStore ) {
             saveExceptionTypeStore( exceptionTypes );
         }
+        hasData = true;
         database.write( HAS_DATA, true );
     }
 
@@ -155,4 +158,6 @@ public class ExceptionTypeStore {
     public boolean removeVotedTypeListener( VotedTypeListener listener ) {
         return votedTypeListeners.remove( listener );
     }
+
+    public boolean hasData() { return hasData; }
 }

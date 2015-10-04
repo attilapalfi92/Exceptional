@@ -7,7 +7,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.widget.Toast;
 import com.attilapalfi.exceptional.R;
@@ -28,13 +27,20 @@ import static java8.util.stream.StreamSupport.stream;
  * Created by palfi on 2015-09-12.
  */
 public class AppStartService {
-    @Inject Context context;
-    @Inject ExceptionInstanceStore exceptionInstanceStore;
-    @Inject ExceptionTypeStore exceptionTypeStore;
-    @Inject FriendStore friendStore;
-    @Inject MetadataStore metadataStore;
-    @Inject RestInterfaceFactory restInterfaceFactory;
-    @Inject QuestionStore questionStore;
+    @Inject
+    Context context;
+    @Inject
+    ExceptionInstanceStore exceptionInstanceStore;
+    @Inject
+    ExceptionTypeStore exceptionTypeStore;
+    @Inject
+    FriendStore friendStore;
+    @Inject
+    MetadataStore metadataStore;
+    @Inject
+    RestInterfaceFactory restInterfaceFactory;
+    @Inject
+    QuestionStore questionStore;
     private String projectNumber;
     private AppStartRestInterface appStartRestInterface;
     private GoogleCloudMessaging googleCloudMessaging;
@@ -90,31 +96,17 @@ public class AppStartService {
     }
 
     private void gcmFirstAppStart( ) {
-        new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground( Void... params ) {
-                googleCloudMessaging = GoogleCloudMessaging.getInstance( context );
-                try {
-                    registrationId = googleCloudMessaging.register( projectNumber );
-                    return null;
-                } catch ( IOException e ) {
-                    return "Error: " + e.getMessage();
-                }
-            }
-
-            @Override
-            protected void onPostExecute( String message ) {
-                if ( registrationId != null ) {
-                    requestBody.setGcmId( registrationId );
-                    backendFirstAppStart();
-                }
-                if ( message != null ) {
-                    Toast.makeText( context, context.getString( R.string.failed_to_connect_to_gcm_servers )
-                            + message, Toast.LENGTH_LONG ).show();
-                }
-            }
-
-        }.execute();
+        googleCloudMessaging = GoogleCloudMessaging.getInstance( context );
+        try {
+            registrationId = googleCloudMessaging.register( projectNumber );
+        } catch ( IOException e ) {
+            Toast.makeText( context, context.getString( R.string.failed_to_connect_to_gcm_servers )
+                    + e.getMessage(), Toast.LENGTH_LONG ).show();
+        }
+        if ( registrationId != null ) {
+            requestBody.setGcmId( registrationId );
+            backendFirstAppStart();
+        }
     }
 
     private void backendFirstAppStart( ) {

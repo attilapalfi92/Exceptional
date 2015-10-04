@@ -57,15 +57,19 @@ public class ExceptionTypeClickListener(private val values: List<ExceptionType>,
     }
 
     private fun buildDoubleNothingDialog(exception: com.attilapalfi.exceptional.model.Exception) {
-        val builder = createMaterialDialog(exception)
+        val builder = initDialogBuilder(exception)
         setCallbacks(builder, exception)
         val dialog = builder.build()
-        setListeners(dialog)
+        setClickListeners(dialog)
         dialog.show()
     }
 
-    private fun createMaterialDialog(exception: Exception): MaterialDialog.Builder {
-        return MaterialDialog.Builder(activity).title(activity.getString(R.string.throw_question) + " " + exception.shortName + "?").customView(R.layout.throw_layout, true).positiveText(R.string.throwException).negativeText(R.string.cancel)
+    private fun initDialogBuilder(exception: Exception): MaterialDialog.Builder {
+        return MaterialDialog.Builder(activity)
+                .title(activity.getString(R.string.throw_question) + " " + exception.shortName + "?")
+                .customView(R.layout.throw_layout, true)
+                .positiveText(R.string.throwException)
+                .negativeText(R.string.cancel)
     }
 
     private fun setCallbacks(builder: MaterialDialog.Builder, exception: Exception) {
@@ -85,7 +89,7 @@ public class ExceptionTypeClickListener(private val values: List<ExceptionType>,
     private fun inputIsValid(): Boolean {
         if ( switchView?.isChecked == true ) {
             questionText = questionView?.text.toString().trim()
-            if (isTooShort()) return false
+            if (isLengthInvalid()) return false
             if (isNotWellFormatted()) return false
         }
         return true
@@ -101,21 +105,24 @@ public class ExceptionTypeClickListener(private val values: List<ExceptionType>,
 
     private fun isNotWellFormatted(): Boolean {
         if ( !questionText.endsWith('?') ) {
-            Toast.makeText(activity, "Questions end with question mark.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity,  R.string.question_ends_question , Toast.LENGTH_SHORT).show();
             return true
         }
         return false
     }
 
-    private fun isTooShort(): Boolean {
-        if ( questionText.length() < 12 ) {
-            Toast.makeText(activity, "Too short question.", Toast.LENGTH_SHORT).show();
+    private fun isLengthInvalid(): Boolean {
+        if ( questionText.length() < 5 ) {
+            Toast.makeText(activity, R.string.too_short_question, Toast.LENGTH_SHORT).show();
+            return true
+        } else if ( questionText.length() > 150 ) {
+            Toast.makeText(activity, R.string.too_long_question, Toast.LENGTH_SHORT).show();
             return true
         }
         return false
     }
 
-    private fun setListeners(dialog: MaterialDialog) {
+    private fun setClickListeners(dialog: MaterialDialog) {
         val throwView = dialog.customView
         throwView?.let {
             switchView = throwView.findViewById(R.id.double_or_nothing_switch) as Switch

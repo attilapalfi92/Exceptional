@@ -30,6 +30,7 @@ public class ExceptionInstanceStore {
     lateinit val exceptionTypeStore: ExceptionTypeStore
     @Inject
     lateinit val exceptionFactory: ExceptionFactory
+    private lateinit val initThread: Thread
     private val database: Book
     private val exceptionChangeListeners = HashSet<ExceptionChangeListener>()
     private val storedExceptions = ArrayList<Exception>()
@@ -49,16 +50,19 @@ public class ExceptionInstanceStore {
         database = Paper.book(INSTANCE_DATABASE)
         handler = Handler(Looper.getMainLooper())
         geocoder = Geocoder(context, Locale.getDefault())
+        initThread = Thread( {
+            idList.addAll(database.read(INSTANCE_IDs, LinkedList<BigInteger>()))
+        } )
+        initThread.start()
         loadExceptionInstances()
     }
 
 
     private fun loadExceptionInstances() {
-        idList.addAll(database.read(INSTANCE_IDs, LinkedList<BigInteger>()))
-
         object : AsyncTask<Void?, Void?, Void?>() {
 
             override fun doInBackground(vararg params: Void?): Void? {
+                initThread.join()
                 idList.forEach {
                     val e = database.read(it.toString(), EMPTY_EXCEPTION)
                     e.exceptionType = exceptionTypeStore.findById(e.exceptionTypeId)
@@ -70,7 +74,6 @@ public class ExceptionInstanceStore {
                         }
                     }
                 }
-
                 return null
             }
 
@@ -216,5 +219,8 @@ public class ExceptionInstanceStore {
         return exceptionChangeListeners.remove(listener)
     }
 
-    public fun getKnownIds() = idList
+    public fun getKnownIds(): ArrayList<BigInteger> {
+        initThread.join()
+        return idList
+    }
 }

@@ -25,6 +25,7 @@ public class FriendStore {
     private val storedFriends = LinkedList<Friend>()
     private val idList = Collections.synchronizedList(LinkedList<BigInteger>())
     private val friendChangeListeners = HashSet<FriendChangeListener>()
+    private lateinit val initThread: Thread
 
     companion object {
         private val FRIEND_DATABASE = "FRIEND_DATABASE"
@@ -46,26 +47,22 @@ public class FriendStore {
         Injector.INSTANCE.applicationComponent.inject(this)
         database = Paper.book(FRIEND_DATABASE)
         handler = Handler(Looper.getMainLooper())
-        synchronized(storedFriends) {
-            idList.addAll(database.read(FRIEND_IDS, LinkedList<BigInteger>()))
-            idList.forEach { storedFriends.add(database.read(it.toString(), EMPTY_FRIEND)) }
-        }
-        organizeAsync()
+        initThread = Thread({
+            synchronized(storedFriends) {
+                idList.addAll(database.read(FRIEND_IDS, LinkedList<BigInteger>()))
+                idList.forEach { storedFriends.add(database.read(it.toString(), EMPTY_FRIEND)) }
+                Collections.sort(storedFriends)
+            }
+        })
+        initThread.start()
     }
 
     public fun updateFriendList(friendList: List<Friend>) {
-        object : AsyncTask<Void?, Void?, Void?>() {
-            override fun doInBackground(vararg params: Void?): Void? {
-                saveNewFriends(friendList)
-                updateOldFriends(friendList)
-                removeDeletedFriends(friendList)
-                return null
-            }
-
-            override fun onPostExecute(result: Void?) {
-                notifyChangeListeners()
-            }
-        }.execute()
+        initThread.join()
+        saveNewFriends(friendList)
+        updateOldFriends(friendList)
+        removeDeletedFriends(friendList)
+        handler.post { notifyChangeListeners() }
     }
 
     public fun updateFriendPoints(id: BigInteger, points: Int) {
@@ -120,7 +117,7 @@ public class FriendStore {
     }
 
     private fun saveFriendList(friendList: List<Friend>) {
-        imageCache.loadImagesInitially(friendList)
+        imageCache.loadImagesInitiallyAsync(friendList)
 
         friendList.forEach {
             idList.add(it.id)
@@ -188,43 +185,10 @@ public class FriendStore {
         }
     }
 
-    public fun updatePointsOfFriendsAsync(points: Map<BigInteger, Int>) {
-        object : AsyncTask<Void, Void, Void>() {
-
-            override fun doInBackground(vararg params: Void): Void? {
-                synchronized(storedFriends) {
-                    points.forEach { it -> updatePointsById(it.key, it.value) }
-                    Collections.sort(storedFriends)
-                }
-                return null
-            }
-
-            override fun onPostExecute(aVoid: Void) {
-                notifyChangeListeners()
-            }
-
-        }.execute()
-    }
-
     public fun wipe() {
         storedFriends.clear()
         idList.clear()
         database.destroy()
         notifyChangeListeners()
-    }
-
-    public fun organizeAsync() {
-        object : AsyncTask<Void?, Void?, Void?>() {
-            override fun doInBackground(vararg params: Void?): Void? {
-                synchronized(storedFriends) {
-                    Collections.sort(storedFriends)
-                }
-                return null
-            }
-
-            override fun onPostExecute(result: Void?) {
-                notifyChangeListeners()
-            }
-        }.execute()
     }
 }

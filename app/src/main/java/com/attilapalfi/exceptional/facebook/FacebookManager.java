@@ -126,8 +126,12 @@ public class FacebookManager {
     private void refreshFriends( ) {
         GraphRequest request = GraphRequest.newMyFriendsRequest( accessToken, ( jsonArray, graphResponse ) -> {
             if ( graphResponse.getError() == null ) {
-                List<Friend> friends = parseFriendsJson( jsonArray );
-                continueAppStart( friends );
+                //List<Friend> friends = parseFriendsJson( jsonArray );
+                //continueAppStart( friends );
+                new Thread( () -> {
+                    List<Friend> friends = parseFriendsJson( jsonArray );
+                    continueAppStart( friends );
+                } ).start();
             } else {
                 if ( metadataStore.isLoggedIn() ) {
                     Log.e( "FacebookManager: ", "GraphRequest error: " + graphResponse.getError() );

@@ -118,7 +118,7 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
         if ( metadataStore.isLoggedIn() ) {
             exceptionService.refreshExceptions( this );
         } else {
-            Toast.makeText( getActivity().getApplicationContext(), "You have to login first!", Toast.LENGTH_SHORT ).show();
+            Toast.makeText( getActivity().getApplicationContext(), R.string.login_first, Toast.LENGTH_SHORT ).show();
             onExceptionRefreshFinished();
         }
     }

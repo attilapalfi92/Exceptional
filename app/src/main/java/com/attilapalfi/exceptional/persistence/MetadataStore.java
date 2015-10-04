@@ -35,12 +35,12 @@ public class MetadataStore {
     @Inject ImageCache imageCache;
     private Book database;
     private Handler handler;
-    private int exceptionVersion = 0;
-    private boolean loggedIn = false;
-    private boolean firstStartFinished = false;
-    private boolean votedThisWeek = true;
-    private boolean submittedThisWeek = true;
-    private Friend user = EMPTY_USER;
+    private volatile int exceptionVersion = 0;
+    private volatile boolean loggedIn = false;
+    private volatile boolean firstStartFinished = false;
+    private volatile boolean votedThisWeek = true;
+    private volatile boolean submittedThisWeek = true;
+    private volatile Friend user = EMPTY_USER;
     private Set<FirstStartFinishedListener> firstStartFinishedListeners = new HashSet<>();
     private Set<PointChangeListener> pointChangeListeners = new HashSet<>();
 

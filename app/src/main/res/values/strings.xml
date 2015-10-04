@@ -59,7 +59,7 @@
     <string name="short_name">short name:</string>
     <string name="short_name_hint">like TooHotSoupException</string>
     <string name="description">description:</string>
-    <string name="description_hint">Here goes the description of the Exception. TooHotSoupException is thrown whenever you try to eat too hot soup.</string>
+    <string name="description_hint">Description.</string>
     <string name="prefix_end_with_dot_error">Prefix has to end with \'.\' character.</string>
     <string name="prefix_too_short_error">Prefix is too short.</string>
     <string name="prefix_too_long_error">Prefix is too long.</string>
@@ -98,4 +98,8 @@
     <string name="unknown">Unknown</string>
     <string name="title_activity_answer_exception">AnswerExceptionActivity</string>
     <string name="example_date">2015-03-14 18:49:23.732</string>
+    <string name="too_long_question">Too long question.</string>
+    <string name="too_short_question">Too short question.</string>
+    <string name="question_ends_question">Questions end with question mark.</string>
+    <string name="login_first">You have to login first!</string>
 </resources>

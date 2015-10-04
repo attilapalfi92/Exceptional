@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
             showValidationToast( R.string.prefix_too_short_error );
             return false;
         }
-        if ( submitPrefix.length() > 500 ) {
+        if ( submitPrefix.length() > 200 ) {
             showValidationToast( R.string.prefix_too_long_error );
             return false;
         }
@@ -195,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
             showValidationToast( R.string.short_name_too_short_error );
             return false;
         }
-        if ( submitShortName.length() > 200 ) {
+        if ( submitShortName.length() > 100 ) {
             showValidationToast( R.string.short_name_too_long_error );
             return false;
         }
@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
             showValidationToast( R.string.description_too_short_error );
             return false;
         }
-        if ( submitDescription.length() > 3000 ) {
+        if ( submitDescription.length() > 1000 ) {
             showValidationToast( R.string.description_too_long_error );
             return false;
         }
