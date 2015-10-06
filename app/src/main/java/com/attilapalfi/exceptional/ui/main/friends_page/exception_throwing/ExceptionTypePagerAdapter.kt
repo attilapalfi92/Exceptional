@@ -19,7 +19,7 @@ public class ExceptionTypePagerAdapter(fragmentManager: FragmentManager, private
     public var exceptionTypeStore: ExceptionTypeStore? = null
         @Inject
         public set
-        public get
+        get
     private val exceptionTypes = ArrayList<String>()
     private val positionsToTypes = HashMap<Int, String>()
 

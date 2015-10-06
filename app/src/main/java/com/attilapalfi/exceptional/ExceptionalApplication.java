@@ -22,8 +22,10 @@ import io.paperdb.Paper;
  * Created by Attila on 2015-06-05.
  */
 public class ExceptionalApplication extends android.support.multidex.MultiDexApplication {
-    @Inject AppStartService appStartService;
-    @Inject FacebookManager facebookManager;
+    @Inject
+    AppStartService appStartService;
+    @Inject
+    FacebookManager facebookManager;
     @Inject
     LocationProvider locationProvider;
 

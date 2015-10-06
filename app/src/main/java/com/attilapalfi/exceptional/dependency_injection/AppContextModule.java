@@ -128,7 +128,7 @@ public class AppContextModule {
 
     @Provides
     @Singleton
-    public ViewHelper converter( ) {
+    public ViewHelper viewHelper( ) {
         return new ViewHelper();
     }
 }

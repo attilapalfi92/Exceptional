@@ -25,7 +25,7 @@ public class ExceptionInstanceStore {
     public var context: Context? = null
         @Inject
         public set
-        public get
+        get
     @Inject
     lateinit val exceptionTypeStore: ExceptionTypeStore
     @Inject

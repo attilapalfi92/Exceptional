@@ -21,6 +21,7 @@ public class Exception implements Comparable<Exception> {
     private Timestamp date;
     private BigInteger fromWho;
     private BigInteger toWho;
+    private Question question;
     @NotNull
     private volatile String city = "";
     private transient ExceptionType exceptionType;
@@ -28,7 +29,7 @@ public class Exception implements Comparable<Exception> {
     private transient Friend receiver;
 
     public Exception( ExceptionInstanceWrapper wrapper, ExceptionType exceptionType ) {
-        this.exceptionTypeId = wrapper.getExceptionTypeId();
+        this.exceptionTypeId = exceptionType.getId();
         this.exceptionType = exceptionType;
         this.instanceId = wrapper.getInstanceId();
         this.longitude = wrapper.getLongitude();
@@ -36,6 +37,7 @@ public class Exception implements Comparable<Exception> {
         this.date = new Timestamp( wrapper.getTimeInMillis() );
         this.fromWho = wrapper.getFromWho();
         this.toWho = wrapper.getToWho();
+        this.question = wrapper.getQuestion();
     }
 
     @Override
@@ -147,6 +149,14 @@ public class Exception implements Comparable<Exception> {
 
     public void setReceiver( Friend receiver ) {
         this.receiver = receiver;
+    }
+
+    public Question getQuestion( ) {
+        return question;
+    }
+
+    public void setQuestion( Question question ) {
+        this.question = question;
     }
 
     @NotNull

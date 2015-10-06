@@ -50,12 +50,12 @@ public class ExceptionService {
         val exceptionInstanceWrapper = ExceptionInstanceWrapper(exception, question)
         try {
             exceptionRestInterface?.throwException(exceptionInstanceWrapper, object : Callback<ExceptionSentResponse> {
-                override fun success(e: ExceptionSentResponse, response: Response) {
-                    val toWho = friendStore.findFriendById(e.instanceWrapper.toWho)
-                    metadataStore.points = e.yourPoints
-                    friendStore.updateFriendPoints(e.instanceWrapper.toWho, e.friendsPoints)
-                    exceptionInstanceStore.addExceptionAsync(exceptionFactory.createFromWrapper(e.instanceWrapper))
-                    printSuccess(e, toWho)
+                override fun success(response: ExceptionSentResponse, r: Response) {
+                    val toWho = friendStore.findFriendById(response.instanceWrapper.toWho)
+                    metadataStore.points = response.sendersPoints
+                    friendStore.updateFriendPoints(response.instanceWrapper.toWho, response.receiversPoints)
+                    exceptionInstanceStore.addExceptionAsync(exceptionFactory.createFromWrapper(response.instanceWrapper))
+                    printSuccess(response, toWho)
                 }
 
                 private fun printSuccess(e: ExceptionSentResponse, toWho: Friend) {

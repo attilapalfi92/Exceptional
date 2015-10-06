@@ -99,7 +99,8 @@ public class ExceptionTypeClickListener(private val values: List<ExceptionType>,
         return Question(
                 questionText,
                 yesRadioView?.isChecked == true,
-                switchView?.isChecked == true
+                switchView?.isChecked == true,
+                false
         )
     }
 
@@ -112,10 +113,10 @@ public class ExceptionTypeClickListener(private val values: List<ExceptionType>,
     }
 
     private fun isLengthInvalid(): Boolean {
-        if ( questionText.length() < 5 ) {
+        if ( questionText.length() < 3 ) {
             Toast.makeText(activity, R.string.too_short_question, Toast.LENGTH_SHORT).show();
             return true
-        } else if ( questionText.length() > 150 ) {
+        } else if ( questionText.length() > 100 ) {
             Toast.makeText(activity, R.string.too_long_question, Toast.LENGTH_SHORT).show();
             return true
         }
