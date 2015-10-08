@@ -95,7 +95,7 @@ public class ShowNotificationActivity : AppCompatActivity(), QuestionChangeListe
     }
 
     private fun loadQuestionToViews() {
-        if (exception.question.hasQuestion) {
+        if (exception.question.hasQuestion && !exception.question.isAnswered) {
             showQuestionViews()
         } else {
             hideQuestionViews()

@@ -136,6 +136,14 @@ public class ExceptionInstanceStore {
         }
     }
 
+    fun setAnswered(instanceId: BigInteger, answered: Boolean) {
+        val exception = findById(instanceId);
+        if ( exception.instanceId != BigInteger.ZERO ) {
+            exception.question.isAnswered = answered
+            database.write(exception.instanceId.toString(), exception)
+        }
+    }
+
     public fun findById(id: BigInteger): Exception {
         initThread.join()
         synchronized(storedExceptions) {

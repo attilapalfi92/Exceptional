@@ -14,7 +14,7 @@ import com.google.gson.Gson;
  * Created by Attila on 2015-06-08.
  */
 public class Exception implements Comparable<Exception> {
-    private BigInteger instanceId = new BigInteger( "0" );
+    private BigInteger instanceId = BigInteger.ZERO;
     private int exceptionTypeId = 0;
     private double longitude;
     private double latitude;

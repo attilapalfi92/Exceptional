@@ -110,6 +110,7 @@ public class ExceptionRestConnector {
             override fun success(response: ExceptionSentResponse?, r: Response?) {
                 response?.let {
                     questionStore.removeQuestion(it.instanceWrapper.instanceId)
+                    exceptionInstanceStore.setAnswered(it.instanceWrapper.instanceId, true);
                     metadataStore.points = it.receiversPoints
                     friendStore.updateFriendPoints(it.instanceWrapper.fromWho, it.sendersPoints)
                 }
