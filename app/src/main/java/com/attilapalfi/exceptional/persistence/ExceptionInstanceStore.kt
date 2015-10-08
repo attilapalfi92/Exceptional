@@ -51,37 +51,29 @@ public class ExceptionInstanceStore {
         handler = Handler(Looper.getMainLooper())
         geocoder = Geocoder(context, Locale.getDefault())
         initThread = Thread( {
-            idList.addAll(database.read(INSTANCE_IDs, LinkedList<BigInteger>()))
-        } )
-        initThread.start()
-        loadExceptionInstances()
-    }
-
-
-    private fun loadExceptionInstances() {
-        object : AsyncTask<Void?, Void?, Void?>() {
-
-            override fun doInBackground(vararg params: Void?): Void? {
-                initThread.join()
+            synchronized(storedExceptions) {
+                idList.addAll(database.read(INSTANCE_IDs, LinkedList<BigInteger>()))
                 idList.forEach {
                     val e = database.read(it.toString(), EMPTY_EXCEPTION)
                     e.exceptionType = exceptionTypeStore.findById(e.exceptionTypeId)
-                    synchronized(storedExceptions) {
-                        var index = Collections.binarySearch(storedExceptions, e)
-                        if (index < 0) {
-                            index = -index - 1
-                            storedExceptions.add(index, e)
-                        }
+                    var index = Collections.binarySearch(storedExceptions, e)
+                    if (index < 0) {
+                        index = -index - 1
+                        storedExceptions.add(index, e)
                     }
                 }
-                return null
             }
+        } )
+        initThread.start()
+        notifyWhenInitFinished()
+    }
 
-            override fun onPostExecute(aVoid: Void?) {
-                notifyListeners()
-            }
 
-        }.execute()
+    private fun notifyWhenInitFinished() {
+        Thread({
+            initThread.join()
+            notifyListeners()
+        }).start()
     }
 
     public fun wipe() {
@@ -218,6 +210,10 @@ public class ExceptionInstanceStore {
     private fun notifyListeners() {
         if (Looper.myLooper() === Looper.getMainLooper()) {
             exceptionChangeListeners.forEach { it.onExceptionsChanged() }
+        } else {
+            handler.post {
+                exceptionChangeListeners.forEach { it.onExceptionsChanged() }
+            }
         }
     }
 

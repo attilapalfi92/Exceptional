@@ -2,12 +2,10 @@ package com.attilapalfi.exceptional.model;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
-import java.util.Comparator;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper;
-import com.google.gson.Gson;
 
 
 /**
@@ -21,7 +19,7 @@ public class Exception implements Comparable<Exception> {
     private Timestamp date;
     private BigInteger fromWho;
     private BigInteger toWho;
-    private Question question;
+    private Question question = new Question();
     @NotNull
     private volatile String city = "";
     private transient ExceptionType exceptionType;
