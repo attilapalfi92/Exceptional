@@ -28,14 +28,21 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"/>
 
-    <EditText
-            android:id="@+id/double_or_nothing_question_edit_text"
-            android:hint="@string/double_nothing_question_hint"
-            android:textSize="18sp"
-            android:enabled="false"
-            android:layout_width="wrap_content"
+    <android.support.design.widget.TextInputLayout
+            android:id="@+id/input_1"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/double_or_nothing_question"/>
+            android:layout_below="@+id/double_or_nothing_question">
+
+        <EditText
+                android:id="@+id/double_or_nothing_question_edit_text"
+                android:hint="@string/double_nothing_question_hint"
+                android:textSize="18sp"
+                android:enabled="false"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+    </android.support.design.widget.TextInputLayout>
 
     <TextView
             android:id="@+id/double_or_nothing_correct_answ"
@@ -45,7 +52,7 @@
             android:textColor="#000000"
             android:text="@string/correct_answer"
             android:layout_centerHorizontal="true"
-            android:layout_below="@+id/double_or_nothing_question_edit_text"/>
+            android:layout_below="@+id/input_1"/>
 
     <RadioButton
             android:id="@+id/double_or_nothing_no_radio"
