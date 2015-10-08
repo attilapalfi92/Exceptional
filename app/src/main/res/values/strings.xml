@@ -102,4 +102,6 @@
     <string name="too_short_question">Too short question.</string>
     <string name="question_ends_question">Questions end with question mark.</string>
     <string name="login_first">You have to login first!</string>
+    <string name="failed_to_answer">Failed to send answer.</string>
+    <string name="notif_sender_prefix">From:</string>
 </resources>

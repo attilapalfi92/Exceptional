@@ -1,5 +1,6 @@
 package com.attilapalfi.exceptional.rest;
 
+import com.attilapalf.exceptional.messages.QuestionAnswer;
 import com.attilapalfi.exceptional.rest.messages.BaseExceptionRequest;
 import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper;
 import com.attilapalfi.exceptional.rest.messages.ExceptionRefreshResponse;
@@ -17,4 +18,7 @@ public interface ExceptionRestInterface {
 
     @POST( "/exception/refresh" )
     void refreshExceptions( @Body BaseExceptionRequest requestBody, Callback<ExceptionRefreshResponse> cb );
+
+    @POST( "/exception/answer" )
+    void answerQuestion( @Body QuestionAnswer questionAnswer, Callback<ExceptionSentResponse> cb );
 }

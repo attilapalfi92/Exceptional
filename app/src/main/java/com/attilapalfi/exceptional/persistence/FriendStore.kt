@@ -69,6 +69,7 @@ public class FriendStore {
         object : AsyncTask<Void?, Void?, Void?>() {
 
             override fun doInBackground(vararg params: Void?): Void? {
+                initThread.join()
                 synchronized(storedFriends) {
                     updatePointsById(id, points)
                     Collections.sort(storedFriends)
@@ -91,7 +92,8 @@ public class FriendStore {
         handler.post { this.notifyChangeListeners() }
     }
 
-    public fun findFriendById(friendId: BigInteger): Friend {
+    public fun findById(friendId: BigInteger): Friend {
+        initThread.join()
         for (friend in getStoredFriends()) {
             if (friend.id == friendId) {
                 return friend
@@ -101,7 +103,7 @@ public class FriendStore {
     }
 
     private fun updatePointsById(id: BigInteger, point: Int) {
-        val friend = findFriendById(id)
+        val friend = findById(id)
         if (point != friend.points) {
             friend.points = point
             database.write(id.toString(), friend)
@@ -121,7 +123,7 @@ public class FriendStore {
 
         friendList.forEach {
             idList.add(it.id)
-            it.imageLoaded = true
+            it.imageDownloaded = true
             database.write(it.id.toString(), it)
         }
         database.write(FRIEND_IDS, idList)

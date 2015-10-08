@@ -1,7 +1,6 @@
 package com.attilapalfi.exceptional.rest.messages
 
 import com.attilapalfi.exceptional.model.Exception
-import com.attilapalfi.exceptional.model.ExceptionQuestion
 import com.attilapalfi.exceptional.model.ExceptionType
 import com.attilapalfi.exceptional.model.Question
 import java.math.BigInteger
@@ -50,8 +49,7 @@ public data class ExceptionInstanceWrapper(var fromWho: BigInteger = BigInteger(
     )
 };
 
-public data class ExceptionRefreshResponse(var exceptionList: List<ExceptionInstanceWrapper>,
-                                           var exceptionQuestions: List<ExceptionQuestion>);
+public data class ExceptionRefreshResponse(var exceptionList: List<ExceptionInstanceWrapper>);
 
 public data class ExceptionSentResponse(var exceptionShortName: String,
                                         var sendersPoints: Int,

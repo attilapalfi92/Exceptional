@@ -42,7 +42,7 @@ public class ViewHelper {
     public fun initExceptionSender(exception: Exception): Friend {
         var fromWho = exception.sender
         if (fromWho == null || fromWho.id == BigInteger.ZERO) {
-            fromWho = friendStore.findFriendById(exception.fromWho)
+            fromWho = friendStore.findById(exception.fromWho)
             if (fromWho.id == BigInteger("0")) {
                 fromWho = metadataStore.user
             }
@@ -54,7 +54,7 @@ public class ViewHelper {
     public fun initExceptionReceiver(exception: Exception): Friend {
         var toWho = exception.receiver
         if (toWho == null || toWho.id == BigInteger.ZERO) {
-            toWho = friendStore.findFriendById(exception.toWho)
+            toWho = friendStore.findById(exception.toWho)
             if (toWho.id == BigInteger("0")) {
                 toWho = metadataStore.user
             }

@@ -24,7 +24,7 @@ import com.attilapalfi.exceptional.model.Exception;
 import com.attilapalfi.exceptional.model.Friend;
 import com.attilapalfi.exceptional.persistence.ExceptionInstanceStore;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
-import com.attilapalfi.exceptional.rest.ExceptionService;
+import com.attilapalfi.exceptional.rest.ExceptionRestConnector;
 import com.attilapalfi.exceptional.ui.main.friends_page.FriendDetailsActivity;
 
 /**
@@ -36,7 +36,7 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
     private static long lastSyncTime = 0;
 
     @Inject
-    ExceptionService exceptionService;
+    ExceptionRestConnector exceptionRestConnector;
     @Inject
     ExceptionInstanceStore exceptionInstanceStore;
     @Inject
@@ -110,7 +110,7 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
 
     private void actualRefresh( ) {
         if ( metadataStore.isLoggedIn() ) {
-            exceptionService.refreshExceptions( this );
+            exceptionRestConnector.refreshExceptions( this );
         } else {
             Toast.makeText( getActivity().getApplicationContext(), R.string.login_first, Toast.LENGTH_SHORT ).show();
             onExceptionRefreshFinished();

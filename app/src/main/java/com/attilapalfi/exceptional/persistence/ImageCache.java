@@ -70,7 +70,7 @@ public class ImageCache {
         if ( bitmap != null ) {
             view.setImageBitmap( bitmap );
         } else {
-            if ( friend.isImageLoaded() ) {
+            if ( friend.isImageDownloaded() ) {
                 new AsyncImageLoader( friend, view ).execute();
             } else {
                 viewRefreshMap.put( friend, view );

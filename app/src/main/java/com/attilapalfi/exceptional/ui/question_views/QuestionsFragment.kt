@@ -1,5 +1,6 @@
 package com.attilapalfi.exceptional.ui.question_views
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
@@ -7,22 +8,20 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.attilapalfi.exceptional.R
 import com.attilapalfi.exceptional.dependency_injection.Injector
-import com.attilapalfi.exceptional.model.ExceptionQuestion
+import com.attilapalfi.exceptional.model.Exception
+import com.attilapalfi.exceptional.persistence.QuestionChangeListener
 import com.attilapalfi.exceptional.persistence.QuestionStore
+import com.attilapalfi.exceptional.ui.main.MainActivity
 import java.util.*
 import javax.inject.Inject
-import com.attilapalfi.exceptional.R
 
 /**
  * Created by palfi on 2015-10-03.
  */
-public interface QuestionChangeListener{
-    fun onQuestionsChanged()
-}
-
 public class QuestionsFragment : Fragment(), QuestionChangeListener {
-    private var exceptionQuestions: List<ExceptionQuestion> = ArrayList()
+    private var exceptionQuestions: List<Exception> = ArrayList()
     private var recyclerView: RecyclerView? = null
     private var questionAdapter: QuestionAdapter? = null
     @Inject
@@ -61,7 +60,15 @@ public class QuestionsFragment : Fragment(), QuestionChangeListener {
     }
 
     override public fun onQuestionsChanged() {
-        questionAdapter?.values = questionStore.getQuestions()
-        questionAdapter?.notifyDataSetChanged()
+        questionAdapter?.let {
+            it.values = questionStore.getQuestions()
+            if ( it.values.isEmpty() ) {
+                val intent = Intent(activity, MainActivity::class.java)
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                activity.startActivity(intent)
+            } else {
+                it.notifyDataSetChanged()
+            }
+        }
     }
 }

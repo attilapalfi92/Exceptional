@@ -14,7 +14,7 @@ import android.util.Base64;
 import android.util.Log;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.facebook.FacebookManager;
-import com.attilapalfi.exceptional.rest.AppStartService;
+import com.attilapalfi.exceptional.rest.AppStartRestConnector;
 import com.attilapalfi.exceptional.services.LocationProvider;
 import io.paperdb.Paper;
 
@@ -23,7 +23,7 @@ import io.paperdb.Paper;
  */
 public class ExceptionalApplication extends android.support.multidex.MultiDexApplication {
     @Inject
-    AppStartService appStartService;
+    AppStartRestConnector appStartRestConnector;
     @Inject
     FacebookManager facebookManager;
     @Inject
@@ -43,7 +43,7 @@ public class ExceptionalApplication extends android.support.multidex.MultiDexApp
         Injector.INSTANCE.getApplicationComponent().inject( this );
         String androidId = Settings.Secure.getString( applicationContext
                 .getContentResolver(), Settings.Secure.ANDROID_ID );
-        appStartService.setAndroidId( androidId );
+        appStartRestConnector.setAndroidId( androidId );
     }
 
     @Override

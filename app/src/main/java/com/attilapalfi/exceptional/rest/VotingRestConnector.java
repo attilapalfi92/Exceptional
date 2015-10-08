@@ -21,7 +21,7 @@ import retrofit.client.Response;
 /**
  * Created by palfi on 2015-09-13.
  */
-public class VotingService {
+public class VotingRestConnector {
     @Inject Context context;
     @Inject MetadataStore metadataStore;
     @Inject FriendStore friendStore;
@@ -29,7 +29,7 @@ public class VotingService {
     @Inject RestInterfaceFactory restInterfaceFactory;
     private VotingRestInterface votingRestInterface;
 
-    public VotingService( ) {
+    public VotingRestConnector( ) {
         Injector.INSTANCE.getApplicationComponent().inject( this );
         votingRestInterface = restInterfaceFactory.create( context, VotingRestInterface.class );
     }

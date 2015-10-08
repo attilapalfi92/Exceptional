@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.location.Geocoder
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -15,13 +16,13 @@ import android.support.v4.content.WakefulBroadcastReceiver
 import com.attilapalfi.exceptional.R
 import com.attilapalfi.exceptional.dependency_injection.Injector
 import com.attilapalfi.exceptional.model.Exception
-import com.attilapalfi.exceptional.model.ExceptionQuestion
 import com.attilapalfi.exceptional.model.Question
 import com.attilapalfi.exceptional.persistence.*
 import com.attilapalfi.exceptional.ui.ShowNotificationActivity
 import com.attilapalfi.exceptional.ui.main.MainActivity
 import java.math.BigInteger
 import java.sql.Timestamp
+import java.util.*
 import javax.inject.Inject
 
 
@@ -31,6 +32,7 @@ import javax.inject.Inject
 public class GcmMessageHandler : IntentService("GcmMessageHandler") {
     private var handler: Handler? = null
     private var exception: Exception = Exception()
+    private var geocoder: Geocoder? = null
     @Inject
     lateinit val exceptionInstanceStore: ExceptionInstanceStore
     @Inject
@@ -45,6 +47,7 @@ public class GcmMessageHandler : IntentService("GcmMessageHandler") {
     override fun onCreate() {
         super.onCreate()
         Injector.INSTANCE.applicationComponent.inject(this)
+        geocoder = Geocoder(applicationContext, Locale.getDefault())
         handler = Handler(Looper.getMainLooper())
     }
 
@@ -74,9 +77,9 @@ public class GcmMessageHandler : IntentService("GcmMessageHandler") {
 
     private fun handleExceptionNotification(extras: Bundle) {
         parseNotificationToException(extras)
-        saveDataOnMainThread(extras)
+        saveExceptionAndPoints(extras)
         val bundle = createBundle()
-        showExceptionNotification("New exception caught!", "You have caught a(n) " + exception!!.shortName, bundle)
+        showExceptionNotification("New exception caught!", "You have caught a(n) " + exception.shortName, bundle)
     }
 
     private fun parseNotificationToException(extras: Bundle) {
@@ -96,26 +99,31 @@ public class GcmMessageHandler : IntentService("GcmMessageHandler") {
         if ( extras.getString("hasQuestion").toBoolean()) {
             val questionText = extras.getString("questionText")
             val yesIsCorrect = extras.getString("yesIsCorrect").toBoolean()
-            questionStore.addQuestion(ExceptionQuestion(Question(questionText, yesIsCorrect), exception))
+            exception.question = Question(questionText, yesIsCorrect, true, false)
+            questionStore.addQuestion(exception)
         }
     }
 
     private fun createBundle(): Bundle {
         val bundle = Bundle()
-        exception.let {
-            bundle.putInt("typeId", it.exceptionTypeId)
-            bundle.putString("fromWho", it.fromWho.toString())
-            bundle.putDouble("longitude", it.longitude)
-            bundle.putDouble("latitude", it.latitude)
-            bundle.putLong("timeInMillis", it.date.time)
-        }
+        bundle.putString("instanceId", exception.instanceId.toString())
         return bundle
     }
 
-    private fun saveDataOnMainThread(extras: Bundle) {
+    private fun saveExceptionAndPoints(extras: Bundle) {
+        setCityForException(exception)
+        exceptionInstanceStore.addExceptionWithoutCity(exception)
         handler?.post {
-            exception.let { exceptionInstanceStore.addExceptionAsync(it) }
             savePoints(extras)
+        }
+    }
+
+    private fun setCityForException(e: Exception) {
+        try {
+            e.city = geocoder?.getFromLocation(e.latitude, e.longitude, 1)?.get(0)?.locality ?: "Unknown"
+        } catch (exception: java.lang.Exception) {
+            e.city = getString(R.string.unknown)
+            exception.printStackTrace()
         }
     }
 

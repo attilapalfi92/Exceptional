@@ -18,7 +18,7 @@ public class ExceptionFactory {
     ExceptionTypeStore exceptionTypeStore;
 
     public ExceptionFactory( ) {
-        Injector.INSTANCE.getApplicationComponent().inject( this );;
+        Injector.INSTANCE.getApplicationComponent().inject( this );
     }
 
     public Exception createFromWrapper( ExceptionInstanceWrapper wrapper ) {

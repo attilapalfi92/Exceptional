@@ -11,17 +11,17 @@ public data class Friend(
         @Volatile public var lastName: String = "",
         @Volatile public var imageUrl: String = "",
         @Volatile public var points: Int = 100,
-        @Volatile public var imageLoaded: Boolean = false) : Comparable<Friend> {
+        @Volatile public var imageDownloaded: Boolean = false) : Comparable<Friend> {
 
-    override fun compareTo(o: Friend) = o.points.compareTo(points)
+    override fun compareTo(other: Friend) = other.points.compareTo(points)
 
-    override fun equals(o: Any?): Boolean {
-        if (this === o) return true
-        if (o == null || javaClass != o.javaClass) return false
-        return (o as Friend).id == id
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+        return (other as Friend).id == id
     }
 
-    public fun isImageLoaded() = imageLoaded
+    public fun isImageDownloaded() = imageDownloaded
 
     public fun getName() = firstName + " " + lastName
 }

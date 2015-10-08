@@ -6,7 +6,7 @@ import android.widget.Toast
 import com.attilapalfi.exceptional.R
 import com.attilapalfi.exceptional.dependency_injection.Injector
 import com.attilapalfi.exceptional.model.Exception
-import com.attilapalfi.exceptional.model.ExceptionQuestion
+import com.attilapalfi.exceptional.model.ExceptionFactory
 import com.attilapalfi.exceptional.model.Friend
 import com.attilapalfi.exceptional.persistence.*
 import com.attilapalfi.exceptional.rest.messages.AppStartRequest
@@ -23,7 +23,7 @@ import javax.inject.Inject
 /**
  * Created by palfi on 2015-09-12.
  */
-public class AppStartService {
+public class AppStartRestConnector {
     @Inject
     lateinit val context: Context
     @Inject
@@ -38,9 +38,10 @@ public class AppStartService {
     lateinit val restInterfaceFactory: RestInterfaceFactory
     @Inject
     lateinit val questionStore: QuestionStore
+    @Inject
+    lateinit val exceptionFactory: ExceptionFactory
     private var projectNumber: String = ""
     private var appStartRestInterface: AppStartRestInterface? = null
-    private var googleCloudMessaging: GoogleCloudMessaging? = null
     private var registrationId: String = ""
     public var androidId: String = ""
     private val requestBody = AppStartRequest()
@@ -66,8 +67,10 @@ public class AppStartService {
         requestBody.exceptionVersion = metadataStore.exceptionVersion
         try {
             appStartRestInterface?.regularAppStart(requestBody, object : Callback<AppStartResponse> {
-                override fun success(responseBody: AppStartResponse, response: Response) {
-                    saveCommonData(responseBody)
+                override fun success(responseBody: AppStartResponse?, response: Response?) {
+                    responseBody?.let {
+                        saveCommonData(it)
+                    }
                 }
 
                 override fun failure(error: RetrofitError) {
@@ -92,9 +95,9 @@ public class AppStartService {
     }
 
     private fun gcmFirstAppStart() {
-        googleCloudMessaging = GoogleCloudMessaging.getInstance(context)
+        val googleCloudMessaging = GoogleCloudMessaging.getInstance(context)
         try {
-            registrationId = googleCloudMessaging!!.register(projectNumber)
+            registrationId = googleCloudMessaging.register(projectNumber)
         } catch (e: IOException) {
             Toast.makeText(context, context.getString(R.string.failed_to_connect_to_gcm_servers) + e.getMessage(), Toast.LENGTH_LONG).show()
         }
@@ -108,9 +111,11 @@ public class AppStartService {
     private fun backendFirstAppStart() {
         try {
             appStartRestInterface?.firstAppStart(requestBody, object : Callback<AppStartResponse> {
-                override fun success(responseBody: AppStartResponse, response: Response) {
-                    saveCommonData(responseBody)
-                    metadataStore.isFirstStartFinished = true
+                override fun success(responseBody: AppStartResponse?, response: Response?) {
+                    responseBody?.let {
+                        saveCommonData(it)
+                        metadataStore.isFirstStartFinished = true
+                    }
                 }
 
                 override fun failure(error: RetrofitError) {
@@ -135,15 +140,10 @@ public class AppStartService {
             metadataStore.isVotedThisWeek = responseBody.votedThisWeek
             metadataStore.exceptionVersion = responseBody.exceptionVersion
             exceptionTypeStore.setVotedExceptionTypes(responseBody.beingVotedTypes)
-            storeQuestions(responseBody.myExceptions)
-            exceptionInstanceStore.saveExceptionList(responseBody.myExceptions)
+            val exceptionList = responseBody.myExceptions.map{ exceptionFactory.createFromWrapper(it) }
+            questionStore.addUnfilteredList(exceptionList)
+            exceptionInstanceStore.saveExceptionList(exceptionList)
         }.start()
-    }
-
-    private fun storeQuestions(exceptions: List<ExceptionInstanceWrapper>) {
-        val questionList = exceptions.filter { it.question.hasQuestion && !it.question.isAnswered }
-                .map { ExceptionQuestion(it.question, Exception(it, exceptionTypeStore.findById(it.exceptionTypeId))) }
-        questionStore.addQuestionList(questionList)
     }
 
     public fun getDeviceName(): String {

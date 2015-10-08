@@ -17,7 +17,7 @@ import com.attilapalfi.exceptional.model.ExceptionFactory
 import com.attilapalfi.exceptional.model.ExceptionType
 import com.attilapalfi.exceptional.model.Question
 import com.attilapalfi.exceptional.persistence.MetadataStore
-import com.attilapalfi.exceptional.rest.ExceptionService
+import com.attilapalfi.exceptional.rest.ExceptionRestConnector
 import com.attilapalfi.exceptional.services.LocationException
 import com.attilapalfi.exceptional.services.LocationProvider
 import com.attilapalfi.exceptional.ui.main.Constants
@@ -37,7 +37,7 @@ public class ExceptionTypeClickListener(private val values: List<ExceptionType>,
     private var yesRadioView: RadioButton? = null
     private var questionText = ""
     @Inject lateinit val locationProvider: LocationProvider
-    @Inject lateinit val exceptionService: ExceptionService
+    @Inject lateinit val exceptionRestConnector: ExceptionRestConnector
     @Inject lateinit val exceptionFactory: ExceptionFactory
     @Inject lateinit val metadataStore: MetadataStore
 
@@ -76,7 +76,7 @@ public class ExceptionTypeClickListener(private val values: List<ExceptionType>,
         builder.callback(object : MaterialDialog.ButtonCallback() {
             override fun onPositive(dialog: MaterialDialog?) {
                 if (inputIsValid()) {
-                    exceptionService.throwException(exception, getQuestion())
+                    exceptionRestConnector.throwException(exception, getQuestion())
                     navigateToMainPage()
                 }
             }

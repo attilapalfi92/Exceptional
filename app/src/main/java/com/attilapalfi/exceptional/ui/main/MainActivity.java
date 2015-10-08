@@ -18,7 +18,7 @@ import com.attilapalfi.exceptional.R;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.ExceptionType;
 import com.attilapalfi.exceptional.persistence.MetadataStore;
-import com.attilapalfi.exceptional.rest.VotingService;
+import com.attilapalfi.exceptional.rest.VotingRestConnector;
 import com.attilapalfi.exceptional.ui.*;
 import com.attilapalfi.exceptional.ui.main.main_page.MapsActivity;
 import com.attilapalfi.exceptional.ui.helpers.page_transformers.ZoomOutPageTransformer;
@@ -32,7 +32,8 @@ public class MainActivity extends AppCompatActivity {
     private String submitPrefix = "";
     private String submitShortName = "";
     private String submitDescription = "";
-    @Inject VotingService votingService;
+    @Inject
+    VotingRestConnector votingRestConnector;
     @Inject MetadataStore metadataStore;
     @Inject
     QuestionNavigator questionNavigator;
@@ -135,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
                         public void onPositive( MaterialDialog dialog ) {
                             getSubmitStrings( dialog.getCustomView() );
                             if ( prefixIsValid() && shortNameIsValid() && descriptionIsValid() ) {
-                                votingService.submitType( new ExceptionType(
+                                votingRestConnector.submitType( new ExceptionType(
                                         0,
                                         submitShortName,
                                         submitPrefix,

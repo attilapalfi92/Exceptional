@@ -18,7 +18,7 @@ import android.util.Log;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Friend;
 import com.attilapalfi.exceptional.persistence.*;
-import com.attilapalfi.exceptional.rest.AppStartService;
+import com.attilapalfi.exceptional.rest.AppStartRestConnector;
 import com.facebook.*;
 import com.facebook.login.LoginResult;
 
@@ -27,7 +27,7 @@ import com.facebook.login.LoginResult;
  */
 public class FacebookManager {
     @Inject
-    AppStartService appStartService;
+    AppStartRestConnector appStartRestConnector;
     @Inject
     ExceptionInstanceStore exceptionInstanceStore;
     @Inject
@@ -169,9 +169,9 @@ public class FacebookManager {
             metadataStore.updateUser( user );
             friendStore.updateFriendList( friends );
             if ( !metadataStore.isFirstStartFinished() ) {
-                appStartService.onFirstAppStart( friends, user.getId() );
+                appStartRestConnector.onFirstAppStart( friends, user.getId() );
             } else {
-                appStartService.onRegularAppStart( friends, user.getId() );
+                appStartRestConnector.onRegularAppStart( friends, user.getId() );
             }
         }
     }
@@ -184,7 +184,7 @@ public class FacebookManager {
             user.setLastName( profile.getLastName() );
             user.setImageUrl( profile.getProfilePictureUri( 200, 200 ).toString() );
             user.setPoints( 100 );
-            user.setImageLoaded( false );
+            user.setImageDownloaded( false );
         }
     }
 

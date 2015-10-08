@@ -6,9 +6,9 @@ import com.attilapalfi.exceptional.ExceptionalApplication;
 import com.attilapalfi.exceptional.facebook.FacebookManager;
 import com.attilapalfi.exceptional.model.ExceptionFactory;
 import com.attilapalfi.exceptional.persistence.*;
-import com.attilapalfi.exceptional.rest.AppStartService;
-import com.attilapalfi.exceptional.rest.ExceptionService;
-import com.attilapalfi.exceptional.rest.VotingService;
+import com.attilapalfi.exceptional.rest.AppStartRestConnector;
+import com.attilapalfi.exceptional.rest.ExceptionRestConnector;
+import com.attilapalfi.exceptional.rest.VotingRestConnector;
 import com.attilapalfi.exceptional.services.GcmMessageHandler;
 import com.attilapalfi.exceptional.services.LocationProvider;
 import com.attilapalfi.exceptional.ui.FacebookLoginFragment;
@@ -44,7 +44,7 @@ public interface ApplicationComponent extends AppContextComponent {
 
     void inject( ExceptionTypeAdapter exceptionTypeAdapter );
 
-    void inject( ExceptionService exceptionService );
+    void inject( ExceptionRestConnector exceptionRestConnector );
 
     void inject( ExceptionalApplication exceptionalApplication );
 
@@ -58,7 +58,7 @@ public interface ApplicationComponent extends AppContextComponent {
 
     void inject( VotedExceptionAdapter votedExceptionAdapter );
 
-    void inject( AppStartService appStartService );
+    void inject( AppStartRestConnector appStartRestConnector );
 
     void inject( ExceptionInstanceStore exceptionInstanceStore );
 
@@ -92,7 +92,7 @@ public interface ApplicationComponent extends AppContextComponent {
 
     void inject( OptionsActivity optionsActivity );
 
-    void inject( VotingService votingService );
+    void inject( VotingRestConnector votingRestConnector );
 
     void inject( ExceptionInstanceAdapter exceptionInstanceAdapter );
 

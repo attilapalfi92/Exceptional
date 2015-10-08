@@ -4,12 +4,12 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.attilapalfi.exceptional.R
-import com.attilapalfi.exceptional.model.ExceptionQuestion
+import com.attilapalfi.exceptional.model.Exception
 
 /**
  * Created by palfi on 2015-10-03.
  */
-class QuestionAdapter(public var values: List<ExceptionQuestion>) : RecyclerView.Adapter<QuestionViewHolder>() {
+class QuestionAdapter(public var values: List<Exception>) : RecyclerView.Adapter<QuestionViewHolder>() {
 
     override fun getItemCount() = values.size()
 

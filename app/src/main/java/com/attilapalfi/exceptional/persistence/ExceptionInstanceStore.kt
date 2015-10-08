@@ -107,19 +107,24 @@ public class ExceptionInstanceStore {
         }
     }
 
-    public fun saveExceptionList(wrapperList: List<ExceptionInstanceWrapper>) {
-        if (!wrapperList.isEmpty()) {
-            saveListToStore(wrapperList)
+    fun addExceptionWithoutCity(exception: Exception) {
+        initThread.join()
+        addToListInOrder(exception)
+    }
+
+    public fun saveExceptionList(exceptionList: List<Exception>) {
+        if (!exceptionList.isEmpty()) {
+            storeEachIfNotContained(exceptionList)
             handler.post { this.notifyListeners() }
         }
     }
 
-    public fun saveExceptionListAsync(wrapperList: List<ExceptionInstanceWrapper>) {
-        if (!wrapperList.isEmpty()) {
+    public fun saveExceptionListAsync(exceptionList: List<Exception>) {
+        if (!exceptionList.isEmpty()) {
             object : AsyncTask<Void?, Void?, Void?>() {
 
                 override fun doInBackground(vararg params: Void?): Void? {
-                    saveListToStore(wrapperList)
+                    storeEachIfNotContained(exceptionList)
                     return null
                 }
 
@@ -131,20 +136,19 @@ public class ExceptionInstanceStore {
         }
     }
 
+    public fun findById(id: BigInteger): Exception {
+        initThread.join()
+        synchronized(storedExceptions) {
+            return storedExceptions.find { it.instanceId == id } ?: Exception()
+        }
+    }
+
     private fun saveToStore(e: Exception) {
         if (!storedExceptions.contains(e)) {
             saveWithCity(e)
             database.write(INSTANCE_IDs, idList)
         }
     }
-
-    private fun saveListToStore(wrapperList: List<ExceptionInstanceWrapper>) {
-        val toBeStored = wrapperListToExceptions(wrapperList)
-        storeEachIfNotContained(toBeStored)
-    }
-
-    private fun wrapperListToExceptions(wrappers: List<ExceptionInstanceWrapper>) =
-            wrappers.map { exceptionFactory.createFromWrapper(it) }
 
     private fun storeEachIfNotContained(toBeStored: List<Exception>) {
         toBeStored.forEach { e ->

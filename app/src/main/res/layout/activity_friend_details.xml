@@ -9,6 +9,7 @@
     <ImageView
         android:layout_width="60dp"
         android:layout_height="60dp"
+        android:src="@drawable/logo"
         android:id="@+id/friend_details_image"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"

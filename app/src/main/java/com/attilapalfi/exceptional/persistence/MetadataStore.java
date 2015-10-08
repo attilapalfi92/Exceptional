@@ -6,8 +6,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
@@ -145,14 +143,14 @@ public class MetadataStore {
     }
 
     private void saveUser( Friend user ) {
-        user.setImageLoaded( true );
+        user.setImageDownloaded( true );
         this.user = user;
         database.write( USER, user );
     }
 
 
     public void updateUser( Friend newUserState ) {
-        newUserState.setImageLoaded( true );
+        newUserState.setImageDownloaded( true );
         lookForChange( newUserState );
     }
 

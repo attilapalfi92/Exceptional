@@ -22,6 +22,7 @@
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:id="@+id/myMainImageView"
+            android:src="@drawable/logo"
             android:layout_below="@+id/mainText"
             android:layout_marginStart="0dp"
             android:layout_marginLeft="0dp"

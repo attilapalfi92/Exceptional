@@ -62,7 +62,7 @@ public class ExceptionTypeChooserActivity : AppCompatActivity() {
 
     private fun initFriend() {
         val friendId = BigInteger(intent.getStringExtra(Constants.FRIEND_ID))
-        friend = friendStore.findFriendById(friendId)
+        friend = friendStore.findById(friendId)
     }
 
     private fun initViewPager() {

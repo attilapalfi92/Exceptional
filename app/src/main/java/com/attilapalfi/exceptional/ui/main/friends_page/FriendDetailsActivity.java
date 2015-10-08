@@ -16,7 +16,6 @@ import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.model.Friend;
 import com.attilapalfi.exceptional.persistence.FriendStore;
 import com.attilapalfi.exceptional.persistence.ImageCache;
-import com.attilapalfi.exceptional.services.LocationProvider;
 import com.attilapalfi.exceptional.ui.main.Constants;
 import com.attilapalfi.exceptional.ui.main.friends_page.exception_throwing.ExceptionTypeChooserActivity;
 
@@ -53,7 +52,7 @@ public class FriendDetailsActivity extends AppCompatActivity {
 
     private void initFriend( ) {
         BigInteger friendId = new BigInteger( getIntent().getStringExtra( Constants.FRIEND_ID ) );
-        friend = friendStore.findFriendById( friendId );
+        friend = friendStore.findById( friendId );
     }
 
     public void throwExceptionClicked( View view ) {
