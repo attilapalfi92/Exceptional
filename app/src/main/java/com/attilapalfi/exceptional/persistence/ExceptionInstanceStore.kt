@@ -99,7 +99,7 @@ public class ExceptionInstanceStore {
         }
     }
 
-    fun addExceptionWithoutCity(exception: Exception) {
+    public fun addExceptionWithoutCity(exception: Exception) {
         initThread.join()
         addToListInOrder(exception)
     }

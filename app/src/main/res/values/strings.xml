@@ -104,4 +104,6 @@
     <string name="login_first">You have to login first!</string>
     <string name="failed_to_answer">Failed to send answer.</string>
     <string name="notif_sender_prefix">From:</string>
+    <string name="points_for_you">Points for you:</string>
+    <string name="points_for_friend">Points for friend:</string>
 </resources>

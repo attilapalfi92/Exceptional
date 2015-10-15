@@ -36,16 +36,20 @@ public data class ExceptionInstanceWrapper(var fromWho: BigInteger = BigInteger(
                                            var latitude: Double = 0.0,
                                            var exceptionTypeId: Int = 0,
                                            var instanceId: BigInteger = BigInteger("0"),
+                                           var pointsForSender: Int = 25,
+                                           var pointsForReceiver: Int = -20,
                                            var question: Question = Question()) {
-    constructor(e: Exception, question: Question) : this(
-            e.fromWho,
-            e.toWho,
-            e.date.time,
-            e.longitude,
-            e.latitude,
-            e.exceptionTypeId,
-            e.instanceId,
-            question
+    constructor(e: Exception, question_: Question) : this(
+            fromWho = e.fromWho,
+            toWho = e.toWho,
+            timeInMillis = e.date.time,
+            longitude = e.longitude,
+            latitude = e.latitude,
+            exceptionTypeId = e.exceptionTypeId,
+            instanceId = e.instanceId,
+            pointsForSender = e.pointsForSender,
+            pointsForReceiver = e.pointsForReceiver,
+            question = question_
     )
 };
 

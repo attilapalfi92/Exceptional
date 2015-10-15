@@ -22,6 +22,8 @@ public class Exception implements Comparable<Exception> {
     private Question question = new Question();
     @NotNull
     private volatile String city = "";
+    private int pointsForSender;
+    private int pointsForReceiver;
     private transient ExceptionType exceptionType;
     private transient Friend sender;
     private transient Friend receiver;
@@ -35,6 +37,8 @@ public class Exception implements Comparable<Exception> {
         this.date = new Timestamp( wrapper.getTimeInMillis() );
         this.fromWho = wrapper.getFromWho();
         this.toWho = wrapper.getToWho();
+        this.pointsForSender = wrapper.getPointsForSender();
+        this.pointsForReceiver = wrapper.getPointsForReceiver();
         this.question = wrapper.getQuestion();
     }
 
@@ -155,6 +159,22 @@ public class Exception implements Comparable<Exception> {
 
     public void setQuestion( Question question ) {
         this.question = question;
+    }
+
+    public int getPointsForSender( ) {
+        return pointsForSender;
+    }
+
+    public void setPointsForSender( int pointsForSender ) {
+        this.pointsForSender = pointsForSender;
+    }
+
+    public int getPointsForReceiver( ) {
+        return pointsForReceiver;
+    }
+
+    public void setPointsForReceiver( int pointsForReceiver ) {
+        this.pointsForReceiver = pointsForReceiver;
     }
 
     @NotNull
