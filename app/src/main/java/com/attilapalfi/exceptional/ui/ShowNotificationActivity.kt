@@ -40,15 +40,15 @@ public class ShowNotificationActivity : AppCompatActivity(), QuestionChangeListe
     private lateinit var sender: Friend
     private lateinit var exception: Exception
     private lateinit var exceptionType: ExceptionType
-    private lateinit var exceptionNameView: TextView
-    private lateinit var exceptionDescView: TextView
-    private lateinit var senderImageView: ImageView
-    private lateinit var senderNameView: TextView
-    private lateinit var sendDateView: TextView
-    private lateinit var mapView: MapView
-    private lateinit var questionText: TextView
-    private lateinit var noButton: Button
-    private lateinit var yesButton: Button
+    private val exceptionNameView: TextView by lazy { findViewById(R.id.notif_full_exc_name) as TextView }
+    private val exceptionDescView: TextView by lazy { findViewById(R.id.notif_exc_desc) as TextView }
+    private val senderImageView: ImageView by lazy { findViewById(R.id.notif_sender_image) as ImageView }
+    private val senderNameView: TextView by lazy { findViewById(R.id.notif_sender_name) as TextView }
+    private val sendDateView: TextView by lazy { findViewById(R.id.notif_sent_date) as TextView }
+    private val mapView: MapView by lazy { findViewById(R.id.notif_map) as MapView }
+    private val questionText: TextView by lazy { findViewById(R.id.notif_question_text) as TextView }
+    private val noButton: Button by lazy { findViewById(R.id.notif_question_no) as Button }
+    private val yesButton: Button by lazy { findViewById(R.id.notif_question_yes) as Button }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,7 +56,6 @@ public class ShowNotificationActivity : AppCompatActivity(), QuestionChangeListe
         Injector.INSTANCE.applicationComponent.inject(this)
         questionStore.addChangeListener(this)
         getModelFromBundle()
-        getViews()
         loadViewsWithData()
     }
 
@@ -71,18 +70,6 @@ public class ShowNotificationActivity : AppCompatActivity(), QuestionChangeListe
         exception = exceptionInstanceStore.findById(instanceId)
         sender = friendStore.findById(exception.fromWho)
         exceptionType = exceptionTypeStore.findById(exception.exceptionTypeId)
-    }
-
-    private fun getViews() {
-        exceptionNameView = findViewById(R.id.notif_full_exc_name) as TextView
-        exceptionDescView = findViewById(R.id.notif_exc_desc) as TextView
-        senderImageView = findViewById(R.id.notif_sender_image) as ImageView
-        senderNameView = findViewById(R.id.notif_sender_name) as TextView
-        sendDateView = findViewById(R.id.notif_sent_date) as TextView
-        mapView = findViewById(R.id.notif_map) as MapView
-        questionText = findViewById(R.id.notif_question_text) as TextView
-        noButton = findViewById(R.id.notif_question_no) as Button
-        yesButton = findViewById(R.id.notif_question_yes) as Button
     }
 
     private fun loadViewsWithData() {

@@ -18,6 +18,7 @@ import com.attilapalfi.exceptional.dependency_injection.Injector
 import com.attilapalfi.exceptional.model.Exception
 import com.attilapalfi.exceptional.model.Question
 import com.attilapalfi.exceptional.persistence.*
+import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper
 import com.attilapalfi.exceptional.ui.ShowNotificationActivity
 import com.attilapalfi.exceptional.ui.main.MainActivity
 import java.math.BigInteger
@@ -65,6 +66,7 @@ public class GcmMessageHandler : IntentService("GcmMessageHandler") {
         when (notificationType) {
             "exception" -> handleExceptionNotification(extras)
             "friend" -> handleFriendNotification(extras)
+            "answer" -> handleAnswerNotification(extras)
             else -> {
             }
         }
@@ -82,6 +84,15 @@ public class GcmMessageHandler : IntentService("GcmMessageHandler") {
         showExceptionNotification("New exception caught!", "You have caught a(n) " + exception.shortName, bundle)
     }
 
+    private fun handleAnswerNotification(extras: Bundle) {
+        val usersPoints = extras.getString("usersPoints").toInt()
+        val friendsPoints = extras.getString("friendsPoints").toInt()
+        val instanceId = BigInteger(extras.getString("instanceId"))
+        exceptionInstanceStore.setAnswered(ExceptionInstanceWrapper(pointsForSender = usersPoints,
+                pointsForReceiver = friendsPoints, instanceId = instanceId), true)
+
+    }
+
     private fun parseNotificationToException(extras: Bundle) {
         exception = Exception()
         val typeId = Integer.parseInt(extras.getString("typeId"))
@@ -96,7 +107,7 @@ public class GcmMessageHandler : IntentService("GcmMessageHandler") {
     }
 
     private fun parseAndSaveQuestion(extras: Bundle, exception: Exception) {
-        if ( extras.getString("hasQuestion").toBoolean()) {
+        if ( extras.getString("hasQuestion").toBoolean() ) {
             val questionText = extras.getString("questionText")
             val yesIsCorrect = extras.getString("yesIsCorrect").toBoolean()
             exception.question = Question(questionText, yesIsCorrect, true, false)

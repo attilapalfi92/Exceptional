@@ -50,7 +50,7 @@ public class ExceptionInstanceStore {
         database = Paper.book(INSTANCE_DATABASE)
         handler = Handler(Looper.getMainLooper())
         geocoder = Geocoder(context, Locale.getDefault())
-        initThread = Thread( {
+        initThread = Thread({
             synchronized(storedExceptions) {
                 idList.addAll(database.read(INSTANCE_IDs, LinkedList<BigInteger>()))
                 idList.forEach {
@@ -63,7 +63,7 @@ public class ExceptionInstanceStore {
                     }
                 }
             }
-        } )
+        })
         initThread.start()
         notifyWhenInitFinished()
     }
@@ -128,12 +128,15 @@ public class ExceptionInstanceStore {
         }
     }
 
-    fun setAnswered(instanceId: BigInteger, answered: Boolean) {
-        val exception = findById(instanceId);
+    fun setAnswered(instanceWrapper: ExceptionInstanceWrapper, answered: Boolean) {
+        val exception = findById(instanceWrapper.instanceId);
         if ( exception.instanceId != BigInteger.ZERO ) {
+            exception.pointsForSender = instanceWrapper.pointsForSender
+            exception.pointsForReceiver = instanceWrapper.pointsForReceiver
             exception.question.isAnswered = answered
             database.write(exception.instanceId.toString(), exception)
         }
+        notifyListeners()
     }
 
     public fun findById(id: BigInteger): Exception {
