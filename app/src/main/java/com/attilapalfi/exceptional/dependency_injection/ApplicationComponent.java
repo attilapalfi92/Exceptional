@@ -113,4 +113,6 @@ public interface ApplicationComponent extends AppContextComponent {
     void inject( QuestionViewHolder questionViewHolder );
 
     void inject( QuestionsFragment questionsFragment );
+
+    void inject( MapsActivity.ExceptionRenderer exceptionRenderer );
 }

@@ -6,12 +6,14 @@ import java.sql.Timestamp;
 import org.jetbrains.annotations.NotNull;
 
 import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.clustering.ClusterItem;
 
 
 /**
  * Created by Attila on 2015-06-08.
  */
-public class Exception implements Comparable<Exception> {
+public class Exception implements Comparable<Exception>, ClusterItem {
     private BigInteger instanceId = BigInteger.ZERO;
     private int exceptionTypeId = 0;
     private double longitude;
@@ -199,5 +201,10 @@ public class Exception implements Comparable<Exception> {
     @Override
     public int hashCode( ) {
         return instanceId != null ? instanceId.hashCode() : 0;
+    }
+
+    @Override
+    public LatLng getPosition( ) {
+        return new LatLng( latitude, longitude );
     }
 }

@@ -84,12 +84,16 @@
             android:layout_alignRight="@+id/notif_question_yes"
             android:layout_alignEnd="@+id/notif_question_yes"/>
 
-    <com.google.android.gms.maps.MapView
+
+    <fragment
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_marginTop="5dp"
             android:id="@+id/notif_map"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:name="com.google.android.gms.maps.MapFragment"
             android:layout_below="@+id/notif_sent_date"
-            android:layout_above="@+id/notif_question_text"/>
+            android:layout_above="@+id/notif_question_text"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"/>
 
     <TextView
             android:id="@+id/notif_question_text"

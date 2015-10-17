@@ -1,114 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.attilapalfi.exceptional" >
+          package="com.attilapalfi.exceptional">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-    <uses-permission android:name="com.google.android.c2dm.permission.SEND" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="ANDROID.PERMISSION.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="com.attilapalfi.exceptional.permission.C2D_MESSAGE" />
-    <uses-permission android:name="com.vogella.android.locationapi.maps.permission.MAPS_RECEIVE" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+    <uses-permission android:name="com.google.android.c2dm.permission.SEND"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="ANDROID.PERMISSION.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="com.attilapalfi.exceptional.permission.C2D_MESSAGE"/>
 
     <application
-        android:name=".ExceptionalApplication"
-        android:allowBackup="true"
-        android:fullBackupContent="false"
-        android:icon="@drawable/logo"
-        android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+            android:name=".ExceptionalApplication"
+            android:allowBackup="true"
+            android:fullBackupContent="false"
+            android:icon="@drawable/logo"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme">
         <meta-data
-            android:name="com.facebook.sdk.ApplicationId"
-            android:value="@string/facebook_app_id" />
+                android:name="com.facebook.sdk.ApplicationId"
+                android:value="@string/facebook_app_id"/>
         <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCSwgwKHOuqBozM-JhhKYp6xnwFKs8xJrU" />
+                android:name="com.google.android.geo.API_KEY"
+                android:value="AIzaSyCSwgwKHOuqBozM-JhhKYp6xnwFKs8xJrU"/>
 
         <receiver
-            android:name=".services.GcmBroadcastReceiver"
-            android:exported="true"
-            android:permission="com.google.android.c2dm.permission.SEND" >
+                android:name=".services.GcmBroadcastReceiver"
+                android:exported="true"
+                android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
 
-                <category android:name="com.attilapalfi.exceptional" />
+                <category android:name="com.attilapalfi.exceptional"/>
             </intent-filter>
         </receiver>
 
         <service
-            android:name=".services.GcmMessageHandler"
-            android:exported="false" >
+                android:name=".services.GcmMessageHandler"
+                android:exported="false">
             <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
             </intent-filter>
         </service>
 
         <activity
-            android:name=".ui.main.MainActivity"
-            android:label="@string/app_name" >
+                android:name=".ui.main.MainActivity"
+                android:label="@string/app_name">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity
-            android:name="com.facebook.FacebookActivity"
-            android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
-            android:label="@string/app_name"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+                android:name="com.facebook.FacebookActivity"
+                android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
+                android:label="@string/app_name"
+                android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
         <activity
-            android:name=".ui.LoginActivity"
-            android:label="@string/app_name" >
+                android:name=".ui.LoginActivity"
+                android:label="@string/app_name">
         </activity>
         <activity
-            android:name=".ui.ShowNotificationActivity"
-            android:excludeFromRecents="true"
-            android:label="@string/app_name"
-            android:launchMode="singleTask"
-            android:taskAffinity="" >
+                android:name=".ui.ShowNotificationActivity"
+                android:excludeFromRecents="true"
+                android:label="@string/app_name"
+                android:launchMode="singleTask"
+                android:taskAffinity="">
         </activity>
         <activity
-            android:name=".ui.OptionsActivity"
-            android:label="@string/title_activity_options" >
+                android:name=".ui.OptionsActivity"
+                android:label="@string/title_activity_options">
             <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.main.MainActivity" />
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value=".ui.main.MainActivity"/>
         </activity>
         <activity
-            android:name=".ui.main.friends_page.FriendDetailsActivity"
-            android:label="@string/title_activity_friend_details" >
+                android:name=".ui.main.friends_page.FriendDetailsActivity"
+                android:label="@string/title_activity_friend_details">
             <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.main.MainActivity" />
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value=".ui.main.MainActivity"/>
         </activity>
         <activity
-            android:name=".ui.ExceptionHistoryActivity"
-            android:label="@string/title_activity_exception_history" >
+                android:name=".ui.ExceptionHistoryActivity"
+                android:label="@string/title_activity_exception_history">
             <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.main.MainActivity" />
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value=".ui.main.MainActivity"/>
         </activity>
         <activity
-            android:name=".ui.main.friends_page.exception_throwing.ExceptionTypeChooserActivity"
-            android:label="@string/title_activity_exception_type_chooser" >
+                android:name=".ui.main.friends_page.exception_throwing.ExceptionTypeChooserActivity"
+                android:label="@string/title_activity_exception_type_chooser">
             <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.main.friends_page.FriendDetailsActivity" />
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value=".ui.main.friends_page.FriendDetailsActivity"/>
         </activity>
         <activity
-            android:name=".ui.main.main_page.MapsActivity"
-            android:label="@string/title_activity_maps" >
+                android:name=".ui.main.main_page.MapsActivity"
+                android:label="@string/title_activity_maps">
             <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ui.main.MainActivity" />
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value=".ui.main.MainActivity"/>
         </activity>
         <activity
-            android:name=".ui.question_views.AnswerExceptionActivity"
-            android:label="@string/title_activity_answer_exception" >
+                android:name=".ui.question_views.AnswerExceptionActivity"
+                android:label="@string/title_activity_answer_exception">
         </activity>
     </application>
 

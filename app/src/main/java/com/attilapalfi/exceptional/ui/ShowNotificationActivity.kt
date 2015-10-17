@@ -15,7 +15,13 @@ import com.attilapalfi.exceptional.persistence.*
 import com.attilapalfi.exceptional.rest.ExceptionRestConnector
 import com.attilapalfi.exceptional.ui.helpers.ViewHelper
 import com.attilapalfi.exceptional.ui.question_views.QuestionYesNoClickListener
-import com.google.android.gms.maps.MapView
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.MapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import java.math.BigInteger
 import javax.inject.Inject
 
@@ -45,10 +51,10 @@ public class ShowNotificationActivity : AppCompatActivity(), QuestionChangeListe
     private val senderImageView: ImageView by lazy { findViewById(R.id.notif_sender_image) as ImageView }
     private val senderNameView: TextView by lazy { findViewById(R.id.notif_sender_name) as TextView }
     private val sendDateView: TextView by lazy { findViewById(R.id.notif_sent_date) as TextView }
-    private val mapView: MapView by lazy { findViewById(R.id.notif_map) as MapView }
     private val questionText: TextView by lazy { findViewById(R.id.notif_question_text) as TextView }
     private val noButton: Button by lazy { findViewById(R.id.notif_question_no) as Button }
     private val yesButton: Button by lazy { findViewById(R.id.notif_question_yes) as Button }
+    private val receivedMarker by lazy { BitmapDescriptorFactory.fromResource(R.drawable.incoming_big) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,6 +63,7 @@ public class ShowNotificationActivity : AppCompatActivity(), QuestionChangeListe
         questionStore.addChangeListener(this)
         getModelFromBundle()
         loadViewsWithData()
+        loadMap()
     }
 
     override fun onDestroy() {
@@ -100,6 +107,31 @@ public class ShowNotificationActivity : AppCompatActivity(), QuestionChangeListe
         questionText.visibility = View.INVISIBLE
         noButton.visibility = View.INVISIBLE
         yesButton.visibility = View.INVISIBLE
+    }
+
+    private fun loadMap() {
+        val mapFragment = fragmentManager.findFragmentById(R.id.notif_map) as MapFragment
+        mapFragment.getMapAsync {
+            setMarker(it)
+            setPosition(it)
+        }
+    }
+
+    private fun setMarker(googleMap: GoogleMap) {
+        val markerOptions = MarkerOptions()
+                .position(LatLng(exception.latitude, exception.longitude))
+                .draggable(false)
+                .icon(receivedMarker)
+        googleMap.addMarker(markerOptions)
+    }
+
+    private fun setPosition(googleMap: GoogleMap) {
+        val cameraPosition = CameraPosition.Builder()
+                .target(LatLng(exception.latitude, exception.longitude))
+                .zoom(15f)
+                .tilt(30f)
+                .build()
+        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
     }
 
     override fun onQuestionsChanged() {
