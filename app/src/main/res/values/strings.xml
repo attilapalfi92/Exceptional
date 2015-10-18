@@ -41,8 +41,8 @@
     <string name="title_activity_exception_type_chooser">ExceptionTypeChooserActivity</string>
     <string name="exc_history_row_to_city_prefix">To:</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="install_google_services">Please install or update Google Play Services to use this app.</string>
+    <string name="google_services_not_found">Google Play Services not found. App won\'t work.</string>
     <string name="can_throw_location_pls">Can\'t throw the Exception, please enable location services.</string>
     <string name="submitter_text">"Submitter: "</string>
     <string name="voted_type_votes_text">"Votes: "</string>

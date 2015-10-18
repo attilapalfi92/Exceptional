@@ -9,8 +9,9 @@ import com.attilapalfi.exceptional.persistence.*;
 import com.attilapalfi.exceptional.rest.AppStartRestConnector;
 import com.attilapalfi.exceptional.rest.ExceptionRestConnector;
 import com.attilapalfi.exceptional.rest.VotingRestConnector;
-import com.attilapalfi.exceptional.services.GcmMessageHandler;
+import com.attilapalfi.exceptional.services.gcm.ExceptionalGcmService;
 import com.attilapalfi.exceptional.services.LocationProvider;
+import com.attilapalfi.exceptional.services.RegistrationIntentService;
 import com.attilapalfi.exceptional.ui.FacebookLoginFragment;
 import com.attilapalfi.exceptional.ui.OptionsActivity;
 import com.attilapalfi.exceptional.ui.ShowNotificationActivity;
@@ -62,7 +63,7 @@ public interface ApplicationComponent extends AppContextComponent {
 
     void inject( ExceptionInstanceStore exceptionInstanceStore );
 
-    void inject( GcmMessageHandler gcmMessageHandler );
+    void inject( ExceptionalGcmService exceptionalGcmService );
 
     void inject( ExceptionInstancesFragment exceptionInstancesFragment );
 
@@ -115,4 +116,6 @@ public interface ApplicationComponent extends AppContextComponent {
     void inject( QuestionsFragment questionsFragment );
 
     void inject( MapsActivity.ExceptionRenderer exceptionRenderer );
+
+    void inject( RegistrationIntentService registrationIntentService );
 }

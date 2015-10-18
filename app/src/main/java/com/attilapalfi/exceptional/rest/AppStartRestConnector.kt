@@ -1,22 +1,22 @@
 package com.attilapalfi.exceptional.rest
 
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.widget.Toast
 import com.attilapalfi.exceptional.R
 import com.attilapalfi.exceptional.dependency_injection.Injector
-import com.attilapalfi.exceptional.model.Exception
 import com.attilapalfi.exceptional.model.ExceptionFactory
 import com.attilapalfi.exceptional.model.Friend
 import com.attilapalfi.exceptional.persistence.*
 import com.attilapalfi.exceptional.rest.messages.AppStartRequest
 import com.attilapalfi.exceptional.rest.messages.AppStartResponse
-import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper
-import com.google.android.gms.gcm.GoogleCloudMessaging
+import com.attilapalfi.exceptional.services.gcm.RegistrationIntentService
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import retrofit.Callback
 import retrofit.RetrofitError
 import retrofit.client.Response
-import java.io.IOException
 import java.math.BigInteger
 import javax.inject.Inject
 
@@ -40,20 +40,12 @@ public class AppStartRestConnector {
     lateinit val questionStore: QuestionStore
     @Inject
     lateinit val exceptionFactory: ExceptionFactory
-    private var projectNumber: String = ""
-    private var appStartRestInterface: AppStartRestInterface? = null
-    private var registrationId: String = ""
+    private val appStartRestInterface by lazy { restInterfaceFactory.create(context, AppStartRestInterface::class.java) }
     public var androidId: String = ""
     private val requestBody = AppStartRequest()
 
     init {
-        init()
-    }
-
-    private fun init() {
         Injector.INSTANCE.applicationComponent.inject(this)
-        projectNumber = context.getString(R.string.project_number)
-        appStartRestInterface = restInterfaceFactory.create(context, AppStartRestInterface::class.java)
     }
 
     public fun onFirstAppStart(friendList: List<Friend>, profileId: BigInteger) {
@@ -95,20 +87,16 @@ public class AppStartRestConnector {
     }
 
     private fun gcmFirstAppStart() {
-        val googleCloudMessaging = GoogleCloudMessaging.getInstance(context)
-        try {
-            registrationId = googleCloudMessaging.register(projectNumber)
-        } catch (e: IOException) {
-            Toast.makeText(context, context.getString(R.string.failed_to_connect_to_gcm_servers) + e.getMessage(), Toast.LENGTH_LONG).show()
-        }
-
-        if (registrationId != "") {
-            requestBody.gcmId = registrationId
-            backendFirstAppStart()
+        if (checkPlayServices()) {
+            // Start IntentService to register this application with GCM.
+            val intent = Intent(context, RegistrationIntentService::class.java)
+            context.startService(intent);
         }
     }
 
-    private fun backendFirstAppStart() {
+    public fun backendFirstAppStart(gcmToken: String) {
+        requestBody.gcmId = gcmToken
+
         try {
             appStartRestInterface?.firstAppStart(requestBody, object : Callback<AppStartResponse> {
                 override fun success(responseBody: AppStartResponse?, response: Response?) {
@@ -131,19 +119,31 @@ public class AppStartRestConnector {
 
     private fun saveCommonData(responseBody: AppStartResponse) {
         Thread {
-            if (responseBody.exceptionVersion > metadataStore.exceptionVersion) {
-                exceptionTypeStore.addExceptionTypes(responseBody.exceptionTypes)
-            }
-            friendStore.updatePointsOfFriends(responseBody.friendsPoints)
-            metadataStore.points = responseBody.points
-            metadataStore.isSubmittedThisWeek = responseBody.submittedThisWeek
-            metadataStore.isVotedThisWeek = responseBody.votedThisWeek
-            metadataStore.exceptionVersion = responseBody.exceptionVersion
-            exceptionTypeStore.setVotedExceptionTypes(responseBody.beingVotedTypes)
-            val exceptionList = responseBody.myExceptions.map{ exceptionFactory.createFromWrapper(it) }
-            questionStore.addUnfilteredList(exceptionList)
-            exceptionInstanceStore.saveExceptionList(exceptionList)
+            saveTypesAndPoints(responseBody)
+            saveMetadata(responseBody)
+            saveQuestionsAndExceptions(responseBody)
         }.start()
+    }
+
+    private fun saveTypesAndPoints(responseBody: AppStartResponse) {
+        if (responseBody.exceptionVersion > metadataStore.exceptionVersion) {
+            exceptionTypeStore.addExceptionTypes(responseBody.exceptionTypes)
+        }
+        friendStore.updatePointsOfFriends(responseBody.friendsPoints)
+    }
+
+    private fun saveMetadata(responseBody: AppStartResponse) {
+        metadataStore.points = responseBody.points
+        metadataStore.isSubmittedThisWeek = responseBody.submittedThisWeek
+        metadataStore.isVotedThisWeek = responseBody.votedThisWeek
+        metadataStore.exceptionVersion = responseBody.exceptionVersion
+    }
+
+    private fun saveQuestionsAndExceptions(responseBody: AppStartResponse) {
+        exceptionTypeStore.setVotedExceptionTypes(responseBody.beingVotedTypes)
+        val exceptionList = responseBody.myExceptions.map { exceptionFactory.createFromWrapper(it) }
+        questionStore.addUnfilteredList(exceptionList)
+        exceptionInstanceStore.saveExceptionList(exceptionList)
     }
 
     public fun getDeviceName(): String {
@@ -166,5 +166,19 @@ public class AppStartRestConnector {
         } else {
             return Character.toUpperCase(first) + s.substring(1)
         }
+    }
+
+    private fun checkPlayServices(): Boolean {
+        val apiAvailability = GoogleApiAvailability.getInstance();
+        val resultCode = apiAvailability.isGooglePlayServicesAvailable(context);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (apiAvailability.isUserResolvableError(resultCode)) {
+                Toast.makeText(context, context.getString(R.string.install_google_services), Toast.LENGTH_LONG)
+            } else {
+                Toast.makeText(context, context.getString(R.string.google_services_not_found), Toast.LENGTH_LONG)
+            }
+            return false;
+        }
+        return true;
     }
 }
