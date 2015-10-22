@@ -21,8 +21,6 @@ import com.attilapalfi.exceptional.ui.ShowNotificationActivity
 import com.attilapalfi.exceptional.ui.main.MainActivity
 import com.google.android.gms.gcm.GcmListenerService
 import java.lang
-import java.lang.Double
-import java.lang.Long
 import java.math.BigInteger
 import java.sql.Timestamp
 import java.util.*
@@ -97,9 +95,9 @@ public class ExceptionalGcmService : GcmListenerService() {   // IntentService("
         exception.instanceId = BigInteger(extras.getString("instanceId"))
         exception.fromWho = BigInteger(extras.getString("fromWho"))
         exception.toWho = BigInteger(extras.getString("toWho"))
-        exception.longitude = Double.parseDouble(extras.getString("longitude"))
-        exception.latitude = Double.parseDouble(extras.getString("latitude"))
-        exception.date = Timestamp(Long.parseLong(extras.getString("timeInMillis")))
+        exception.longitude = extras.getString("longitude")!!.toDouble()
+        exception.latitude = extras.getString("latitude")!!.toDouble()
+        exception.date = Timestamp(extras.getString("timeInMillis")!!.toLong())
         parseAndSaveQuestion(extras, exception)
     }
 
@@ -121,7 +119,7 @@ public class ExceptionalGcmService : GcmListenerService() {   // IntentService("
     private fun saveExceptionAndPoints(extras: Bundle) {
         setCityForException(exception)
         exceptionInstanceStore.addExceptionWithoutCity(exception)
-        Handler.post {
+        handler?.post {
             savePoints(extras)
         }
     }

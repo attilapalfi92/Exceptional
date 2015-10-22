@@ -39,7 +39,7 @@ public class ExceptionInstanceStore {
     private val handler: Handler
 
     companion object {
-        private val STORE_SIZE = 1000
+        private val STORE_SIZE = 10000
         private val INSTANCE_DATABASE = "INSTANCE_DATABASE"
         private val INSTANCE_IDs = "INSTANCE_IDs"
         private val EMPTY_EXCEPTION = Exception()

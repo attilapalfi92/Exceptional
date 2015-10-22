@@ -23,7 +23,8 @@ public class LocationProvider implements ConnectionCallbacks, OnConnectionFailed
     public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 1000 * 10;
     public static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS = UPDATE_INTERVAL_IN_MILLISECONDS / 2;
 
-    @Inject Context context;
+    @Inject
+    Context context;
     private Location location;
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
