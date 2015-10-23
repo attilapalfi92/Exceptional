@@ -106,4 +106,10 @@
     <string name="notif_sender_prefix">From:</string>
     <string name="points_for_you">Points for you:</string>
     <string name="points_for_friend">Points for friend:</string>
+    <string name="you_still_have_to_answer">You still have to answer it.</string>
+    <string name="friend_still_has_to_answer">Friend still has to answer it.</string>
+    <string name="friend_aswered_correctly">Friend answered correctly.</string>
+    <string name="friend_aswered_wrong">Friend answered wrong.</string>
+    <string name="you_aswered_correctly">You answered correctly.</string>
+    <string name="you_aswered_wrong">You answered wrong.</string>
 </resources>

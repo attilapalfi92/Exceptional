@@ -22,7 +22,7 @@
         <item name="android:background">@color/status_bar</item>
     </style>
 
-    <style name="MyButtonStyle" parent="Widget.AppCompat.Button" >
+    <style name="MyButtonStyle" parent="Widget.AppCompat.Button">
         <item name="android:background">@color/status_bar</item>
         <item name="android:textColor">@color/white</item>
     </style>
@@ -33,5 +33,63 @@
     <color name="exceptional_green">#00ff00</color>
     <color name="status_bar">#002b4c</color>
     <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="grey">#535c5f</color>
+    <color name="yellow">#ffff00</color>
+    <color name="orange">#ff910c</color>
+
+    <color name="purple_200">#CE93D8</color>
+    <color name="purple_300">#BA68C8</color>
+    <color name="purple_400">#AB47BC</color>
+    <color name="purple_500">#9C27B0</color>
+    <color name="purple_600">#8E24AA</color>
+
+    <color name="indigo_200">#9FA8DA</color>
+    <color name="indigo_300">#7986CB</color>
+    <color name="indigo_400">#5C6BC0</color>
+    <color name="indigo_500">#3F51B5</color>
+    <color name="indigo_600">#3949AB</color>
+
+    <color name="blue_200">#90CAF9</color>
+    <color name="blue_300">#64B5F6</color>
+    <color name="blue_400">#42A5F5</color>
+    <color name="blue_500">#2196F3</color>
+    <color name="blue_600">#1E88E5</color>
+
+    <color name="teal_200">#80CBC4</color>
+    <color name="teal_300">#4DB6AC</color>
+    <color name="teal_400">#26A69A</color>
+    <color name="teal_500">#009688</color>
+    <color name="teal_600">#00897B</color>
+
+    <color name="green_200">#A5D6A7</color>
+    <color name="green_300">#81C784</color>
+    <color name="green_400">#66BB6A</color>
+    <color name="green_500">#4CAF50</color>
+    <color name="green_600">#43A047</color>
+
+    <color name="lime_200">#E6EE9C</color>
+    <color name="lime_300">#DCE775</color>
+    <color name="lime_400">#D4E157</color>
+    <color name="lime_500">#CDDC39</color>
+    <color name="lime_600">#C0CA33</color>
+
+    <color name="yellow_200">#FFF59D</color>
+    <color name="yellow_300">#FFF176</color>
+    <color name="yellow_400">#FFEE58</color>
+    <color name="yellow_500">#FFEB3B</color>
+    <color name="yellow_600">#FDD835</color>
+
+    <color name="orange_200">#FFAB91</color>
+    <color name="orange_300">#FF8A65</color>
+    <color name="orange_400">#FF7043</color>
+    <color name="orange_500">#FF5722</color>
+    <color name="orange_600">#F4511E</color>
+
+    <color name="grey_200">#B0BEC5</color>
+    <color name="grey_300">#90A4AE</color>
+    <color name="grey_400">#78909C</color>
+    <color name="grey_500">#607D8B</color>
+    <color name="grey_600">#546E7A</color>
 
 </resources>
