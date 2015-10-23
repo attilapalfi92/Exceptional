@@ -11,7 +11,7 @@ import com.attilapalfi.exceptional.model.Exception
  */
 class QuestionAdapter(public var values: List<Exception>) : RecyclerView.Adapter<QuestionViewHolder>() {
 
-    override fun getItemCount() = values.size()
+    override fun getItemCount() = values.size
 
     override fun onBindViewHolder(holder: QuestionViewHolder, position: Int) {
         holder.bindRow(values.get(position))

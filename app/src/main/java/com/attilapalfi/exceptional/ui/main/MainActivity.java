@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void GoToLoginIfNotLoggedIn( ) {
-        if ( !metadataStore.isLoggedIn() ) {
+        if ( !metadataStore.getLoggedIn() ) {
             Intent intent = new Intent( this, LoginActivity.class );
             startActivity( intent );
         }
@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void submitClicked( View view ) {
-        if ( metadataStore.isSubmittedThisWeek() ) {
+        if ( metadataStore.getSubmittedThisWeek() ) {
             Toast.makeText( this, R.string.already_submitted, Toast.LENGTH_SHORT ).show();
         } else {
             MaterialDialog materialDialog = new MaterialDialog.Builder( this )
@@ -217,10 +217,5 @@ public class MainActivity extends AppCompatActivity {
 
     private void showValidationToast( @StringRes int resId ) {
         Toast.makeText( getApplicationContext(), resId, Toast.LENGTH_SHORT ).show();
-    }
-
-    public void testButtonClicked( View view ) {
-        Intent intent = new Intent( this, AnswerExceptionActivity.class );
-        startActivity( intent );
     }
 }

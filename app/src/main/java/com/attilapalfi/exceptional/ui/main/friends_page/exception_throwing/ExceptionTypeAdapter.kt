@@ -31,5 +31,5 @@ public class ExceptionTypeAdapter(private val activity: Activity,
         holder.bindRow(values.get(position))
     }
 
-    override fun getItemCount() = values.size()
+    override fun getItemCount() = values.size
 }

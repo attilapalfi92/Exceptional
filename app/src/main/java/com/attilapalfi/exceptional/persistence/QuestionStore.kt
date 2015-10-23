@@ -28,14 +28,14 @@ public class QuestionStore {
     private val database: Book
     private val storedQuestions = Collections.synchronizedList(ArrayList<Exception>())
     @Inject
-    lateinit val friendStore: FriendStore
+    lateinit var friendStore: FriendStore
     @Inject
-    lateinit val metadataStore: MetadataStore
+    lateinit var metadataStore: MetadataStore
     @Inject
-    lateinit val exceptionTypeStore: ExceptionTypeStore
+    lateinit var exceptionTypeStore: ExceptionTypeStore
     private val handler = Handler(Looper.getMainLooper())
 
-    public constructor() {
+    init {
         Injector.INSTANCE.applicationComponent.inject(this)
         database = Paper.book(KOTLIN_DATABASE)
         storedQuestions.addAll(database.read(QUESTION_LIST, EMPTY_QUESTION_LIST))

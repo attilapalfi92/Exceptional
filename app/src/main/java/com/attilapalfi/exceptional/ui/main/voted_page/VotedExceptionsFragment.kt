@@ -31,11 +31,11 @@ public class VotedExceptionsFragment : Fragment(), VotedTypeListener {
     private var recyclerView: RecyclerView? = null
     private var votedTypeList: List<ExceptionType>? = null
     @Inject
-    lateinit val exceptionTypeStore: ExceptionTypeStore
+    lateinit var exceptionTypeStore: ExceptionTypeStore
     @Inject
-    lateinit val votingRestConnector: VotingRestConnector
+    lateinit var votingRestConnector: VotingRestConnector
     @Inject
-    lateinit val metadataStore: MetadataStore
+    lateinit var metadataStore: MetadataStore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,7 +66,7 @@ public class VotedExceptionsFragment : Fragment(), VotedTypeListener {
     }
 
     private fun initTypeAdapter(recyclerView: RecyclerView) {
-        votedTypeList = exceptionTypeStore.votedExceptionTypeList
+        votedTypeList = exceptionTypeStore.getVotedExceptionTypeList()
         if (votedTypeList == null) {
             votedTypeList = ArrayList<ExceptionType>()
         }
@@ -77,7 +77,7 @@ public class VotedExceptionsFragment : Fragment(), VotedTypeListener {
 
     override fun onVoteListChanged() {
         adapter?.let {
-            it.setValues(exceptionTypeStore.votedExceptionTypeList)
+            it.setValues(exceptionTypeStore.getVotedExceptionTypeList())
             it.notifyDataSetChanged()
         }
     }
@@ -93,7 +93,7 @@ public class VotedExceptionsFragment : Fragment(), VotedTypeListener {
             override fun onClick(view: View) {
                 val itemPosition = recyclerView.getChildLayoutPosition(view)
                 val exceptionType = values.get(itemPosition)
-                if (metadataStore.isVotedThisWeek) {
+                if (metadataStore.votedThisWeek) {
                     Toast.makeText(activity, R.string.you_already_voted, Toast.LENGTH_SHORT).show()
                 } else {
                     showDialog(exceptionType)
@@ -131,7 +131,7 @@ public class VotedExceptionsFragment : Fragment(), VotedTypeListener {
         }
 
         override fun getItemCount(): Int {
-            return values.size()
+            return values.size
         }
 
         public class RowViewHolder(viewItem: View, private val context: Context) : RecyclerView.ViewHolder(viewItem) {
@@ -175,7 +175,7 @@ public class VotedExceptionsFragment : Fragment(), VotedTypeListener {
                 for (part in fullNameParts) {
                     fullName += part + "." + "\n"
                 }
-                fullName = fullName.substring(0, fullName.length() - 2)
+                fullName = fullName.substring(0, fullName.length - 2)
                 return fullName
             }
         }

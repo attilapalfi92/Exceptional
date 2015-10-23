@@ -133,7 +133,7 @@ public class FacebookManager {
                     continueAppStart( friends );
                 } ).start();
             } else {
-                if ( metadataStore.isLoggedIn() ) {
+                if ( metadataStore.getLoggedIn() ) {
                     Log.e( "FacebookManager: ", "GraphRequest error: " + graphResponse.getError() );
                 }
             }
@@ -164,11 +164,11 @@ public class FacebookManager {
     }
 
     private void continueAppStart( List<Friend> friends ) {
-        if ( metadataStore.isLoggedIn() ) {
+        if ( metadataStore.getLoggedIn() ) {
             initYourself();
             metadataStore.updateUser( user );
             friendStore.updateFriendList( friends );
-            if ( !metadataStore.isFirstStartFinished() ) {
+            if ( !metadataStore.getFirstStartFinished() ) {
                 appStartRestConnector.onFirstAppStart( friends, user.getId() );
             } else {
                 appStartRestConnector.onRegularAppStart( friends, user.getId() );

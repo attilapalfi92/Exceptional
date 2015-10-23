@@ -109,7 +109,7 @@ public class ExceptionInstancesFragment extends Fragment implements ExceptionRef
     }
 
     private void actualRefresh( ) {
-        if ( metadataStore.isLoggedIn() ) {
+        if ( metadataStore.getLoggedIn() ) {
             exceptionRestConnector.refreshExceptions( this );
         } else {
             Toast.makeText( getActivity().getApplicationContext(), R.string.login_first, Toast.LENGTH_SHORT ).show();

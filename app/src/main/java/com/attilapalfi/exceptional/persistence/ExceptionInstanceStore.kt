@@ -27,10 +27,10 @@ public class ExceptionInstanceStore {
         public set
         get
     @Inject
-    lateinit val exceptionTypeStore: ExceptionTypeStore
+    lateinit var exceptionTypeStore: ExceptionTypeStore
     @Inject
-    lateinit val exceptionFactory: ExceptionFactory
-    private lateinit val initThread: Thread
+    lateinit var exceptionFactory: ExceptionFactory
+    private lateinit var initThread: Thread
     private val database: Book
     private val exceptionChangeListeners = HashSet<ExceptionChangeListener>()
     private val storedExceptions = ArrayList<Exception>()
@@ -67,7 +67,6 @@ public class ExceptionInstanceStore {
         initThread.start()
         notifyWhenInitFinished()
     }
-
 
     private fun notifyWhenInitFinished() {
         Thread({
@@ -171,7 +170,7 @@ public class ExceptionInstanceStore {
             var index = Collections.binarySearch(storedExceptions, e)
             if (index < 0) {
                 index = -index - 1
-                if (storedExceptions.size() >= STORE_SIZE) {
+                if (storedExceptions.size >= STORE_SIZE) {
                     addNewOrKeepOld(e, index)
                 } else {
                     addTheNewOne(e, index)
@@ -181,7 +180,7 @@ public class ExceptionInstanceStore {
     }
 
     private fun addNewOrKeepOld(e: Exception, index: Int) {
-        val removeCandidate = storedExceptions.get(storedExceptions.size() - 1)
+        val removeCandidate = storedExceptions.get(storedExceptions.size - 1)
         if (removeCandidate.compareTo(e) > 0) {
             removeTheCandidate(storedExceptions)
             addTheNewOne(e, index)
@@ -189,8 +188,8 @@ public class ExceptionInstanceStore {
     }
 
     private fun removeTheCandidate(list: MutableList<Exception>) {
-        val removed = list.remove(list.size() - 1)
-        idList.remove(idList.size() - 1)
+        val removed = list.removeAt(list.size - 1)
+        idList.removeAt(idList.size - 1)
         database.delete(removed.instanceId.toString())
     }
 

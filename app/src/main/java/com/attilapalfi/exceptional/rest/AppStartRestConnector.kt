@@ -25,21 +25,21 @@ import javax.inject.Inject
  */
 public class AppStartRestConnector {
     @Inject
-    lateinit val context: Context
+    lateinit var context: Context
     @Inject
-    lateinit val exceptionInstanceStore: ExceptionInstanceStore
+    lateinit var exceptionInstanceStore: ExceptionInstanceStore
     @Inject
-    lateinit val exceptionTypeStore: ExceptionTypeStore
+    lateinit var exceptionTypeStore: ExceptionTypeStore
     @Inject
-    lateinit val friendStore: FriendStore
+    lateinit var friendStore: FriendStore
     @Inject
-    lateinit val metadataStore: MetadataStore
+    lateinit var metadataStore: MetadataStore
     @Inject
-    lateinit val restInterfaceFactory: RestInterfaceFactory
+    lateinit var restInterfaceFactory: RestInterfaceFactory
     @Inject
-    lateinit val questionStore: QuestionStore
+    lateinit var questionStore: QuestionStore
     @Inject
-    lateinit val exceptionFactory: ExceptionFactory
+    lateinit var exceptionFactory: ExceptionFactory
     private val appStartRestInterface by lazy { restInterfaceFactory.create(context, AppStartRestInterface::class.java) }
     public var androidId: String = ""
     private val requestBody = AppStartRequest()
@@ -66,7 +66,7 @@ public class AppStartRestConnector {
                 }
 
                 override fun failure(error: RetrofitError) {
-                    Toast.makeText(context, context.getString(R.string.failed_to_connect) + error.getMessage(),
+                    Toast.makeText(context, context.getString(R.string.failed_to_connect) + error.message,
                             Toast.LENGTH_LONG).show()
                 }
             })
@@ -102,12 +102,12 @@ public class AppStartRestConnector {
                 override fun success(responseBody: AppStartResponse?, response: Response?) {
                     responseBody?.let {
                         saveCommonData(it)
-                        metadataStore.isFirstStartFinished = true
+                        metadataStore.firstStartFinished = true
                     }
                 }
 
                 override fun failure(error: RetrofitError) {
-                    Toast.makeText(context, context.getString(R.string.failed_to_connect_3) + error.getMessage(),
+                    Toast.makeText(context, context.getString(R.string.failed_to_connect_3) + error.message,
                             Toast.LENGTH_LONG).show()
                 }
             })
@@ -133,9 +133,9 @@ public class AppStartRestConnector {
     }
 
     private fun saveMetadata(responseBody: AppStartResponse) {
-        metadataStore.points = responseBody.points
-        metadataStore.isSubmittedThisWeek = responseBody.submittedThisWeek
-        metadataStore.isVotedThisWeek = responseBody.votedThisWeek
+        metadataStore.setPoints(responseBody.points)
+        metadataStore.submittedThisWeek = responseBody.submittedThisWeek
+        metadataStore.votedThisWeek = responseBody.votedThisWeek
         metadataStore.exceptionVersion = responseBody.exceptionVersion
     }
 
@@ -157,10 +157,10 @@ public class AppStartRestConnector {
     }
 
     private fun capitalize(s: String?): String {
-        if (s == null || s.length() == 0) {
+        if (s == null || s.length == 0) {
             return ""
         }
-        val first = s.charAt(0)
+        val first = s.get(0)
         if (Character.isUpperCase(first)) {
             return s
         } else {

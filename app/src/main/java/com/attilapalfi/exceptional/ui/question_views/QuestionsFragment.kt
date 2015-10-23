@@ -25,7 +25,7 @@ public class QuestionsFragment : Fragment(), QuestionChangeListener {
     private var recyclerView: RecyclerView? = null
     private var questionAdapter: QuestionAdapter? = null
     @Inject
-    lateinit val questionStore: QuestionStore
+    lateinit var questionStore: QuestionStore
 
     init {
         Injector.INSTANCE.applicationComponent.inject(this)

@@ -25,17 +25,17 @@ import javax.inject.Inject
  */
 public class ExceptionRestConnector {
     @Inject
-    lateinit val context: Context
+    lateinit var context: Context
     public var restInterfaceFactory: RestInterfaceFactory? = null
         @Inject
         set
         get
-    @Inject lateinit val exceptionInstanceStore: ExceptionInstanceStore
-    @Inject lateinit val exceptionFactory: ExceptionFactory
-    @Inject lateinit val friendStore: FriendStore
-    @Inject lateinit val metadataStore: MetadataStore
-    @Inject lateinit val questionStore: QuestionStore
-    @Inject lateinit val exceptionTypeStore: ExceptionTypeStore
+    @Inject lateinit var exceptionInstanceStore: ExceptionInstanceStore
+    @Inject lateinit var exceptionFactory: ExceptionFactory
+    @Inject lateinit var friendStore: FriendStore
+    @Inject lateinit var metadataStore: MetadataStore
+    @Inject lateinit var questionStore: QuestionStore
+    @Inject lateinit var exceptionTypeStore: ExceptionTypeStore
     private var exceptionRestInterface: ExceptionRestInterface? = null
 
     init {
@@ -56,7 +56,7 @@ public class ExceptionRestConnector {
                 override fun success(response: ExceptionSentResponse?, r: Response?) {
                     response?.let {
                         val toWho = friendStore.findById(it.instanceWrapper.toWho)
-                        metadataStore.points = it.sendersPoints
+                        metadataStore.setPoints(it.sendersPoints)
                         friendStore.updateFriendPoints(it.instanceWrapper.toWho, it.receiversPoints)
                         exceptionInstanceStore.addExceptionAsync(exceptionFactory.createFromWrapper(it.instanceWrapper))
                         printSuccess(it, toWho)
@@ -69,13 +69,13 @@ public class ExceptionRestConnector {
                 }
 
                 override fun failure(error: RetrofitError?) {
-                    Toast.makeText(context, context.getString(R.string.failed_to_throw_1) + error?.getMessage(),
+                    Toast.makeText(context, context.getString(R.string.failed_to_throw_1) + error?.message,
                             Toast.LENGTH_LONG).show()
                 }
             })
 
         } catch (e: java.lang.Exception) {
-            Toast.makeText(context, context.getString(R.string.failed_to_throw_2) + e.getMessage(),
+            Toast.makeText(context, context.getString(R.string.failed_to_throw_2) + e.message,
                     Toast.LENGTH_LONG).show()
         }
     }
@@ -98,7 +98,7 @@ public class ExceptionRestConnector {
             }
 
             override fun failure(error: RetrofitError?) {
-                Toast.makeText(context, context.getString(R.string.failed_to_sync) + error?.getMessage(),
+                Toast.makeText(context, context.getString(R.string.failed_to_sync) + error?.message,
                         Toast.LENGTH_SHORT).show()
                 refreshListener.onExceptionRefreshFinished()
             }
@@ -111,13 +111,13 @@ public class ExceptionRestConnector {
                 response?.let {
                     questionStore.removeQuestion(it.instanceWrapper.instanceId)
                     exceptionInstanceStore.setAnswered(it.instanceWrapper, true);
-                    metadataStore.points = it.receiversPoints
+                    metadataStore.setPoints(it.receiversPoints)
                     friendStore.updateFriendPoints(it.instanceWrapper.fromWho, it.sendersPoints)
                 }
             }
 
             override fun failure(error: RetrofitError?) {
-                Toast.makeText(context, context.getString(R.string.failed_to_answer) + error?.getMessage(),
+                Toast.makeText(context, context.getString(R.string.failed_to_answer) + error?.message,
                         Toast.LENGTH_SHORT).show()
             }
 

@@ -7,10 +7,7 @@ import com.attilapalfi.exceptional.ExceptionalApplication;
 import com.attilapalfi.exceptional.facebook.FacebookManager;
 import com.attilapalfi.exceptional.model.ExceptionFactory;
 import com.attilapalfi.exceptional.persistence.*;
-import com.attilapalfi.exceptional.rest.AppStartRestConnector;
-import com.attilapalfi.exceptional.rest.ExceptionRestConnector;
-import com.attilapalfi.exceptional.rest.RestInterfaceFactory;
-import com.attilapalfi.exceptional.rest.VotingRestConnector;
+import com.attilapalfi.exceptional.rest.*;
 import com.attilapalfi.exceptional.services.LocationProvider;
 import com.attilapalfi.exceptional.ui.helpers.QuestionNavigator;
 import com.attilapalfi.exceptional.ui.helpers.ViewHelper;
@@ -130,5 +127,11 @@ public class AppContextModule {
     @Singleton
     public ViewHelper viewHelper( ) {
         return new ViewHelper();
+    }
+
+    @Provides
+    @Singleton
+    public StatSupplier statSupplier( ) {
+        return new StatSupplier();
     }
 }

@@ -21,6 +21,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.maps.android.clustering.Cluster
 import com.google.maps.android.clustering.ClusterManager
 import com.google.maps.android.clustering.view.DefaultClusterRenderer
+import org.jetbrains.anko.async
 import java.util.*
 import javax.inject.Inject
 
@@ -30,7 +31,7 @@ public class MapsActivity : AppCompatActivity(), OnMapReadyCallback, ClusterMana
 
     private lateinit var clusterManager: ClusterManager<Exception>
     @Inject
-    lateinit val exceptionInstanceStore: ExceptionInstanceStore
+    lateinit var exceptionInstanceStore: ExceptionInstanceStore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,9 +48,11 @@ public class MapsActivity : AppCompatActivity(), OnMapReadyCallback, ClusterMana
     override fun onMapReady(googleMap: GoogleMap?) {
         googleMap?.let {
             val exceptionList = exceptionInstanceStore.getExceptionList()
-            initClusterManager(exceptionList, it)
-            it.setOnCameraChangeListener(clusterManager)
-            setPosition(it, LatLng(exceptionList.get(0).latitude, exceptionList.get(0).longitude))
+            if (exceptionList.isNotEmpty()) {
+                initClusterManager(exceptionList, it)
+                it.setOnCameraChangeListener(clusterManager)
+                setPosition(it, LatLng(exceptionList[0].latitude, exceptionList[0].longitude))
+            }
         }
     }
 
@@ -92,9 +95,9 @@ public class MapsActivity : AppCompatActivity(), OnMapReadyCallback, ClusterMana
     : DefaultClusterRenderer<Exception>(context, googleMap, clusterManager) {
 
         @Inject
-        lateinit val metadataStore: MetadataStore
+        lateinit var metadataStore: MetadataStore
         @Inject
-        lateinit val friendStore: FriendStore
+        lateinit var friendStore: FriendStore
         private val sentMarker by lazy { BitmapDescriptorFactory.fromResource(R.drawable.outgoing_big) }
         private val receivedMarker by lazy { BitmapDescriptorFactory.fromResource(R.drawable.incoming_big) }
 

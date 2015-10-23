@@ -23,7 +23,7 @@ public class ExceptionTypesFragment : Fragment() {
     private var recyclerView: RecyclerView? = null
     private var typeAdapter: ExceptionTypeAdapter? = null
     @Inject
-    lateinit val exceptionTypeStore: ExceptionTypeStore
+    lateinit var exceptionTypeStore: ExceptionTypeStore
 
     init {
         Injector.INSTANCE.applicationComponent.inject(this)
@@ -31,8 +31,8 @@ public class ExceptionTypesFragment : Fragment() {
     }
 
     private fun initExceptionTypes() {
-        val index = instanceCounter++ % exceptionTypeStore.exceptionTypes.size()
-        typeName = ArrayList(exceptionTypeStore.exceptionTypes).get(index)
+        val index = instanceCounter++ % exceptionTypeStore.getExceptionTypes().size
+        typeName = ArrayList(exceptionTypeStore.getExceptionTypes()).get(index)
         exceptionTypes = exceptionTypeStore.getExceptionTypeListByName(typeName)
     }
 

@@ -16,11 +16,11 @@ import javax.inject.Inject
  */
 public class ViewHelper {
     @Inject
-    lateinit val friendStore: FriendStore
+    lateinit var friendStore: FriendStore
     @Inject
-    lateinit val metadataStore: MetadataStore
+    lateinit var metadataStore: MetadataStore
     @Inject
-    lateinit val imageCache: ImageCache
+    lateinit var imageCache: ImageCache
 
     init {
         Injector.INSTANCE.applicationComponent.inject(this)

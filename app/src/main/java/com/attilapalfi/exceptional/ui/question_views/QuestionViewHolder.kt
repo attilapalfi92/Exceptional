@@ -25,11 +25,11 @@ class QuestionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val cityName: TextView
     private val dateText: TextView
     @Inject
-    lateinit val viewHelper: ViewHelper
+    lateinit var viewHelper: ViewHelper
     @Inject
-    lateinit val exceptionTypeStore: ExceptionTypeStore
+    lateinit var exceptionTypeStore: ExceptionTypeStore
     @Inject
-    lateinit val exceptionRestConnector: ExceptionRestConnector
+    lateinit var exceptionRestConnector: ExceptionRestConnector
 
     init {
         Injector.INSTANCE.applicationComponent.inject(this)

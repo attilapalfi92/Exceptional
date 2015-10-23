@@ -20,7 +20,6 @@ import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper
 import com.attilapalfi.exceptional.ui.ShowNotificationActivity
 import com.attilapalfi.exceptional.ui.main.MainActivity
 import com.google.android.gms.gcm.GcmListenerService
-import java.lang
 import java.math.BigInteger
 import java.sql.Timestamp
 import java.util.*
@@ -35,15 +34,15 @@ public class ExceptionalGcmService : GcmListenerService() {   // IntentService("
     private var exception: Exception = Exception()
     private var geocoder: Geocoder? = null
     @Inject
-    lateinit val exceptionInstanceStore: ExceptionInstanceStore
+    lateinit var exceptionInstanceStore: ExceptionInstanceStore
     @Inject
-    lateinit val exceptionTypeStore: ExceptionTypeStore
+    lateinit var exceptionTypeStore: ExceptionTypeStore
     @Inject
-    lateinit val friendStore: FriendStore
+    lateinit var friendStore: FriendStore
     @Inject
-    lateinit val metadataStore: MetadataStore
+    lateinit var metadataStore: MetadataStore
     @Inject
-    lateinit val questionStore: QuestionStore
+    lateinit var questionStore: QuestionStore
 
     override fun onCreate() {
         super.onCreate()
@@ -127,7 +126,7 @@ public class ExceptionalGcmService : GcmListenerService() {   // IntentService("
     private fun setCityForException(e: Exception) {
         try {
             e.city = geocoder?.getFromLocation(e.latitude, e.longitude, 1)?.get(0)?.locality ?: "Unknown"
-        } catch (exception: lang.Exception) {
+        } catch (exception: java.lang.Exception) {
             e.city = getString(R.string.unknown)
             exception.printStackTrace()
         }
@@ -136,7 +135,7 @@ public class ExceptionalGcmService : GcmListenerService() {   // IntentService("
     private fun savePoints(extras: Bundle) {
         val yourPointsString = extras.getString("yourPoints")
         if (yourPointsString != null) {
-            metadataStore.points = Integer.parseInt(yourPointsString)
+            metadataStore.setPoints(Integer.parseInt(yourPointsString))
         }
         val friendPointsString = extras.getString("friendPoints")
         if (friendPointsString != null) {

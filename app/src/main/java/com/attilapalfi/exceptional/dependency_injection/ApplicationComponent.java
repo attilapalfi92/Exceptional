@@ -8,6 +8,7 @@ import com.attilapalfi.exceptional.model.ExceptionFactory;
 import com.attilapalfi.exceptional.persistence.*;
 import com.attilapalfi.exceptional.rest.AppStartRestConnector;
 import com.attilapalfi.exceptional.rest.ExceptionRestConnector;
+import com.attilapalfi.exceptional.rest.StatSupplier;
 import com.attilapalfi.exceptional.rest.VotingRestConnector;
 import com.attilapalfi.exceptional.services.LocationProvider;
 import com.attilapalfi.exceptional.services.gcm.ExceptionalGcmService;
@@ -118,4 +119,6 @@ public interface ApplicationComponent extends AppContextComponent {
     void inject( MapsActivity.ExceptionRenderer exceptionRenderer );
 
     void inject( RegistrationIntentService registrationIntentService );
+
+    void inject( StatSupplier statSupplier );
 }

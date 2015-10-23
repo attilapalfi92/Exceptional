@@ -10,7 +10,7 @@ import javax.inject.Inject
 
 public class AnswerExceptionActivity : AppCompatActivity() {
     @Inject
-    lateinit val questionStore: QuestionStore
+    lateinit var questionStore: QuestionStore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

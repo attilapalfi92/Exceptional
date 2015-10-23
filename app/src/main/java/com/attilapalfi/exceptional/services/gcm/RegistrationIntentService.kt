@@ -20,7 +20,7 @@ import javax.inject.Inject
  */
 public class RegistrationIntentService : IntentService(RegistrationIntentService.TAG) {
     @Inject
-    lateinit val appStartRestConnector: AppStartRestConnector
+    lateinit var appStartRestConnector: AppStartRestConnector
 
     init {
         Injector.INSTANCE.applicationComponent.inject(this)
@@ -42,7 +42,7 @@ public class RegistrationIntentService : IntentService(RegistrationIntentService
     private fun handleError(e: Exception, sharedPreferences: SharedPreferences) {
         Log.d(TAG, "Failed to complete token refresh", e)
         Toast.makeText(applicationContext, getString(R.string.failed_to_connect_to_gcm_servers)
-                + e.getMessage(), Toast.LENGTH_LONG).show()
+                + e.message, Toast.LENGTH_LONG).show()
         sharedPreferences.edit().putBoolean(SENT_TOKEN_TO_SERVER, false).apply()
     }
 

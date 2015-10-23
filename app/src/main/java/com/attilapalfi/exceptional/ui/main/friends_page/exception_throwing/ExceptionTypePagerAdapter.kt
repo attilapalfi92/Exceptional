@@ -16,16 +16,18 @@ import javax.inject.Inject
 public class ExceptionTypePagerAdapter(fragmentManager: FragmentManager, private val activity: Activity) :
         FragmentPagerAdapter(fragmentManager), ViewPager.OnPageChangeListener {
 
-    public var exceptionTypeStore: ExceptionTypeStore? = null
-        @Inject
-        public set
-        get
+    @Inject
+    lateinit var exceptionTypeStore: ExceptionTypeStore
     private val exceptionTypes = ArrayList<String>()
     private val positionsToTypes = HashMap<Int, String>()
 
     init {
         Injector.INSTANCE.applicationComponent.inject(this)
-        exceptionTypes.addAll(exceptionTypeStore?.exceptionTypes)
+        init()
+    }
+
+    private fun init() {
+        exceptionTypes.addAll(exceptionTypeStore.getExceptionTypes())
     }
 
     override fun getItem(position: Int): Fragment {
@@ -36,7 +38,7 @@ public class ExceptionTypePagerAdapter(fragmentManager: FragmentManager, private
     }
 
     override fun getCount(): Int {
-        return exceptionTypes.size()
+        return exceptionTypes.size
     }
 
     override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {

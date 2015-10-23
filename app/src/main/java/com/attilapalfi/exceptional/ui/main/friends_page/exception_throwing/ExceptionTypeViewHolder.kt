@@ -48,7 +48,7 @@ public class ExceptionTypeViewHolder(itemView: View, private val context: Contex
         for (part in fullNameParts) {
             fullName += part + "." + "\n"
         }
-        fullName = fullName.substring(0, fullName.length() - 2)
+        fullName = fullName.substring(0, fullName.length - 2)
         return fullName
     }
 }

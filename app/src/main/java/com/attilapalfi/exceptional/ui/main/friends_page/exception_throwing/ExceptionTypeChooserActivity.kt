@@ -23,9 +23,9 @@ public class ExceptionTypeChooserActivity : AppCompatActivity() {
     private var pagerAdapter: ExceptionTypePagerAdapter? = null
     private var viewPager: ViewPager? = null
     @Inject
-    lateinit val exceptionTypeStore: ExceptionTypeStore
+    lateinit var exceptionTypeStore: ExceptionTypeStore
     @Inject
-    lateinit val friendStore: FriendStore
+    lateinit var friendStore: FriendStore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,7 +52,7 @@ public class ExceptionTypeChooserActivity : AppCompatActivity() {
     }
 
     private fun initTitle() {
-        val exceptionTypeList = ArrayList(exceptionTypeStore.exceptionTypes)
+        val exceptionTypeList = ArrayList(exceptionTypeStore.getExceptionTypes())
         if (exceptionTypeList.isEmpty()) {
             title = getString(R.string.no_exception_types_found)
         } else {

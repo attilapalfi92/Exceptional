@@ -19,13 +19,13 @@ import javax.inject.Inject
 public class FriendStore {
 
     @Inject
-    lateinit val imageCache: ImageCache
+    lateinit var imageCache: ImageCache
     private val database: Book
     private val handler: Handler
     private val storedFriends = LinkedList<Friend>()
     private val idList = Collections.synchronizedList(LinkedList<BigInteger>())
     private val friendChangeListeners = HashSet<FriendChangeListener>()
-    private lateinit val initThread: Thread
+    private lateinit var initThread: Thread
 
     companion object {
         private val FRIEND_DATABASE = "FRIEND_DATABASE"
@@ -134,7 +134,7 @@ public class FriendStore {
     }
 
     private fun updateOldFriends(friendList: List<Friend>) {
-        val knownCurrentFriends = ArrayList<Friend>(friendList.size())
+        val knownCurrentFriends = ArrayList<Friend>(friendList.size)
         knownCurrentFriends.addAll(friendList)
         var storedFriendsCopy = getStoredFriends()
         for (f1 in knownCurrentFriends) {

@@ -28,21 +28,21 @@ import javax.inject.Inject
 
 public class ShowNotificationActivity : AppCompatActivity(), QuestionChangeListener {
     @Inject
-    lateinit val exceptionTypeStore: ExceptionTypeStore
+    lateinit var exceptionTypeStore: ExceptionTypeStore
     @Inject
-    lateinit val friendStore: FriendStore
+    lateinit var friendStore: FriendStore
     @Inject
-    lateinit val imageCache: ImageCache
+    lateinit var imageCache: ImageCache
     @Inject
-    lateinit val metadataStore: MetadataStore
+    lateinit var metadataStore: MetadataStore
     @Inject
-    lateinit val viewHelper: ViewHelper
+    lateinit var viewHelper: ViewHelper
     @Inject
-    lateinit val exceptionInstanceStore: ExceptionInstanceStore
+    lateinit var exceptionInstanceStore: ExceptionInstanceStore
     @Inject
-    lateinit val exceptionRestConnector: ExceptionRestConnector
+    lateinit var exceptionRestConnector: ExceptionRestConnector
     @Inject
-    lateinit val questionStore: QuestionStore
+    lateinit var questionStore: QuestionStore
     private lateinit var sender: Friend
     private lateinit var exception: Exception
     private lateinit var exceptionType: ExceptionType

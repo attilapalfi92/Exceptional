@@ -12,7 +12,7 @@ import javax.inject.Inject
  */
 public class QuestionNavigator {
     @Inject
-    lateinit val questionStore: QuestionStore
+    lateinit var questionStore: QuestionStore
     init {
         Injector.INSTANCE.applicationComponent.inject(this)
     }
