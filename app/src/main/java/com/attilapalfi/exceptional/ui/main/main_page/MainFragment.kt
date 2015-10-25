@@ -68,7 +68,8 @@ class MainFragment : Fragment(), FirstStartFinishedListener, PointChangeListener
             if (globalTypePieData.dataSet.entryCount == 0) {
                 try {
                     val throwCounts = statSupplier.globalThrowCounts
-                    val pieDataSet = PieDataSet(throwCounts.values.mapIndexed { index, count -> Entry(count.toFloat(), index) }, "Types")
+                    val pieDataSet = PieDataSet(throwCounts.values.toList().subList(0, 9)
+                            .mapIndexed { index, count -> Entry(count.toFloat(), index) }, "Types")
                     setDataSetColors(pieDataSet)
                     globalTypePieData = PieData(throwCounts.keys.map { typeStore.findById(it).shortName }, pieDataSet)
                 } catch (e: Exception) {
@@ -118,24 +119,6 @@ class MainFragment : Fragment(), FirstStartFinishedListener, PointChangeListener
         )
     }
 
-    private fun setCharts() {
-        val globalTypeChart = myView!!.findViewById(R.id.global_type_chart) as PieChart
-
-        val pieDataSet = PieDataSet(listOf(Entry(1f, 1, "Data 1"), Entry(2f, 2, "Data 2"),
-                Entry(3f, 3, "Data 3"), Entry(4f, 4, "Data 4")), "")
-
-        pieDataSet.colors = listOf(resources.getColor(R.color.exceptional_blue),
-                resources.getColor(R.color.exceptional_green),
-                resources.getColor(R.color.exceptional_red),
-                resources.getColor(R.color.exceptional_purple),
-                resources.getColor(R.color.yellow),
-                resources.getColor(R.color.orange))
-
-        val pieData = PieData(listOf("Type 1", "Type 2", "Type 3", "Type 4"), pieDataSet)
-
-        globalTypeChart.data = pieData
-    }
-
     private fun setViews() {
         setImageView()
         setNameView()
@@ -149,13 +132,15 @@ class MainFragment : Fragment(), FirstStartFinishedListener, PointChangeListener
 
     private fun setNameView() {
         val nameView = myView!!.findViewById(R.id.mainNameTextView) as TextView
-        val nameText = resources.getString(R.string.main_welcome_before_name) + " " + metadataStore.user.firstName.trim { it <= ' ' } + "!"
+        val nameText = "${resources.getString(R.string.main_welcome_before_name)} " +
+                "${metadataStore.user.firstName.trim { it <= ' ' }}!"
         nameView.text = nameText
     }
 
     private fun setPointView() {
         val pointView = myView!!.findViewById(R.id.mainPointTextView) as TextView
-        val pointText = getString(R.string.main_point_view_pre) + " " + metadataStore.getPoints() + " " + getString(R.string.main_point_view_post)
+        val pointText = "${getString(R.string.main_point_view_pre)} ${metadataStore.getPoints()} " +
+                "${getString(R.string.main_point_view_post)}"
         pointView.text = pointText
     }
 
