@@ -27,6 +27,8 @@ import com.attilapalfi.exceptional.ui.main.friends_page.FriendsFragment;
 import com.attilapalfi.exceptional.ui.main.friends_page.exception_throwing.*;
 import com.attilapalfi.exceptional.ui.main.main_page.MainFragment;
 import com.attilapalfi.exceptional.ui.main.main_page.MapsActivity;
+import com.attilapalfi.exceptional.ui.main.main_page.recycler_adapter.MainAdapter;
+import com.attilapalfi.exceptional.ui.main.main_page.recycler_model.UserRowModel;
 import com.attilapalfi.exceptional.ui.main.voted_page.VotedExceptionsFragment;
 import com.attilapalfi.exceptional.ui.main.voted_page.VotedExceptionsFragment.VotedExceptionAdapter;
 import com.attilapalfi.exceptional.ui.question_views.AnswerExceptionActivity;
@@ -121,4 +123,8 @@ public interface ApplicationComponent extends AppContextComponent {
     void inject( RegistrationIntentService registrationIntentService );
 
     void inject( StatSupplier statSupplier );
+
+    void inject( MainAdapter mainAdapter );
+
+    void inject( UserRowModel userRowModel );
 }

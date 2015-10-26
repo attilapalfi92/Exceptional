@@ -102,7 +102,6 @@ public class AppStartRestConnector {
                 override fun success(responseBody: AppStartResponse?, response: Response?) {
                     responseBody?.let {
                         saveCommonData(it)
-                        metadataStore.firstStartFinished = true
                     }
                 }
 
@@ -133,10 +132,11 @@ public class AppStartRestConnector {
     }
 
     private fun saveMetadata(responseBody: AppStartResponse) {
-        metadataStore.setPoints(responseBody.points)
         metadataStore.submittedThisWeek = responseBody.submittedThisWeek
         metadataStore.votedThisWeek = responseBody.votedThisWeek
         metadataStore.exceptionVersion = responseBody.exceptionVersion
+        metadataStore.setPoints(responseBody.points)
+        metadataStore.firstStartFinished = true
     }
 
     private fun saveQuestionsAndExceptions(responseBody: AppStartResponse) {

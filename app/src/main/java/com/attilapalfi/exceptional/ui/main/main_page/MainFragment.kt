@@ -2,6 +2,8 @@ package com.attilapalfi.exceptional.ui.main.main_page
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,24 +11,22 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.attilapalfi.exceptional.R
 import com.attilapalfi.exceptional.dependency_injection.Injector
-import com.attilapalfi.exceptional.interfaces.FirstStartFinishedListener
 import com.attilapalfi.exceptional.interfaces.PointChangeListener
 import com.attilapalfi.exceptional.persistence.ExceptionTypeStore
 import com.attilapalfi.exceptional.persistence.ImageCache
 import com.attilapalfi.exceptional.persistence.MetadataStore
 import com.attilapalfi.exceptional.rest.StatSupplier
-import com.github.mikephil.charting.charts.PieChart
+import com.attilapalfi.exceptional.ui.main.main_page.recycler_adapter.MainAdapter
+import com.attilapalfi.exceptional.ui.main.main_page.recycler_model.UserRowModel
 import com.github.mikephil.charting.data.DataSet
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
-import org.jetbrains.anko.async
-import org.jetbrains.anko.uiThread
 import javax.inject.Inject
 
 /**
  */
-class MainFragment : Fragment(), FirstStartFinishedListener, PointChangeListener {
+class MainFragment : Fragment(), PointChangeListener {
     private var myView: View? = null
     @Inject
     lateinit var imageCache: ImageCache
@@ -38,51 +38,64 @@ class MainFragment : Fragment(), FirstStartFinishedListener, PointChangeListener
     lateinit var statSupplier: StatSupplier
     private var globalTypePieData = PieData(listOf(), PieDataSet(listOf(), ""))
 
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var adapter: MainAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Injector.INSTANCE.applicationComponent.inject(this)
     }
 
-    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        metadataStore.addFirstStartFinishedListener(this)
+    override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         metadataStore.addPointChangeListener(this)
-        myView = inflater!!.inflate(R.layout.fragment_main, container, false)
-        initCharts()
+        myView = initAdapter(inflater, container)
+        //initCharts()
         return myView
     }
 
     override fun onResume() {
         super.onResume()
-        setViews()
+        //setViews()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        metadataStore.removeFirstStartFinishedListener(this)
         metadataStore.removePointChangeListener(this)
     }
 
-    private fun initCharts() {
-        async {
-            if (globalTypePieData.dataSet.entryCount == 0) {
-                try {
-                    val throwCounts = statSupplier.globalThrowCounts
-                    val pieDataSet = PieDataSet(throwCounts.values.toList().subList(0, 9)
-                            .mapIndexed { index, count -> Entry(count.toFloat(), index) }, "Types")
-                    setDataSetColors(pieDataSet)
-                    globalTypePieData = PieData(throwCounts.keys.map { typeStore.findById(it).shortName }, pieDataSet)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            }
-            uiThread {
-                val globalTypeChart = myView!!.findViewById(R.id.global_type_chart) as PieChart
-                globalTypeChart.setDescription("Count of different exception types thrown globally.")
-                globalTypeChart.data = globalTypePieData
-                globalTypeChart.invalidate()
-            }
+    private fun initAdapter(inflater: LayoutInflater?, container: ViewGroup?): View? {
+        if (inflater != null && container != null) {
+            val fragmentView = inflater.inflate(R.layout.fragment_main, container, false);
+            recyclerView = fragmentView.findViewById(R.id.main_recycler_view) as RecyclerView;
+            recyclerView.layoutManager = LinearLayoutManager(activity)
+            val adapterData = listOf(UserRowModel(metadataStore.user))
+            adapter = MainAdapter(adapterData, recyclerView)
+            recyclerView.adapter = adapter
+            return fragmentView
         }
+        return null
+    }
+
+    private fun initCharts() {
+        //        async {
+        //            if (globalTypePieData.dataSet.entryCount == 0) {
+        //                try {
+        //                    val throwCounts = statSupplier.globalThrowCounts
+        //                    val pieDataSet = PieDataSet(throwCounts.values.toList().subList(0, 9)
+        //                            .mapIndexed { index, count -> Entry(count.toFloat(), index) }, "Types")
+        //                    setDataSetColors(pieDataSet)
+        //                    globalTypePieData = PieData(throwCounts.keys.map { typeStore.findById(it).shortName }, pieDataSet)
+        //                } catch (e: Exception) {
+        //                    e.printStackTrace()
+        //                }
+        //            }
+        //            uiThread {
+        //                val globalTypeChart = myView!!.findViewById(R.id.global_type_chart) as PieChart
+        //                globalTypeChart.setDescription("Count of different exception types thrown globally.")
+        //                globalTypeChart.data = globalTypePieData
+        //                globalTypeChart.invalidate()
+        //            }
+        //        }
     }
 
     private fun setDataSetColors(dataSet: DataSet<Entry>) {
@@ -144,13 +157,7 @@ class MainFragment : Fragment(), FirstStartFinishedListener, PointChangeListener
         pointView.text = pointText
     }
 
-    override fun onFirstStartFinished(state: Boolean) {
-        if (state) {
-            setViews()
-        }
-    }
-
     override fun onPointsChanged() {
-        setPointView()
+        adapter.notifyItemChanged(0)
     }
 }

@@ -3,7 +3,6 @@ package com.attilapalfi.exceptional.persistence
 import android.os.Handler
 import android.os.Looper
 import com.attilapalfi.exceptional.dependency_injection.Injector
-import com.attilapalfi.exceptional.interfaces.FirstStartFinishedListener
 import com.attilapalfi.exceptional.interfaces.PointChangeListener
 import com.attilapalfi.exceptional.model.Friend
 import io.paperdb.Book
@@ -47,9 +46,6 @@ public class MetadataStore {
                 field = value
                 database.write(FIRST_START_FINISHED, value)
             }
-            for (l in firstStartFinishedListeners) {
-                l.onFirstStartFinished(value)
-            }
         }
 
     @Volatile
@@ -78,7 +74,6 @@ public class MetadataStore {
             database.write(USER, value)
         }
 
-    private val firstStartFinishedListeners = HashSet<FirstStartFinishedListener>()
     private val pointChangeListeners = HashSet<PointChangeListener>()
 
     init {
@@ -142,14 +137,6 @@ public class MetadataStore {
         loggedIn = false
         firstStartFinished = false
         database.destroy()
-    }
-
-    public fun addFirstStartFinishedListener(listener: FirstStartFinishedListener): Boolean {
-        return firstStartFinishedListeners.add(listener)
-    }
-
-    public fun removeFirstStartFinishedListener(listener: FirstStartFinishedListener): Boolean {
-        return firstStartFinishedListeners.remove(listener)
     }
 
     public fun addPointChangeListener(listener: PointChangeListener): Boolean {
