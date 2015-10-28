@@ -25,9 +25,11 @@ import com.attilapalfi.exceptional.ui.main.exception_instance_views.ExceptionIns
 import com.attilapalfi.exceptional.ui.main.friends_page.FriendDetailsActivity;
 import com.attilapalfi.exceptional.ui.main.friends_page.FriendsFragment;
 import com.attilapalfi.exceptional.ui.main.friends_page.exception_throwing.*;
+import com.attilapalfi.exceptional.ui.main.main_page.ColorTemplate;
 import com.attilapalfi.exceptional.ui.main.main_page.MainFragment;
 import com.attilapalfi.exceptional.ui.main.main_page.MapsActivity;
 import com.attilapalfi.exceptional.ui.main.main_page.recycler_adapter.MainAdapter;
+import com.attilapalfi.exceptional.ui.main.main_page.recycler_model.FriendPointsChartModel;
 import com.attilapalfi.exceptional.ui.main.main_page.recycler_model.UserRowModel;
 import com.attilapalfi.exceptional.ui.main.voted_page.VotedExceptionsFragment;
 import com.attilapalfi.exceptional.ui.main.voted_page.VotedExceptionsFragment.VotedExceptionAdapter;
@@ -127,4 +129,8 @@ public interface ApplicationComponent extends AppContextComponent {
     void inject( MainAdapter mainAdapter );
 
     void inject( UserRowModel userRowModel );
+
+    void inject( ColorTemplate colorTemplate );
+
+    void inject( FriendPointsChartModel friendPointsChartModel );
 }

@@ -11,12 +11,15 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.attilapalfi.exceptional.R
 import com.attilapalfi.exceptional.dependency_injection.Injector
+import com.attilapalfi.exceptional.interfaces.FriendChangeListener
 import com.attilapalfi.exceptional.interfaces.PointChangeListener
 import com.attilapalfi.exceptional.persistence.ExceptionTypeStore
+import com.attilapalfi.exceptional.persistence.FriendStore
 import com.attilapalfi.exceptional.persistence.ImageCache
 import com.attilapalfi.exceptional.persistence.MetadataStore
 import com.attilapalfi.exceptional.rest.StatSupplier
 import com.attilapalfi.exceptional.ui.main.main_page.recycler_adapter.MainAdapter
+import com.attilapalfi.exceptional.ui.main.main_page.recycler_model.FriendPointsChartModel
 import com.attilapalfi.exceptional.ui.main.main_page.recycler_model.UserRowModel
 import com.github.mikephil.charting.data.DataSet
 import com.github.mikephil.charting.data.Entry
@@ -26,8 +29,10 @@ import javax.inject.Inject
 
 /**
  */
-class MainFragment : Fragment(), PointChangeListener {
+class MainFragment : Fragment(), PointChangeListener, FriendChangeListener {
     private var myView: View? = null
+    @Inject
+    lateinit var friendStore: FriendStore
     @Inject
     lateinit var imageCache: ImageCache
     @Inject
@@ -48,6 +53,7 @@ class MainFragment : Fragment(), PointChangeListener {
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         metadataStore.addPointChangeListener(this)
+        friendStore.addFriendChangeListener(this)
         myView = initAdapter(inflater, container)
         //initCharts()
         return myView
@@ -61,6 +67,7 @@ class MainFragment : Fragment(), PointChangeListener {
     override fun onDestroyView() {
         super.onDestroyView()
         metadataStore.removePointChangeListener(this)
+        friendStore.removeFriendChangeListener(this)
     }
 
     private fun initAdapter(inflater: LayoutInflater?, container: ViewGroup?): View? {
@@ -68,7 +75,7 @@ class MainFragment : Fragment(), PointChangeListener {
             val fragmentView = inflater.inflate(R.layout.fragment_main, container, false);
             recyclerView = fragmentView.findViewById(R.id.main_recycler_view) as RecyclerView;
             recyclerView.layoutManager = LinearLayoutManager(activity)
-            val adapterData = listOf(UserRowModel(metadataStore.user))
+            val adapterData = listOf(UserRowModel(metadataStore.user), FriendPointsChartModel())
             adapter = MainAdapter(adapterData, recyclerView)
             recyclerView.adapter = adapter
             return fragmentView
@@ -158,6 +165,10 @@ class MainFragment : Fragment(), PointChangeListener {
     }
 
     override fun onPointsChanged() {
-        adapter.notifyItemChanged(0)
+        adapter.notifyItemChanged(0, 1)
+    }
+
+    override fun onFriendsChanged() {
+        adapter.notifyItemRangeChanged(0, 1)
     }
 }

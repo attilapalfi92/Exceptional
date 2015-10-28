@@ -5,8 +5,6 @@ import android.view.View
 /**
  * Created by palfi on 2015-10-26.
  */
-
-
 public abstract class RowItemModel {
     public abstract val rowType: RowType
     public abstract fun bindRow(rowView: View)

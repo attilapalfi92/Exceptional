@@ -2,7 +2,6 @@ package com.attilapalfi.exceptional.persistence
 
 import android.content.Context
 import android.location.Geocoder
-import android.os.AsyncTask
 import android.os.Handler
 import android.os.Looper
 import com.attilapalfi.exceptional.R
@@ -13,6 +12,8 @@ import com.attilapalfi.exceptional.model.ExceptionFactory
 import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper
 import io.paperdb.Book
 import io.paperdb.Paper
+import org.jetbrains.anko.async
+import org.jetbrains.anko.uiThread
 import java.math.BigInteger
 import java.util.*
 import javax.inject.Inject
@@ -82,19 +83,11 @@ public class ExceptionInstanceStore {
     }
 
     public fun addExceptionAsync(exception: Exception) {
-        if (!storedExceptions.contains(exception)) {
-            object : AsyncTask<Void?, Void?, Void?>() {
-
-                override fun doInBackground(vararg params: Void?): Void? {
-                    saveToStore(exception)
-                    return null
-                }
-
-                override fun onPostExecute(aVoid: Void?) {
-                    notifyListeners()
-                }
-
-            }.execute()
+        async {
+            saveToStore(exception)
+            uiThread {
+                notifyListeners()
+            }
         }
     }
 
@@ -105,25 +98,19 @@ public class ExceptionInstanceStore {
 
     public fun saveExceptionList(exceptionList: List<Exception>) {
         if (!exceptionList.isEmpty()) {
-            storeEachIfNotContained(exceptionList)
+            storeExceptionList(exceptionList)
             handler.post { this.notifyListeners() }
         }
     }
 
     public fun saveExceptionListAsync(exceptionList: List<Exception>) {
         if (!exceptionList.isEmpty()) {
-            object : AsyncTask<Void?, Void?, Void?>() {
-
-                override fun doInBackground(vararg params: Void?): Void? {
-                    storeEachIfNotContained(exceptionList)
-                    return null
-                }
-
-                override fun onPostExecute(aVoid: Void?) {
+            async {
+                storeExceptionList(exceptionList)
+                uiThread {
                     notifyListeners()
                 }
-
-            }.execute()
+            }
         }
     }
 
@@ -152,12 +139,8 @@ public class ExceptionInstanceStore {
         }
     }
 
-    private fun storeEachIfNotContained(toBeStored: List<Exception>) {
-        toBeStored.forEach { e ->
-            if (!storedExceptions.contains(e)) {
-                saveWithCity(e)
-            }
-        }
+    private fun storeExceptionList(toBeStored: List<Exception>) {
+        toBeStored.forEach { e -> saveWithCity(e) }
     }
 
     private fun saveWithCity(e: Exception) {
@@ -167,13 +150,15 @@ public class ExceptionInstanceStore {
 
     private fun addToListInOrder(e: Exception) {
         synchronized(storedExceptions) {
-            var index = Collections.binarySearch(storedExceptions, e)
-            if (index < 0) {
-                index = -index - 1
-                if (storedExceptions.size >= STORE_SIZE) {
-                    addNewOrKeepOld(e, index)
-                } else {
-                    addTheNewOne(e, index)
+            if (!storedExceptions.contains(e)) {
+                var index = Collections.binarySearch(storedExceptions, e)
+                if (index < 0) {
+                    index = -index - 1
+                    if (storedExceptions.size >= STORE_SIZE) {
+                        addNewOrKeepOld(e, index)
+                    } else {
+                        addTheNewOne(e, index)
+                    }
                 }
             }
         }
