@@ -1,6 +1,7 @@
 package com.attilapalfi.exceptional.ui.main.friends_page.exception_throwing
 
 import android.content.Context
+import android.support.v7.widget.CardView
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.TextView
@@ -15,12 +16,14 @@ public class ExceptionTypeViewHolder(itemView: View, private val context: Contex
     private val fullNameView: TextView
     private val descriptionView: TextView
     private val submitterView: TextView
+    public val container: CardView
 
     init {
         shortNameView = itemView.findViewById(R.id.type_short_name_text) as TextView
         fullNameView = itemView.findViewById(R.id.type_full_name_text) as TextView
         descriptionView = itemView.findViewById(R.id.type_description_text) as TextView
         submitterView = itemView.findViewById(R.id.type_submitter_text) as TextView
+        container = itemView.findViewById(R.id.type_row_layout_container) as CardView
     }
 
     public fun bindRow(exceptionType: ExceptionType) {

@@ -35,7 +35,7 @@ public class FriendPointsChartModel : RowItemModel() {
         val friendPoints = ArrayList(friendList.map { it.points })
         val user = metadataStore.user
         val userIndex = getUserIndex(friendPoints, user)
-        initBarChart(friendNames, friendPoints, rowView, user, userIndex)
+        initChart(friendNames, friendPoints, rowView, user, userIndex)
     }
 
     private fun getUserIndex(friendPoints: ArrayList<Int>, user: Friend): Int {
@@ -47,13 +47,13 @@ public class FriendPointsChartModel : RowItemModel() {
         }
     }
 
-    private fun initBarChart(friendNames: ArrayList<String>, friendPoints: ArrayList<Int>, rowView: View,
-                             user: Friend, userIndex: Int): BarChart {
+    private fun initChart(friendNames: ArrayList<String>, friendPoints: ArrayList<Int>, rowView: View,
+                          user: Friend, userIndex: Int) {
         val barChart = rowView.findViewById(R.id.friend_points_bar_chart) as BarChart
         barChart.setDescription("Your points among friends'.")
         barChart.legend.isEnabled = false
         barChart.data = createBarData(friendNames, friendPoints, user, userIndex)
-        return barChart
+        barChart.animateXY(900, 900)
     }
 
     private fun createBarData(friendNames: ArrayList<String>, friendPoints: ArrayList<Int>,

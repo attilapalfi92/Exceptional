@@ -62,9 +62,10 @@ dependencies {
     compile 'io.paperdb:paperdb:1.0'
     compile 'com.google.maps.android:android-maps-utils:0.4'
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile 'org.jetbrains.anko:anko-sdk23:0.7.2' // sdk19, sdk21, sdk23 are also available
-    compile 'org.jetbrains.anko:anko-support-v4:0.7.2' // In case you need support.v4 bindings
+    compile 'org.jetbrains.anko:anko-sdk23:0.7.2'
+    compile 'org.jetbrains.anko:anko-support-v4:0.7.2'
     compile 'com.github.PhilJay:MPAndroidChart:v2.1.5'
+    compile 'jp.wasabeef:recyclerview-animators:2.0.0'
 }
 buildscript {
     ext.kotlin_version = '1.0.0-beta-1038'

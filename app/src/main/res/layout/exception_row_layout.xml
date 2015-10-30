@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.CardView
         xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/instance_row_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
@@ -170,7 +171,7 @@
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:gravity="center"
-                android:textColor="@color/exceptional_purple" />
+                android:textColor="@color/exceptional_purple"/>
 
         <TextView
                 android:id="@+id/exc_row_question_answer"
@@ -181,7 +182,7 @@
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"
                 android:gravity="right"
-                android:textColor="@color/exceptional_blue" />
+                android:textColor="@color/exceptional_blue"/>
 
     </RelativeLayout>
 </android.support.v7.widget.CardView>

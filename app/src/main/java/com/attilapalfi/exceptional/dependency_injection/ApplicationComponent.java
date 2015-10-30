@@ -30,6 +30,7 @@ import com.attilapalfi.exceptional.ui.main.main_page.MainFragment;
 import com.attilapalfi.exceptional.ui.main.main_page.MapsActivity;
 import com.attilapalfi.exceptional.ui.main.main_page.recycler_adapter.MainAdapter;
 import com.attilapalfi.exceptional.ui.main.main_page.recycler_model.FriendPointsChartModel;
+import com.attilapalfi.exceptional.ui.main.main_page.recycler_model.TypeThrowChartModel;
 import com.attilapalfi.exceptional.ui.main.main_page.recycler_model.UserRowModel;
 import com.attilapalfi.exceptional.ui.main.voted_page.VotedExceptionsFragment;
 import com.attilapalfi.exceptional.ui.main.voted_page.VotedExceptionsFragment.VotedExceptionAdapter;
@@ -133,4 +134,6 @@ public interface ApplicationComponent extends AppContextComponent {
     void inject( ColorTemplate colorTemplate );
 
     void inject( FriendPointsChartModel friendPointsChartModel );
+
+    void inject( TypeThrowChartModel typeThrowChartModel );
 }

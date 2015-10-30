@@ -1,9 +1,5 @@
 package com.attilapalfi.exceptional.ui.main.friends_page.exception_throwing
 
-import java.util.ArrayList
-
-import javax.inject.Inject
-
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
@@ -15,6 +11,9 @@ import com.attilapalfi.exceptional.R
 import com.attilapalfi.exceptional.dependency_injection.Injector
 import com.attilapalfi.exceptional.model.ExceptionType
 import com.attilapalfi.exceptional.persistence.ExceptionTypeStore
+import java.lang.ref.WeakReference
+import java.util.*
+import javax.inject.Inject
 
 public class ExceptionTypesFragment : Fragment() {
     public var position: Int = 0
@@ -47,7 +46,7 @@ public class ExceptionTypesFragment : Fragment() {
         recyclerView = view.findViewById(R.id.exception_type_recycler_view) as RecyclerView
         recyclerView?.let {
             it.layoutManager = LinearLayoutManager(activity)
-            typeAdapter = ExceptionTypeAdapter(activity, it, exceptionTypes)
+            typeAdapter = ExceptionTypeAdapter(WeakReference(activity), it, exceptionTypes)
             it.adapter = typeAdapter
         }
         return view

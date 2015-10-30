@@ -3,6 +3,7 @@ package com.attilapalfi.exceptional.ui.main.exception_instance_views
 import android.content.Context
 import android.support.annotation.ColorInt
 import android.support.v4.content.ContextCompat
+import android.support.v7.widget.CardView
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.ImageView
@@ -34,6 +35,7 @@ public class ExceptionInstanceViewHolder(rowView: View) : RecyclerView.ViewHolde
     private val pointsForFriendView: TextView = rowView.findViewById(R.id.exc_row_points_for_friend) as TextView
     private val questionTextView: TextView = rowView.findViewById(R.id.exc_row_question_text) as TextView
     private val questionAnswerView: TextView = rowView.findViewById(R.id.exc_row_question_answer) as TextView
+    public val container: CardView = rowView.findViewById(R.id.instance_row_container) as CardView
     private lateinit var fromWho: Friend
     private lateinit var toWho: Friend
     private lateinit var user: Friend

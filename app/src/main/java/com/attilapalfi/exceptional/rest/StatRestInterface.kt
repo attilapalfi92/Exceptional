@@ -8,5 +8,5 @@ import java.util.*
  */
 public interface StatRestInterface {
     @GET("/stats/globalThrowCounts")
-    fun getGlobalThrowCounts(): LinkedHashMap<Int, Int>
+    fun getGlobalThrowCounts(): LinkedHashMap<Int, Long>
 }
