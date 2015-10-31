@@ -98,11 +98,11 @@ class MainFragment : Fragment(), PointChangeListener, FriendChangeListener,
         adapter.notifyItemRangeChanged(0, 2)
     }
 
-    override fun onGlobalThrowCountChanged() {
-        adapter.notifyItemChanged(3)
-    }
-
     override fun onGlobalPointsChanged() {
         adapter.notifyItemChanged(2)
+    }
+
+    override fun onGlobalThrowCountChanged() {
+        adapter.notifyItemChanged(3)
     }
 }

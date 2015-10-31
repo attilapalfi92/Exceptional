@@ -77,7 +77,7 @@ public class FriendPointsChartBinder : RowItemBinder() {
 
     private fun customizeDataSet(dataSet: BarDataSet, userIndex: Int) {
         dataSet.barSpacePercent = 10f
-        val colors = ArrayList(ColorTemplate.ChartColors)
+        val colors = ArrayList(ColorTemplate.DarkChartColors)
         colors.add(userIndex, ColorTemplate.Black)
         dataSet.colors = colors
     }

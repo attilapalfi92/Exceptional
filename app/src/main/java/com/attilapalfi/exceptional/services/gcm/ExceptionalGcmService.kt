@@ -99,6 +99,7 @@ public class ExceptionalGcmService : GcmListenerService() {   // IntentService("
         exception.date = Timestamp(extras.getString("timeInMillis")!!.toLong())
         exception.pointsForSender = extras.getString("exceptionPointsForSender")!!.toInt()
         exception.pointsForReceiver = extras.getString("exceptionPointsForReceiver")!!.toInt()
+        exception.city = extras.getString("city")
         parseAndSaveQuestion(extras, exception)
     }
 
@@ -119,7 +120,7 @@ public class ExceptionalGcmService : GcmListenerService() {   // IntentService("
 
     private fun saveExceptionAndPoints(extras: Bundle) {
         setCityForException(exception)
-        exceptionInstanceStore.addExceptionWithoutCity(exception)
+        exceptionInstanceStore.addException(exception)
         handler?.post {
             savePoints(extras)
         }

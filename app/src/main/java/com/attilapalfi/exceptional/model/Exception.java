@@ -23,7 +23,7 @@ public class Exception implements Comparable<Exception>, ClusterItem {
     private BigInteger toWho;
     private Question question = new Question();
     @NotNull
-    private volatile String city = "";
+    private volatile String city = "unknown";
     private int pointsForSender;
     private int pointsForReceiver;
     private transient ExceptionType exceptionType;

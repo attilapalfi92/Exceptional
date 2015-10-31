@@ -38,8 +38,9 @@ public data class ExceptionInstanceWrapper(var fromWho: BigInteger = BigInteger(
                                            var instanceId: BigInteger = BigInteger("0"),
                                            var pointsForSender: Int = 25,
                                            var pointsForReceiver: Int = -20,
+                                           var city: String = "unknown",
                                            var question: Question = Question()) {
-    constructor(e: Exception, question_: Question) : this(
+    constructor(e: Exception) : this(
             fromWho = e.fromWho,
             toWho = e.toWho,
             timeInMillis = e.date.time,
@@ -49,7 +50,8 @@ public data class ExceptionInstanceWrapper(var fromWho: BigInteger = BigInteger(
             instanceId = e.instanceId,
             pointsForSender = e.pointsForSender,
             pointsForReceiver = e.pointsForReceiver,
-            question = question_
+            city = e.city,
+            question = e.question
     )
 };
 

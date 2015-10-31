@@ -4,7 +4,6 @@ import android.content.Context
 import android.location.Geocoder
 import android.os.Handler
 import android.os.Looper
-import com.attilapalfi.exceptional.R
 import com.attilapalfi.exceptional.dependency_injection.Injector
 import com.attilapalfi.exceptional.interfaces.ExceptionChangeListener
 import com.attilapalfi.exceptional.model.Exception
@@ -24,10 +23,8 @@ import javax.inject.Inject
  * Created by Attila on 2015-06-08.
  */
 public class ExceptionInstanceStore : AbstractStore() {
-    public var context: Context? = null
-        @Inject
-        public set
-        get
+    @Inject
+    lateinit var context: Context
     @Inject
     lateinit var exceptionTypeStore: ExceptionTypeStore
     @Inject
@@ -38,7 +35,6 @@ public class ExceptionInstanceStore : AbstractStore() {
     private val exceptionChangeListeners = HashSet<ExceptionChangeListener>()
     private val storedExceptions = ArrayList<Exception>()
     private val idList = ArrayList<BigInteger>()
-    private val geocoder: Geocoder
     private val handler: Handler
 
     @Volatile
@@ -55,7 +51,6 @@ public class ExceptionInstanceStore : AbstractStore() {
         Injector.INSTANCE.applicationComponent.inject(this)
         database = Paper.book(INSTANCE_DATABASE)
         handler = Handler(Looper.getMainLooper())
-        geocoder = Geocoder(context, Locale.getDefault())
     }
 
     override public fun init() {
@@ -85,16 +80,18 @@ public class ExceptionInstanceStore : AbstractStore() {
 
     public fun addExceptionAsync(exception: Exception) {
         async {
-            saveToStore(exception)
+            waitTillInitialized()
+            storeException(exception)
             uiThread {
                 notifyListeners()
             }
         }
     }
 
-    public fun addExceptionWithoutCity(exception: Exception) {
+    public fun addException(exception: Exception) {
         waitTillInitialized()
-        addToListInOrder(exception)
+        storeException(exception)
+        notifyListeners()
     }
 
     public fun saveExceptionList(exceptionList: List<Exception>) {
@@ -133,18 +130,14 @@ public class ExceptionInstanceStore : AbstractStore() {
         }
     }
 
-    private fun saveToStore(e: Exception) {
-        saveWithCity(e)
+    private fun storeException(e: Exception) {
+        addToListInOrder(e)
         database.write(INSTANCE_IDs, idList)
     }
 
     private fun storeExceptionList(toBeStored: List<Exception>) {
-        toBeStored.forEach { e -> saveWithCity(e) }
-    }
-
-    private fun saveWithCity(e: Exception) {
-        setCityForException(e)
-        addToListInOrder(e)
+        toBeStored.forEach { e -> addToListInOrder(e) }
+        database.write(INSTANCE_IDs, idList)
     }
 
     private fun addToListInOrder(e: Exception) {
@@ -181,16 +174,6 @@ public class ExceptionInstanceStore : AbstractStore() {
         storedExceptions.add(index, e)
         idList.add(index, e.instanceId)
         database.write(e.instanceId.toString(), e)
-        database.write(INSTANCE_IDs, idList)
-    }
-
-    private fun setCityForException(e: Exception) {
-        try {
-            e.city = geocoder.getFromLocation(e.latitude, e.longitude, 1)[0].locality
-        } catch (exception: java.lang.Exception) {
-            e.city = context!!.getString(R.string.unknown)
-            exception.printStackTrace()
-        }
     }
 
     private fun notifyListeners() {

@@ -49,8 +49,8 @@ public class ExceptionRestConnector {
         }
     }
 
-    fun throwException(exception: Exception, question: Question) {
-        val exceptionInstanceWrapper = ExceptionInstanceWrapper(exception, question)
+    fun throwException(exception: Exception) {
+        val exceptionInstanceWrapper = ExceptionInstanceWrapper(exception)
         try {
             exceptionRestInterface?.throwException(exceptionInstanceWrapper, object : Callback<ExceptionSentResponse> {
                 override fun success(response: ExceptionSentResponse?, r: Response?) {

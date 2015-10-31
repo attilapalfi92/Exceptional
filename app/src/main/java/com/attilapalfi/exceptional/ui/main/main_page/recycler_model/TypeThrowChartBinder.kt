@@ -67,7 +67,7 @@ public class TypeThrowChartBinder : RowItemBinder() {
 
     private fun createPieDataSet(entryList: ArrayList<Entry>): PieDataSet {
         val pieDataSet = PieDataSet(entryList, "Types")
-        pieDataSet.colors = ColorTemplate.ChartColors
+        pieDataSet.colors = ColorTemplate.LightChartColors
         return pieDataSet
     }
 

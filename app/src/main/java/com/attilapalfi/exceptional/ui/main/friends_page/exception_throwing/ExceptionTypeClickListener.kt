@@ -12,16 +12,14 @@ import android.widget.Toast
 import com.afollestad.materialdialogs.MaterialDialog
 import com.attilapalfi.exceptional.R
 import com.attilapalfi.exceptional.dependency_injection.Injector
-import com.attilapalfi.exceptional.model.Exception
-import com.attilapalfi.exceptional.model.ExceptionFactory
-import com.attilapalfi.exceptional.model.ExceptionType
-import com.attilapalfi.exceptional.model.Question
+import com.attilapalfi.exceptional.model.*
 import com.attilapalfi.exceptional.persistence.MetadataStore
 import com.attilapalfi.exceptional.rest.ExceptionRestConnector
 import com.attilapalfi.exceptional.services.LocationException
 import com.attilapalfi.exceptional.services.LocationProvider
 import com.attilapalfi.exceptional.ui.main.Constants
 import com.attilapalfi.exceptional.ui.main.MainActivity
+import org.jetbrains.anko.async
 import java.math.BigInteger
 import javax.inject.Inject
 
@@ -36,10 +34,16 @@ public class ExceptionTypeClickListener(private val values: List<ExceptionType>,
     private var noRadioView: RadioButton? = null
     private var yesRadioView: RadioButton? = null
     private var questionText = ""
-    @Inject lateinit var locationProvider: LocationProvider
-    @Inject lateinit var exceptionRestConnector: ExceptionRestConnector
-    @Inject lateinit var exceptionFactory: ExceptionFactory
-    @Inject lateinit var metadataStore: MetadataStore
+    @Inject
+    lateinit var locationProvider: LocationProvider
+    @Inject
+    lateinit var exceptionRestConnector: ExceptionRestConnector
+    @Inject
+    lateinit var exceptionFactory: ExceptionFactory
+    @Inject
+    lateinit var metadataStore: MetadataStore
+    @Inject
+    lateinit var exceptionHelper: ExceptionHelper
 
     init {
         Injector.INSTANCE.applicationComponent.inject(this)
@@ -76,7 +80,11 @@ public class ExceptionTypeClickListener(private val values: List<ExceptionType>,
         builder.callback(object : MaterialDialog.ButtonCallback() {
             override fun onPositive(dialog: MaterialDialog?) {
                 if (inputIsValid()) {
-                    exceptionRestConnector.throwException(exception, getQuestion())
+                    exception.question = getQuestion()
+                    async {
+                        exceptionHelper.geoDecodeCity(exception)
+                        exceptionRestConnector.throwException(exception)
+                    }
                     navigateToMainPage()
                 }
             }
@@ -106,7 +114,7 @@ public class ExceptionTypeClickListener(private val values: List<ExceptionType>,
 
     private fun isNotWellFormatted(): Boolean {
         if ( !questionText.endsWith('?') ) {
-            Toast.makeText(activity,  R.string.question_ends_question , Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, R.string.question_ends_question, Toast.LENGTH_SHORT).show();
             return true
         }
         return false
