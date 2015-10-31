@@ -58,7 +58,7 @@ public class LocationProvider implements ConnectionCallbacks, OnConnectionFailed
         locationRequest = new LocationRequest();
         locationRequest.setInterval( UPDATE_INTERVAL_IN_MILLISECONDS );
         locationRequest.setFastestInterval( FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS );
-        locationRequest.setPriority( LocationRequest.PRIORITY_LOW_POWER );
+        locationRequest.setPriority( LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY );
     }
 
     public Location getLocation( ) throws LocationException {

@@ -86,10 +86,15 @@ public class ImageCache {
         }.start()
     }
 
+    public fun loadImagesInitially(friendList: List<Friend>) {
+        friendList.forEach { getImageForFriend(it) }
+        handler.post { setBitmapsToViews(friendList) }
+    }
+
     private fun setBitmapsToViews(friendList: List<Friend>) {
         friendList.forEach { friend ->
             val bitmap = imageWarehouse.get(friend.id)
-            val view = viewRefreshMap.get(friend)
+            val view = viewRefreshMap[friend]
             view?.setImageBitmap(bitmap)
             viewRefreshMap.remove(friend)
         }

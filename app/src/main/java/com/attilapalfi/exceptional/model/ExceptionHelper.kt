@@ -1,10 +1,8 @@
-package com.attilapalfi.exceptional.ui.helpers
+package com.attilapalfi.exceptional.model
 
 import android.text.format.DateFormat
 import android.widget.ImageView
 import com.attilapalfi.exceptional.dependency_injection.Injector
-import com.attilapalfi.exceptional.model.Exception
-import com.attilapalfi.exceptional.model.Friend
 import com.attilapalfi.exceptional.persistence.FriendStore
 import com.attilapalfi.exceptional.persistence.ImageCache
 import com.attilapalfi.exceptional.persistence.MetadataStore
@@ -12,15 +10,19 @@ import java.math.BigInteger
 import javax.inject.Inject
 
 /**
- * Created by palfi on 2015-10-03.
+ * Created by palfi on 2015-10-31.
  */
-public class ViewHelper {
+public class ExceptionHelper {
     @Inject
     lateinit var friendStore: FriendStore
     @Inject
     lateinit var metadataStore: MetadataStore
     @Inject
     lateinit var imageCache: ImageCache
+
+    companion object {
+        private val UNKNOWN_FRIEND = Friend()
+    }
 
     init {
         Injector.INSTANCE.applicationComponent.inject(this)
@@ -40,28 +42,56 @@ public class ViewHelper {
     }
 
     public fun initExceptionSender(exception: Exception): Friend {
-        var fromWho = exception.sender
-        if (fromWho == null || fromWho.id == BigInteger.ZERO) {
-            fromWho = friendStore.findById(exception.fromWho)
-            if (fromWho.id == BigInteger("0")) {
-                fromWho = metadataStore.user
-            }
-            exception.sender = fromWho
+        if (senderIsUnknown(exception)) {
+            findSender(exception)
         }
-        return fromWho
+        return exception.sender
     }
 
-    public fun initExceptionReceiver(exception: Exception): Friend {
-        var toWho = exception.receiver
-        if (toWho == null || toWho.id == BigInteger.ZERO) {
-            toWho = friendStore.findById(exception.toWho)
-            if (toWho.id == BigInteger("0")) {
-                toWho = metadataStore.user
-            }
-            exception.receiver = toWho
+    private fun findSender(exception: Exception) {
+        var fromWho = friendStore.findById(exception.fromWho)
+        if (otherIsNotFriend(fromWho)) {
+            fromWho = findNotFriendSender(exception)
         }
-        return toWho
+        exception.sender = fromWho
     }
+
+    private fun findNotFriendSender(exception: Exception): Friend {
+        if (exception.fromWho == metadataStore.user.id) {
+            return metadataStore.user
+        } else {
+            return UNKNOWN_FRIEND
+        }
+    }
+
+    private fun senderIsUnknown(exception: Exception) = exception.sender == null || exception.sender.id == BigInteger.ZERO
+
+    public fun initExceptionReceiver(exception: Exception): Friend {
+        if (receiverIsUnknown(exception)) {
+            findReceiver(exception)
+        }
+        return exception.receiver
+    }
+
+    private fun findReceiver(exception: Exception) {
+        var toWho = friendStore.findById(exception.toWho)
+        if (otherIsNotFriend(toWho)) {
+            toWho = findNotFriendReceiver(exception)
+        }
+        exception.receiver = toWho
+    }
+
+    private fun findNotFriendReceiver(exception: Exception): Friend {
+        if (exception.toWho == metadataStore.user.id) {
+            return metadataStore.user
+        } else {
+            return UNKNOWN_FRIEND
+        }
+    }
+
+    private fun receiverIsUnknown(exception: Exception) = exception.receiver == null || exception.receiver.id == BigInteger.ZERO
+
+    private fun otherIsNotFriend(fromWho: Friend) = fromWho.id == BigInteger("0")
 
     public fun bindExceptionImage(fromWho: Friend, toWho: Friend, imageView: ImageView) {
         if (metadataStore.user == fromWho) {

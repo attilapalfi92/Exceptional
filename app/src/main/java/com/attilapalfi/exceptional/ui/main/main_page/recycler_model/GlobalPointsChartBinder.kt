@@ -95,7 +95,7 @@ class GlobalPointsChartBinder : RowItemBinder() {
     }
 
     private fun getUserIndex(friendPoints: List<Int>, user: Friend): Int {
-        var userIndex = Collections.binarySearch(friendPoints, user.points, compareByDescending { it })
+        var userIndex = Collections.binarySearch(friendPoints, user.points)
         if ( userIndex < 0 ) {
             return -userIndex - 1
         } else {
@@ -105,6 +105,7 @@ class GlobalPointsChartBinder : RowItemBinder() {
 
     private fun initChart(barData: BarData, rowView: View) {
         val chart = rowView.findViewById(R.id.global_points_bar_chart) as BarChart
+        chart.setDescription("")
         chart.legend.isEnabled = false
         chart.data = barData
         chart.animateXY(900, 900)

@@ -6,11 +6,11 @@ import android.content.Context;
 import com.attilapalfi.exceptional.ExceptionalApplication;
 import com.attilapalfi.exceptional.facebook.FacebookManager;
 import com.attilapalfi.exceptional.model.ExceptionFactory;
+import com.attilapalfi.exceptional.model.ExceptionHelper;
 import com.attilapalfi.exceptional.persistence.*;
 import com.attilapalfi.exceptional.rest.*;
 import com.attilapalfi.exceptional.services.LocationProvider;
 import com.attilapalfi.exceptional.ui.helpers.QuestionNavigator;
-import com.attilapalfi.exceptional.ui.helpers.ViewHelper;
 import dagger.Module;
 import dagger.Provides;
 
@@ -125,13 +125,19 @@ public class AppContextModule {
 
     @Provides
     @Singleton
-    public ViewHelper viewHelper( ) {
-        return new ViewHelper();
+    public ExceptionHelper viewHelper( ) {
+        return new ExceptionHelper();
     }
 
     @Provides
     @Singleton
     public StatSupplier statSupplier( ) {
         return new StatSupplier();
+    }
+
+    @Provides
+    @Singleton
+    public StoreInitializer storeInitializer( ) {
+        return new StoreInitializer();
     }
 }

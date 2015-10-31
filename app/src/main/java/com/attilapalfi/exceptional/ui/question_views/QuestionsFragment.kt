@@ -10,8 +10,8 @@ import android.view.View
 import android.view.ViewGroup
 import com.attilapalfi.exceptional.R
 import com.attilapalfi.exceptional.dependency_injection.Injector
+import com.attilapalfi.exceptional.interfaces.QuestionChangeListener
 import com.attilapalfi.exceptional.model.Exception
-import com.attilapalfi.exceptional.persistence.QuestionChangeListener
 import com.attilapalfi.exceptional.persistence.QuestionStore
 import com.attilapalfi.exceptional.ui.main.MainActivity
 import java.util.*

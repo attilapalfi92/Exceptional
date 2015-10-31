@@ -5,6 +5,7 @@ import javax.inject.Singleton;
 import com.attilapalfi.exceptional.ExceptionalApplication;
 import com.attilapalfi.exceptional.facebook.FacebookManager;
 import com.attilapalfi.exceptional.model.ExceptionFactory;
+import com.attilapalfi.exceptional.model.ExceptionHelper;
 import com.attilapalfi.exceptional.persistence.*;
 import com.attilapalfi.exceptional.rest.AppStartRestConnector;
 import com.attilapalfi.exceptional.rest.ExceptionRestConnector;
@@ -17,7 +18,6 @@ import com.attilapalfi.exceptional.ui.FacebookLoginFragment;
 import com.attilapalfi.exceptional.ui.OptionsActivity;
 import com.attilapalfi.exceptional.ui.ShowNotificationActivity;
 import com.attilapalfi.exceptional.ui.helpers.QuestionNavigator;
-import com.attilapalfi.exceptional.ui.helpers.ViewHelper;
 import com.attilapalfi.exceptional.ui.main.MainActivity;
 import com.attilapalfi.exceptional.ui.main.exception_instance_views.ExceptionInstanceAdapter;
 import com.attilapalfi.exceptional.ui.main.exception_instance_views.ExceptionInstanceViewHolder;
@@ -114,7 +114,7 @@ public interface ApplicationComponent extends AppContextComponent {
 
     void inject( QuestionNavigator questionNavigator );
 
-    void inject( ViewHelper viewHelper );
+    void inject( ExceptionHelper exceptionHelper );
 
     void inject( ExceptionInstanceViewHolder exceptionInstanceViewHolder );
 
@@ -139,4 +139,6 @@ public interface ApplicationComponent extends AppContextComponent {
     void inject( TypeThrowChartBinder typeThrowChartModel );
 
     void inject( GlobalPointsChartBinder globalPointsChartBinder );
+
+    void inject( StoreInitializer storeInitializer );
 }

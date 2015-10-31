@@ -3,6 +3,7 @@ package com.attilapalfi.exceptional.persistence
 import android.os.Handler
 import android.os.Looper
 import com.attilapalfi.exceptional.dependency_injection.Injector
+import com.attilapalfi.exceptional.interfaces.QuestionChangeListener
 import com.attilapalfi.exceptional.model.Exception
 import io.paperdb.Book
 import io.paperdb.Paper
@@ -13,11 +14,7 @@ import javax.inject.Inject
 /**
  * Created by palfi on 2015-10-03.
  */
-public interface QuestionChangeListener {
-    fun onQuestionsChanged()
-}
-
-public class QuestionStore {
+public class QuestionStore : AbstractStore() {
     companion object {
         private val KOTLIN_DATABASE = "KOTLIN_DATABASE"
         private val QUESTION_LIST = "QUESTION_LIST"
@@ -26,7 +23,7 @@ public class QuestionStore {
 
     private val changeListeners = HashSet<QuestionChangeListener>()
     private val database: Book
-    private val storedQuestions = Collections.synchronizedList(ArrayList<Exception>())
+    private val storedQuestions = ArrayList<Exception>()
     @Inject
     lateinit var friendStore: FriendStore
     @Inject
@@ -34,23 +31,32 @@ public class QuestionStore {
     @Inject
     lateinit var exceptionTypeStore: ExceptionTypeStore
     private val handler = Handler(Looper.getMainLooper())
+    @Volatile
+    override public var initialized = false
 
     init {
         Injector.INSTANCE.applicationComponent.inject(this)
         database = Paper.book(KOTLIN_DATABASE)
-        storedQuestions.addAll(database.read(QUESTION_LIST, EMPTY_QUESTION_LIST))
+    }
+
+    override public fun init() {
+        synchronized(storedQuestions) {
+            storedQuestions.addAll(database.read(QUESTION_LIST, EMPTY_QUESTION_LIST))
+            initialized = true
+        }
     }
 
     public fun hasQuestions() = storedQuestions.isNotEmpty()
 
     public fun addQuestion(question: Exception) {
-        addToStore(question)
+        addToMemoryStore(question)
         database.write(QUESTION_LIST, storedQuestions)
         notifyListeners()
     }
 
     public fun addUnfilteredListAsync(exceptions: List<Exception>) {
         Thread({
+            waitTillInitialized()
             addUnfilteredList(exceptions)
         }).start()
     }
@@ -58,7 +64,7 @@ public class QuestionStore {
     public fun addUnfilteredList(exceptions: List<Exception>) {
         val questionList = exceptions.filter {
             it.question.hasQuestion &&
-                    !it.question.isAnswered &&
+                    !it.question.answered &&
                     metadataStore.user.id != it.fromWho
         }
         addQuestionList(questionList)
@@ -73,14 +79,14 @@ public class QuestionStore {
     public fun addQuestionList(questions: List<Exception>) {
         if (questions.isNotEmpty()) {
             synchronized(storedQuestions) {
-                questions.forEach { addToStore(it) }
+                questions.forEach { addToMemoryStore(it) }
             }
             database.write(QUESTION_LIST, storedQuestions)
             notifyListeners()
         }
     }
 
-    private fun addToStore(question: Exception) {
+    private fun addToMemoryStore(question: Exception) {
         synchronized(storedQuestions) {
             var index = Collections.binarySearch(storedQuestions, question)
             if (index < 0) {
@@ -95,8 +101,8 @@ public class QuestionStore {
     fun removeQuestion(instanceId: BigInteger?) {
         instanceId?.let {
             synchronized(storedQuestions) {
-                val removed = storedQuestions.find { it.instanceId == instanceId }
-                storedQuestions.remove(removed)
+                val removed: Exception? = storedQuestions.find { it.instanceId == instanceId }
+                removed?.let { storedQuestions.remove(removed) }
             }
             database.write(QUESTION_LIST, storedQuestions)
         }

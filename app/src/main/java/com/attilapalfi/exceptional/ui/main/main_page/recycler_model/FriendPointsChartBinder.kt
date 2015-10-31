@@ -49,11 +49,12 @@ public class FriendPointsChartBinder : RowItemBinder() {
 
     private fun initChart(friendNames: ArrayList<String>, friendPoints: ArrayList<Int>,
                           rowView: View, user: Friend, userIndex: Int) {
-        val barChart = rowView.findViewById(R.id.friend_points_bar_chart) as BarChart
-        barChart.setDescription("Your points among friends'.")
-        barChart.legend.isEnabled = false
-        barChart.data = createBarData(friendNames, friendPoints, user, userIndex)
-        barChart.animateXY(900, 900)
+        val chart = rowView.findViewById(R.id.friend_points_bar_chart) as BarChart
+        chart.setDescription("Your points among friends'.")
+        chart.legend.isEnabled = false
+        chart.data = createBarData(friendNames, friendPoints, user, userIndex)
+        chart.animateXY(900, 900)
+        chart.setDescription("")
     }
 
     private fun createBarData(friendNames: ArrayList<String>, friendPoints: ArrayList<Int>,

@@ -14,12 +14,14 @@ import javax.inject.Inject
 /**
  * Created by palfi on 2015-08-21.
  */
-public class MetadataStore {
+public class MetadataStore : AbstractStore() {
 
     @Inject
     lateinit var imageCache: ImageCache
     private val database: Book
     private val handler: Handler
+    @Volatile
+    override public var initialized = false
 
     @Volatile
     public var exceptionVersion: Int = 0
@@ -80,16 +82,17 @@ public class MetadataStore {
         Injector.INSTANCE.applicationComponent.inject(this)
         database = Paper.book(METADATA_DATABASE)
         handler = Handler(Looper.getMainLooper())
-        initMetadata()
     }
 
-    private fun initMetadata() {
+    override public fun init() {
         exceptionVersion = database.read(EXCEPTION_VERSION, exceptionVersion)
         loggedIn = database.read(LOGGED_IN, loggedIn)
         firstStartFinished = database.read(FIRST_START_FINISHED, firstStartFinished)
         votedThisWeek = database.read(VOTED_THIS_WEEK, votedThisWeek)
         submittedThisWeek = database.read(SUBMITTED_THIS_WEEK, submittedThisWeek)
         user = database.read(USER, EMPTY_USER)
+        initialized = true
+        notifyPointListeners()
     }
 
     public fun setPoints(points: Int) {
@@ -137,6 +140,16 @@ public class MetadataStore {
         loggedIn = false
         firstStartFinished = false
         database.destroy()
+    }
+
+    private fun notifyPointListeners() {
+        if (Looper.myLooper() === Looper.getMainLooper()) {
+            pointChangeListeners.forEach { it.onPointsChanged() }
+        } else {
+            handler.post {
+                pointChangeListeners.forEach { it.onPointsChanged() }
+            }
+        }
     }
 
     public fun addPointChangeListener(listener: PointChangeListener): Boolean {

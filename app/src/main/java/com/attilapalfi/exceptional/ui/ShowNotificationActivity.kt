@@ -8,12 +8,13 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.attilapalfi.exceptional.R
 import com.attilapalfi.exceptional.dependency_injection.Injector
+import com.attilapalfi.exceptional.interfaces.QuestionChangeListener
 import com.attilapalfi.exceptional.model.Exception
+import com.attilapalfi.exceptional.model.ExceptionHelper
 import com.attilapalfi.exceptional.model.ExceptionType
 import com.attilapalfi.exceptional.model.Friend
 import com.attilapalfi.exceptional.persistence.*
 import com.attilapalfi.exceptional.rest.ExceptionRestConnector
-import com.attilapalfi.exceptional.ui.helpers.ViewHelper
 import com.attilapalfi.exceptional.ui.question_views.QuestionYesNoClickListener
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -36,7 +37,7 @@ public class ShowNotificationActivity : AppCompatActivity(), QuestionChangeListe
     @Inject
     lateinit var metadataStore: MetadataStore
     @Inject
-    lateinit var viewHelper: ViewHelper
+    lateinit var exceptionHelper: ExceptionHelper
     @Inject
     lateinit var exceptionInstanceStore: ExceptionInstanceStore
     @Inject
@@ -83,13 +84,13 @@ public class ShowNotificationActivity : AppCompatActivity(), QuestionChangeListe
         exceptionNameView.text = exceptionType.prefix + "\n" + exceptionType.shortName
         exceptionDescView.text = exceptionType.description
         imageCache.setImageToView(sender, senderImageView)
-        senderNameView.text = viewHelper.getNameAndCity(exception, sender)
+        senderNameView.text = exceptionHelper.getNameAndCity(exception, sender)
         sendDateView.text = exception.date.toString()
         loadQuestionToViews()
     }
 
     private fun loadQuestionToViews() {
-        if (exception.question.hasQuestion && !exception.question.isAnswered) {
+        if (exception.question.hasQuestion && !exception.question.answered) {
             showQuestionViews()
         } else {
             hideQuestionViews()

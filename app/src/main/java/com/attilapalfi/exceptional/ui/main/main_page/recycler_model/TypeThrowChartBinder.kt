@@ -79,7 +79,7 @@ public class TypeThrowChartBinder : RowItemBinder() {
 
     private fun initChart(pieData: PieData, rowView: View) {
         val chart = rowView.findViewById(R.id.type_throw_pie_chart) as PieChart
-        chart.setDescription("Count of different exception types thrown globally.")
+        chart.setDescription("") // Count of different exception types thrown globally.
         chart.legend.isEnabled = false
         chart.data = pieData
         chart.setUsePercentValues(true)

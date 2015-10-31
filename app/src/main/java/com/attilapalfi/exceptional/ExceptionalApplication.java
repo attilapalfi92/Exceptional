@@ -14,6 +14,7 @@ import android.util.Base64;
 import android.util.Log;
 import com.attilapalfi.exceptional.dependency_injection.Injector;
 import com.attilapalfi.exceptional.facebook.FacebookManager;
+import com.attilapalfi.exceptional.persistence.StoreInitializer;
 import com.attilapalfi.exceptional.rest.AppStartRestConnector;
 import com.attilapalfi.exceptional.services.LocationProvider;
 import io.paperdb.Paper;
@@ -25,6 +26,8 @@ public class ExceptionalApplication extends android.support.multidex.MultiDexApp
     @Inject
     AppStartRestConnector appStartRestConnector;
     @Inject
+    StoreInitializer storeInitializer;
+    @Inject
     FacebookManager facebookManager;
     @Inject
     LocationProvider locationProvider;
@@ -35,7 +38,7 @@ public class ExceptionalApplication extends android.support.multidex.MultiDexApp
         Injector.INSTANCE.initializeApplicationComponent( this );
         Context applicationContext = getApplicationContext();
         initializeServices( applicationContext );
-        facebookManager.onAppStart( this );
+        storeInitializer.initialize( this );
     }
 
     private void initializeServices( Context applicationContext ) {

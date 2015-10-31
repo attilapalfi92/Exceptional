@@ -11,9 +11,9 @@ import android.widget.TextView
 import com.attilapalfi.exceptional.R
 import com.attilapalfi.exceptional.dependency_injection.Injector
 import com.attilapalfi.exceptional.model.Exception
+import com.attilapalfi.exceptional.model.ExceptionHelper
 import com.attilapalfi.exceptional.model.Friend
 import com.attilapalfi.exceptional.persistence.MetadataStore
-import com.attilapalfi.exceptional.ui.helpers.ViewHelper
 import javax.inject.Inject
 
 /**
@@ -22,7 +22,7 @@ import javax.inject.Inject
 public class ExceptionInstanceViewHolder(rowView: View) : RecyclerView.ViewHolder(rowView) {
     @Inject lateinit var context: Context
     @Inject lateinit var metadataStore: MetadataStore
-    @Inject lateinit var viewHelper: ViewHelper
+    @Inject lateinit var exceptionHelper: ExceptionHelper
     private val friendImage: ImageView = rowView.findViewById(R.id.exc_row_image) as ImageView
     private val exceptionNameView: TextView = rowView.findViewById(R.id.question_exception_name) as TextView
     private val descriptionView: TextView = rowView.findViewById(R.id.exc_row_description) as TextView
@@ -53,14 +53,14 @@ public class ExceptionInstanceViewHolder(rowView: View) : RecyclerView.ViewHolde
     }
 
     private fun initBinding(model: Exception) {
-        fromWho = viewHelper.initExceptionSender(model)
-        toWho = viewHelper.initExceptionReceiver(model)
+        fromWho = exceptionHelper.initExceptionSender(model)
+        toWho = exceptionHelper.initExceptionReceiver(model)
         user = metadataStore.user
     }
 
     private fun bindUserInfo(model: Exception) {
         toNameView.text = toWho.getName()
-        viewHelper.bindExceptionImage(fromWho, toWho, friendImage)
+        exceptionHelper.bindExceptionImage(fromWho, toWho, friendImage)
         setFromWhoNameAndCity(model)
         bindPointInfo(model)
     }
@@ -83,14 +83,14 @@ public class ExceptionInstanceViewHolder(rowView: View) : RecyclerView.ViewHolde
     }
 
     private fun setFromWhoNameAndCity(model: Exception) {
-        val nameAndCity = viewHelper.getNameAndCity(model, fromWho)
+        val nameAndCity = exceptionHelper.getNameAndCity(model, fromWho)
         friendNameAndCityView.text = nameAndCity
     }
 
     private fun bindExceptionInfo(model: Exception) {
         exceptionNameView.text = model.shortName
         descriptionView.text = model.description
-        dateView.text = viewHelper.formattedExceptionDate(model)
+        dateView.text = exceptionHelper.formattedExceptionDate(model)
     }
 
     private fun setQuestionTextAndColor(model: Exception) {
@@ -98,7 +98,7 @@ public class ExceptionInstanceViewHolder(rowView: View) : RecyclerView.ViewHolde
         questionAnswerView.visibility = View.VISIBLE
         if (model.question.hasQuestion) {
             questionTextView.text = model.question.text
-            if (model.question.isAnswered) {
+            if (model.question.answered) {
                 if (metadataStore.isItUser(model.sender)) {
                     if (model.question.answeredCorrectly) {
                         setColorToView(questionAnswerView, R.color.exceptional_red)

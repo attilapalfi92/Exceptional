@@ -8,9 +8,9 @@ import android.widget.TextView
 import com.attilapalfi.exceptional.R
 import com.attilapalfi.exceptional.dependency_injection.Injector
 import com.attilapalfi.exceptional.model.Exception
+import com.attilapalfi.exceptional.model.ExceptionHelper
 import com.attilapalfi.exceptional.persistence.ExceptionTypeStore
 import com.attilapalfi.exceptional.rest.ExceptionRestConnector
-import com.attilapalfi.exceptional.ui.helpers.ViewHelper
 import javax.inject.Inject
 
 /**
@@ -25,7 +25,7 @@ class QuestionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val cityName: TextView
     private val dateText: TextView
     @Inject
-    lateinit var viewHelper: ViewHelper
+    lateinit var exceptionHelper: ExceptionHelper
     @Inject
     lateinit var exceptionTypeStore: ExceptionTypeStore
     @Inject
@@ -49,10 +49,10 @@ class QuestionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     }
 
     private fun bindUserInfo(exception: Exception) {
-        val fromWho = viewHelper.initExceptionSender(exception)
-        val toWho = viewHelper.initExceptionReceiver(exception)
-        viewHelper.bindExceptionImage(fromWho, toWho, imageView)
-        cityName.text = viewHelper.getNameAndCity(exception, fromWho)
+        val fromWho = exceptionHelper.initExceptionSender(exception)
+        val toWho = exceptionHelper.initExceptionReceiver(exception)
+        exceptionHelper.bindExceptionImage(fromWho, toWho, imageView)
+        cityName.text = exceptionHelper.getNameAndCity(exception, fromWho)
     }
 
     private fun bindExceptionInfo(exception: Exception) {
@@ -62,7 +62,7 @@ class QuestionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             exceptionName.text = exception.shortName
         }
         questionText.text = exception.question.text
-        dateText.text = viewHelper.formattedExceptionDate(exception)
+        dateText.text = exceptionHelper.formattedExceptionDate(exception)
     }
 
     private fun setClickListeners(exceptionQuestion: Exception) {

@@ -9,6 +9,7 @@ import com.attilapalfi.exceptional.dependency_injection.Injector
 import com.attilapalfi.exceptional.interfaces.ExceptionChangeListener
 import com.attilapalfi.exceptional.model.Exception
 import com.attilapalfi.exceptional.model.ExceptionFactory
+import com.attilapalfi.exceptional.model.ExceptionHelper
 import com.attilapalfi.exceptional.rest.messages.ExceptionInstanceWrapper
 import io.paperdb.Book
 import io.paperdb.Paper
@@ -22,7 +23,7 @@ import javax.inject.Inject
 /**
  * Created by Attila on 2015-06-08.
  */
-public class ExceptionInstanceStore {
+public class ExceptionInstanceStore : AbstractStore() {
     public var context: Context? = null
         @Inject
         public set
@@ -31,13 +32,17 @@ public class ExceptionInstanceStore {
     lateinit var exceptionTypeStore: ExceptionTypeStore
     @Inject
     lateinit var exceptionFactory: ExceptionFactory
-    private lateinit var initThread: Thread
+    @Inject
+    lateinit var exceptionHelper: ExceptionHelper
     private val database: Book
     private val exceptionChangeListeners = HashSet<ExceptionChangeListener>()
     private val storedExceptions = ArrayList<Exception>()
     private val idList = ArrayList<BigInteger>()
     private val geocoder: Geocoder
     private val handler: Handler
+
+    @Volatile
+    override var initialized = false
 
     companion object {
         private val STORE_SIZE = 10000
@@ -51,29 +56,25 @@ public class ExceptionInstanceStore {
         database = Paper.book(INSTANCE_DATABASE)
         handler = Handler(Looper.getMainLooper())
         geocoder = Geocoder(context, Locale.getDefault())
-        initThread = Thread({
-            synchronized(storedExceptions) {
-                idList.addAll(database.read(INSTANCE_IDs, LinkedList<BigInteger>()))
-                idList.forEach {
-                    val e = database.read(it.toString(), EMPTY_EXCEPTION)
-                    e.exceptionType = exceptionTypeStore.findById(e.exceptionTypeId)
-                    var index = Collections.binarySearch(storedExceptions, e)
-                    if (index < 0) {
-                        index = -index - 1
-                        storedExceptions.add(index, e)
-                    }
-                }
-            }
-        })
-        initThread.start()
-        notifyWhenInitFinished()
     }
 
-    private fun notifyWhenInitFinished() {
-        Thread({
-            initThread.join()
-            notifyListeners()
-        }).start()
+    override public fun init() {
+        synchronized(storedExceptions) {
+            idList.addAll(database.read(INSTANCE_IDs, LinkedList<BigInteger>()))
+            idList.forEach {
+                val e = database.read(it.toString(), EMPTY_EXCEPTION)
+                e.exceptionType = exceptionTypeStore.findById(e.exceptionTypeId)
+                exceptionHelper.initExceptionSender(e)
+                exceptionHelper.initExceptionReceiver(e)
+                var index = Collections.binarySearch(storedExceptions, e)
+                if (index < 0) {
+                    index = -index - 1
+                    storedExceptions.add(index, e)
+                }
+            }
+            initialized = true
+        }
+        notifyListeners()
     }
 
     public fun wipe() {
@@ -92,7 +93,7 @@ public class ExceptionInstanceStore {
     }
 
     public fun addExceptionWithoutCity(exception: Exception) {
-        initThread.join()
+        waitTillInitialized()
         addToListInOrder(exception)
     }
 
@@ -114,19 +115,19 @@ public class ExceptionInstanceStore {
         }
     }
 
-    fun setAnswered(instanceWrapper: ExceptionInstanceWrapper, answered: Boolean) {
+    public fun setAnswered(instanceWrapper: ExceptionInstanceWrapper, answered: Boolean) {
         val exception = findById(instanceWrapper.instanceId);
         if ( exception.instanceId != BigInteger.ZERO ) {
             exception.pointsForSender = instanceWrapper.pointsForSender
             exception.pointsForReceiver = instanceWrapper.pointsForReceiver
-            exception.question.isAnswered = answered
+            exception.question.answered = answered
             database.write(exception.instanceId.toString(), exception)
         }
         notifyListeners()
     }
 
     public fun findById(id: BigInteger): Exception {
-        initThread.join()
+        waitTillInitialized()
         synchronized(storedExceptions) {
             return storedExceptions.find { it.instanceId == id } ?: Exception()
         }
@@ -163,7 +164,7 @@ public class ExceptionInstanceStore {
     }
 
     private fun addNewOrKeepOld(e: Exception, index: Int) {
-        val removeCandidate = storedExceptions.get(storedExceptions.size - 1)
+        val removeCandidate = storedExceptions[storedExceptions.size - 1]
         if (removeCandidate.compareTo(e) > 0) {
             removeTheCandidate(storedExceptions)
             addTheNewOne(e, index)
@@ -185,7 +186,7 @@ public class ExceptionInstanceStore {
 
     private fun setCityForException(e: Exception) {
         try {
-            e.city = geocoder.getFromLocation(e.latitude, e.longitude, 1).get(0).locality
+            e.city = geocoder.getFromLocation(e.latitude, e.longitude, 1)[0].locality
         } catch (exception: java.lang.Exception) {
             e.city = context!!.getString(R.string.unknown)
             exception.printStackTrace()
@@ -213,7 +214,7 @@ public class ExceptionInstanceStore {
     }
 
     public fun getKnownIds(): ArrayList<BigInteger> {
-        initThread.join()
+        waitTillInitialized()
         return idList
     }
 }

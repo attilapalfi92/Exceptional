@@ -1,6 +1,5 @@
 package com.attilapalfi.exceptional.persistence
 
-import android.os.AsyncTask
 import android.os.Handler
 import android.os.Looper
 import com.attilapalfi.exceptional.dependency_injection.Injector
@@ -8,6 +7,8 @@ import com.attilapalfi.exceptional.interfaces.FriendChangeListener
 import com.attilapalfi.exceptional.model.Friend
 import io.paperdb.Book
 import io.paperdb.Paper
+import org.jetbrains.anko.async
+import org.jetbrains.anko.uiThread
 import java.math.BigInteger
 import java.util.*
 import javax.inject.Inject
@@ -16,7 +17,7 @@ import javax.inject.Inject
  * Responsible for storing friends in the device's preferences
  * Created by Attila on 2015-06-12.
  */
-public class FriendStore {
+public class FriendStore : AbstractStore() {
 
     @Inject
     lateinit var imageCache: ImageCache
@@ -25,7 +26,8 @@ public class FriendStore {
     private val storedFriends = LinkedList<Friend>()
     private val idList = Collections.synchronizedList(LinkedList<BigInteger>())
     private val friendChangeListeners = HashSet<FriendChangeListener>()
-    private lateinit var initThread: Thread
+    @Volatile
+    override public var initialized = false
 
     companion object {
         private val FRIEND_DATABASE = "FRIEND_DATABASE"
@@ -47,18 +49,20 @@ public class FriendStore {
         Injector.INSTANCE.applicationComponent.inject(this)
         database = Paper.book(FRIEND_DATABASE)
         handler = Handler(Looper.getMainLooper())
-        initThread = Thread({
-            synchronized(storedFriends) {
-                idList.addAll(database.read(FRIEND_IDS, LinkedList<BigInteger>()))
-                idList.forEach { storedFriends.add(database.read(it.toString(), EMPTY_FRIEND)) }
-                Collections.sort(storedFriends)
-            }
-        })
-        initThread.start()
+    }
+
+    override public fun init() {
+        synchronized(storedFriends) {
+            idList.addAll(database.read(FRIEND_IDS, LinkedList<BigInteger>()))
+            idList.forEach { storedFriends.add(database.read(it.toString(), EMPTY_FRIEND)) }
+            Collections.sort(storedFriends)
+            initialized = true
+        }
+        imageCache.loadImagesInitially(getStoredFriends())
     }
 
     public fun updateFriendList(friendList: List<Friend>) {
-        initThread.join()
+        waitTillInitialized()
         saveNewFriends(friendList)
         updateOldFriends(friendList)
         removeDeletedFriends(friendList)
@@ -66,25 +70,20 @@ public class FriendStore {
     }
 
     public fun updateFriendPoints(id: BigInteger, points: Int) {
-        object : AsyncTask<Void?, Void?, Void?>() {
-
-            override fun doInBackground(vararg params: Void?): Void? {
-                initThread.join()
-                synchronized(storedFriends) {
-                    updatePointsById(id, points)
-                    Collections.sort(storedFriends)
-                }
-                return null
+        async {
+            waitTillInitialized()
+            synchronized(storedFriends) {
+                updatePointsById(id, points)
+                Collections.sort(storedFriends)
             }
-
-            override fun onPostExecute(aVoid: Void?) {
+            uiThread {
                 notifyChangeListeners()
             }
-
-        }.execute()
+        }
     }
 
     public fun updatePointsOfFriends(points: Map<BigInteger, Int>) {
+        waitTillInitialized()
         synchronized(storedFriends) {
             points.forEach { updatePointsById(it.key, it.value) }
             Collections.sort(storedFriends)
@@ -93,7 +92,7 @@ public class FriendStore {
     }
 
     public fun findById(friendId: BigInteger): Friend {
-        initThread.join()
+        waitTillInitialized()
         for (friend in getStoredFriends()) {
             if (friend.id == friendId) {
                 return friend
@@ -120,17 +119,26 @@ public class FriendStore {
 
     private fun saveFriendList(friendList: List<Friend>) {
         imageCache.loadImagesInitiallyAsync(friendList)
+        putFriendsToMemoryStore(friendList)
+        writeFriendsToDb(friendList)
+    }
 
-        friendList.forEach {
-            idList.add(it.id)
-            it.imageDownloaded = true
-            database.write(it.id.toString(), it)
-        }
-        database.write(FRIEND_IDS, idList)
+    private fun putFriendsToMemoryStore(friendList: List<Friend>) {
         synchronized(storedFriends) {
+            friendList.forEach {
+                idList.add(it.id)
+                it.imageDownloaded = true
+            }
             storedFriends.addAll(friendList)
             Collections.sort(storedFriends)
         }
+    }
+
+    private fun writeFriendsToDb(friendList: List<Friend>) {
+        friendList.forEach {
+            database.write(it.id.toString(), it)
+        }
+        database.write(FRIEND_IDS, idList)
     }
 
     private fun updateOldFriends(friendList: List<Friend>) {
@@ -171,12 +179,22 @@ public class FriendStore {
     }
 
     private fun deleteFriends(toBeDeleted: List<Friend>) {
-        toBeDeleted.forEach {
-            synchronized(storedFriends) {
+        deleteFriendsFromMemoryStore(toBeDeleted)
+        deleteFriendsFromDb(toBeDeleted)
+    }
+
+    private fun deleteFriendsFromMemoryStore(toBeDeleted: List<Friend>) {
+        synchronized(storedFriends) {
+            toBeDeleted.forEach {
                 storedFriends.remove(it)
+                idList.remove(it.id)
             }
+        }
+    }
+
+    private fun deleteFriendsFromDb(toBeDeleted: List<Friend>) {
+        toBeDeleted.forEach {
             database.delete(it.id.toString())
-            idList.remove(it.id)
         }
         database.write(FRIEND_IDS, idList)
     }

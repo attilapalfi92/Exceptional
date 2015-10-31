@@ -12,11 +12,13 @@ import java.util.*
 /**
  * Created by Attila on 2015-06-09.
  */
-public class ExceptionTypeStore {
+public class ExceptionTypeStore : AbstractStore() {
     private val MAX_ID = "maxId"
     private val HAS_DATA = "hasData"
     @Volatile
     private var hasData = false
+    @Volatile
+    override public var initialized = false
 
     private val database: Book
     private val handler: Handler
@@ -28,12 +30,17 @@ public class ExceptionTypeStore {
         Injector.INSTANCE.applicationComponent.inject(this)
         database = Paper.book(TYPE_DATABASE)
         handler = Handler(Looper.getMainLooper())
+
+    }
+
+    override public fun init() {
         synchronized (exceptionTypeStore) {
             if (database.read(HAS_DATA, false)) {
                 initExceptionTypeStore()
                 sortExceptionStore()
                 hasData = true
             }
+            initialized = true
         }
     }
 
@@ -51,7 +58,7 @@ public class ExceptionTypeStore {
             if (!exceptionTypeStore.containsKey(exception.type)) {
                 exceptionTypeStore.put(exception.type, LinkedList<ExceptionType>())
             }
-            exceptionTypeStore.get(exception.type)?.add(exception)
+            exceptionTypeStore[exception.type]?.add(exception)
             database.write(Integer.toString(exception.id), exception)
             maxId = if (exception.id > maxId) exception.id else maxId
         }
@@ -76,7 +83,7 @@ public class ExceptionTypeStore {
             if (!exceptionTypeStore.containsKey(exceptionType.type)) {
                 exceptionTypeStore.put(exceptionType.type, LinkedList<ExceptionType>())
             }
-            exceptionTypeStore.get(exceptionType.type)?.add(exceptionType)
+            exceptionTypeStore[exceptionType.type]?.add(exceptionType)
         }
     }
 
@@ -91,6 +98,7 @@ public class ExceptionTypeStore {
     }
 
     public fun findById(id: Int): ExceptionType {
+        waitTillInitialized()
         synchronized(exceptionTypeStore) {
             val tempMap = HashMap(exceptionTypeStore)
             for (exceptionTypeList in ArrayList(tempMap.values)) {
@@ -115,7 +123,7 @@ public class ExceptionTypeStore {
         synchronized(exceptionTypeStore) {
             val tempMap = HashMap(exceptionTypeStore)
             if (tempMap.containsKey(typeName)) {
-                return ArrayList(tempMap.get(typeName))
+                return ArrayList(tempMap[typeName])
             }
             return ArrayList()
         }

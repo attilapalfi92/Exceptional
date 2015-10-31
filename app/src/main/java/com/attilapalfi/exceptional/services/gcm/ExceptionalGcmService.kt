@@ -97,6 +97,8 @@ public class ExceptionalGcmService : GcmListenerService() {   // IntentService("
         exception.longitude = extras.getString("longitude")!!.toDouble()
         exception.latitude = extras.getString("latitude")!!.toDouble()
         exception.date = Timestamp(extras.getString("timeInMillis")!!.toLong())
+        exception.pointsForSender = extras.getString("exceptionPointsForSender")!!.toInt()
+        exception.pointsForReceiver = extras.getString("exceptionPointsForReceiver")!!.toInt()
         parseAndSaveQuestion(extras, exception)
     }
 
