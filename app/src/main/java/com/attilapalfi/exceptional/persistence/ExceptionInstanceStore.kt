@@ -133,10 +133,8 @@ public class ExceptionInstanceStore {
     }
 
     private fun saveToStore(e: Exception) {
-        if (!storedExceptions.contains(e)) {
-            saveWithCity(e)
-            database.write(INSTANCE_IDs, idList)
-        }
+        saveWithCity(e)
+        database.write(INSTANCE_IDs, idList)
     }
 
     private fun storeExceptionList(toBeStored: List<Exception>) {

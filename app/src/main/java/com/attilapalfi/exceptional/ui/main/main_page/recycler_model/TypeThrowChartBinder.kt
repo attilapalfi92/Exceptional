@@ -18,7 +18,7 @@ import javax.inject.Inject
 /**
  * Created by palfi on 2015-10-28.
  */
-public class TypeThrowChartModel : RowItemModel() {
+public class TypeThrowChartBinder : RowItemBinder() {
     override val rowType = RowType.TYPES_PIE_CHART
     @Inject
     lateinit var statSupplier: StatSupplier

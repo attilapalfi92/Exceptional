@@ -17,7 +17,7 @@ import javax.inject.Inject
 /**
  * Created by palfi on 2015-10-27.
  */
-public class FriendPointsChartModel : RowItemModel() {
+public class FriendPointsChartBinder : RowItemBinder() {
     override val rowType = RowType.FRIEND_POINTS_CHART
     @Inject
     lateinit var friendStore: FriendStore
@@ -47,8 +47,8 @@ public class FriendPointsChartModel : RowItemModel() {
         }
     }
 
-    private fun initChart(friendNames: ArrayList<String>, friendPoints: ArrayList<Int>, rowView: View,
-                          user: Friend, userIndex: Int) {
+    private fun initChart(friendNames: ArrayList<String>, friendPoints: ArrayList<Int>,
+                          rowView: View, user: Friend, userIndex: Int) {
         val barChart = rowView.findViewById(R.id.friend_points_bar_chart) as BarChart
         barChart.setDescription("Your points among friends'.")
         barChart.legend.isEnabled = false
@@ -77,7 +77,7 @@ public class FriendPointsChartModel : RowItemModel() {
     private fun customizeDataSet(dataSet: BarDataSet, userIndex: Int) {
         dataSet.barSpacePercent = 10f
         val colors = ArrayList(ColorTemplate.ChartColors)
-        colors.add(userIndex, ColorTemplate.black)
+        colors.add(userIndex, ColorTemplate.Black)
         dataSet.colors = colors
     }
 

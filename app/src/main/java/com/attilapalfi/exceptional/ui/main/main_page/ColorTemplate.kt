@@ -16,7 +16,11 @@ object ColorTemplate {
     lateinit var context: Context
     public val ChartColors = ArrayList<Int>(27)
     @ColorInt
-    public val black: Int
+    public val Black: Int
+    @ColorInt
+    public val Blue: Int
+    @ColorInt
+    public val ExceptionalRed: Int
 
     init {
         Injector.INSTANCE.applicationComponent.inject(this)
@@ -51,6 +55,8 @@ object ColorTemplate {
         ChartColors.add(ContextCompat.getColor(context, R.color.grey_600))
         ChartColors.add(ContextCompat.getColor(context, R.color.purple_600))
 
-        black = ContextCompat.getColor(context, R.color.black)
+        Black = ContextCompat.getColor(context, R.color.black)
+        Blue = ContextCompat.getColor(context, R.color.blue_400)
+        ExceptionalRed = ContextCompat.getColor(context, R.color.exceptional_red)
     }
 }

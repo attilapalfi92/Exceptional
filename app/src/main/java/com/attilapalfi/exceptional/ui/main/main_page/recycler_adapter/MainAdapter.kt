@@ -12,7 +12,7 @@ import javax.inject.Inject
 /**
  * Created by palfi on 2015-10-26.
  */
-public class MainAdapter(val values: List<RowItemModel>, val recyclerView: RecyclerView) : RecyclerView.Adapter<MainViewHolder>() {
+public class MainAdapter(val values: List<RowItemBinder>, val recyclerView: RecyclerView) : RecyclerView.Adapter<MainViewHolder>() {
     @Inject
     lateinit var metadataStore: MetadataStore
 
@@ -28,15 +28,19 @@ public class MainAdapter(val values: List<RowItemModel>, val recyclerView: Recyc
         when (viewType) {
             RowType.USER_ROW.ordinal -> {
                 val view = LayoutInflater.from(parent?.context).inflate(R.layout.main_user_row_layout, parent, false)
-                return MainViewHolder(view, UserRowModel(metadataStore.user))
+                return MainViewHolder(view, UserRowBinder(metadataStore.user))
             }
             RowType.FRIEND_POINTS_CHART.ordinal -> {
                 val view = LayoutInflater.from(parent?.context).inflate(R.layout.main_friend_points_row_layout, parent, false)
-                return MainViewHolder(view, FriendPointsChartModel())
+                return MainViewHolder(view, FriendPointsChartBinder())
+            }
+            RowType.GLOBAL_POINTS_CHART.ordinal -> {
+                val view = LayoutInflater.from(parent?.context).inflate(R.layout.main_global_points_row_layout, parent, false)
+                return MainViewHolder(view, GlobalPointsChartBinder())
             }
             RowType.TYPES_PIE_CHART.ordinal -> {
                 val view = LayoutInflater.from(parent?.context).inflate(R.layout.main_type_throw_row_layout, parent, false)
-                return MainViewHolder(view, TypeThrowChartModel())
+                return MainViewHolder(view, TypeThrowChartBinder())
             }
             else -> {
                 return null

@@ -48,7 +48,7 @@ public class ExceptionInstanceViewHolder(rowView: View) : RecyclerView.ViewHolde
         initBinding(model)
         bindUserInfo(model)
         bindExceptionInfo(model)
-        bindQuestionInfo(model)
+        setQuestionTextAndColor(model)
         setDirectionImages()
     }
 
@@ -93,33 +93,35 @@ public class ExceptionInstanceViewHolder(rowView: View) : RecyclerView.ViewHolde
         dateView.text = viewHelper.formattedExceptionDate(model)
     }
 
-    private fun bindQuestionInfo(model: Exception) {
+    private fun setQuestionTextAndColor(model: Exception) {
+        questionTextView.visibility = View.VISIBLE
+        questionAnswerView.visibility = View.VISIBLE
         if (model.question.hasQuestion) {
             questionTextView.text = model.question.text
             if (model.question.isAnswered) {
                 if (metadataStore.isItUser(model.sender)) {
                     if (model.question.answeredCorrectly) {
-                        questionAnswerView.setTextColor(ContextCompat.getColor(context, R.color.exceptional_red))
+                        setColorToView(questionAnswerView, R.color.exceptional_red)
                         questionAnswerView.text = context.getString(R.string.friend_aswered_correctly)
                     } else {
-                        questionAnswerView.setTextColor(ContextCompat.getColor(context, R.color.exceptional_blue))
+                        setColorToView(questionAnswerView, R.color.exceptional_blue)
                         questionAnswerView.text = context.getString(R.string.friend_aswered_wrong)
                     }
                 } else {
                     if (model.question.answeredCorrectly) {
-                        questionAnswerView.setTextColor(ContextCompat.getColor(context, R.color.exceptional_blue))
+                        setColorToView(questionAnswerView, R.color.exceptional_blue)
                         questionAnswerView.text = context.getString(R.string.you_aswered_correctly)
                     } else {
-                        questionAnswerView.setTextColor(ContextCompat.getColor(context, R.color.exceptional_red))
+                        setColorToView(questionAnswerView, R.color.exceptional_red)
                         questionAnswerView.text = context.getString(R.string.you_aswered_wrong)
                     }
                 }
             } else {
                 if (metadataStore.isItUser(model.sender)) {
-                    questionAnswerView.setTextColor(ContextCompat.getColor(context, R.color.grey))
+                    setColorToView(questionAnswerView, R.color.grey)
                     questionAnswerView.text = context.getString(R.string.friend_still_has_to_answer)
                 } else {
-                    questionAnswerView.setTextColor(ContextCompat.getColor(context, R.color.black))
+                    setColorToView(questionAnswerView, R.color.black)
                     questionAnswerView.text = context.getString(R.string.you_still_have_to_answer)
                 }
             }
@@ -127,6 +129,10 @@ public class ExceptionInstanceViewHolder(rowView: View) : RecyclerView.ViewHolde
             questionTextView.visibility = View.GONE
             questionAnswerView.visibility = View.GONE
         }
+    }
+
+    private fun setColorToView(view: TextView, color: Int) {
+        view.setTextColor(ContextCompat.getColor(context, color))
     }
 
     private fun setDirectionImages() {

@@ -13,7 +13,7 @@ import javax.inject.Inject
 /**
  * Created by palfi on 2015-10-26.
  */
-public class UserRowModel(val user: Friend) : RowItemModel() {
+public class UserRowBinder(val user: Friend) : RowItemBinder() {
     override val rowType: RowType = RowType.USER_ROW
     @Inject
     lateinit var imageCache: ImageCache

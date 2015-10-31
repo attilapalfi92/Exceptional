@@ -1,6 +1,7 @@
 package com.attilapalfi.exceptional.rest
 
 import retrofit.http.GET
+import java.math.BigInteger
 import java.util.*
 
 /**
@@ -9,4 +10,7 @@ import java.util.*
 public interface StatRestInterface {
     @GET("/stats/globalThrowCounts")
     fun getGlobalThrowCounts(): LinkedHashMap<Int, Long>
+
+    @GET("/stats/globalPoints")
+    fun getGlobalPoints(): LinkedHashMap<BigInteger, Int>
 }

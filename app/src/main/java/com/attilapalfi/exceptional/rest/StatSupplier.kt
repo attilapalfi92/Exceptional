@@ -2,9 +2,11 @@ package com.attilapalfi.exceptional.rest
 
 import android.content.Context
 import com.attilapalfi.exceptional.dependency_injection.Injector
+import com.attilapalfi.exceptional.interfaces.GlobalPointsChangeListener
 import com.attilapalfi.exceptional.interfaces.GlobalThrowCountChangeListener
 import org.jetbrains.anko.async
 import org.jetbrains.anko.uiThread
+import java.math.BigInteger
 import java.util.*
 import javax.inject.Inject
 
@@ -20,13 +22,18 @@ public class StatSupplier {
     @Volatile
     public var globalThrowCounts = LinkedHashMap<Int, Long>()
     private val throwCountListeners = HashSet<GlobalThrowCountChangeListener>()
+    @Volatile
+    public var globalPoints = LinkedHashMap<BigInteger, Int>()
+    private val globalPointsListeners = HashSet<GlobalPointsChangeListener>()
 
     init {
         Injector.INSTANCE.applicationComponent.inject(this)
         async {
             globalThrowCounts = statRestInterface.getGlobalThrowCounts();
+            globalPoints = statRestInterface.getGlobalPoints();
             uiThread {
                 throwCountListeners.forEach { it.onGlobalThrowCountChanged() }
+                globalPointsListeners.forEach { it.onGlobalPointsChanged() }
             }
         }
     }
@@ -37,5 +44,13 @@ public class StatSupplier {
 
     public fun removeThrowCountListener(listener: GlobalThrowCountChangeListener) {
         throwCountListeners.remove(listener)
+    }
+
+    public fun addGlobalPointsListener(listener: GlobalPointsChangeListener) {
+        globalPointsListeners.add(listener)
+    }
+
+    public fun removeGlobalPointsListener(listener: GlobalPointsChangeListener) {
+        globalPointsListeners.remove(listener)
     }
 }

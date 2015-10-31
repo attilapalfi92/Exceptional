@@ -7,6 +7,6 @@ public data class Question(
         val text: String? = null,
         val yesIsCorrect: Boolean = true,
         val hasQuestion: Boolean = false,
-        var isAnswered: Boolean = true,
+        var isAnswered: Boolean = false,
         var answeredCorrectly: Boolean = true
 )
