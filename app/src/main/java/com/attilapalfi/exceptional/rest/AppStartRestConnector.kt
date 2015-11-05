@@ -66,8 +66,7 @@ public class AppStartRestConnector {
                 }
 
                 override fun failure(error: RetrofitError) {
-                    Toast.makeText(context, context.getString(R.string.failed_to_connect) + error.message,
-                            Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, context.getString(R.string.failed_to_connect), Toast.LENGTH_LONG).show()
                 }
             })
 
@@ -106,8 +105,7 @@ public class AppStartRestConnector {
                 }
 
                 override fun failure(error: RetrofitError) {
-                    Toast.makeText(context, context.getString(R.string.failed_to_connect_3) + error.message,
-                            Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, context.getString(R.string.failed_to_connect_3), Toast.LENGTH_LONG).show()
                 }
             })
         } catch (e: java.lang.Exception) {

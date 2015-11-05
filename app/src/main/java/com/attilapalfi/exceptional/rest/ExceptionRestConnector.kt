@@ -69,14 +69,13 @@ public class ExceptionRestConnector {
                 }
 
                 override fun failure(error: RetrofitError?) {
-                    Toast.makeText(context, context.getString(R.string.failed_to_throw_1) + error?.message,
+                    Toast.makeText(context, context.getString(R.string.failed_to_throw_1),
                             Toast.LENGTH_LONG).show()
                 }
             })
 
         } catch (e: java.lang.Exception) {
-            Toast.makeText(context, context.getString(R.string.failed_to_throw_2) + e.message,
-                    Toast.LENGTH_LONG).show()
+            Toast.makeText(context, context.getString(R.string.failed_to_throw_2), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -98,8 +97,7 @@ public class ExceptionRestConnector {
             }
 
             override fun failure(error: RetrofitError?) {
-                Toast.makeText(context, context.getString(R.string.failed_to_sync) + error?.message,
-                        Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.failed_to_sync), Toast.LENGTH_SHORT).show()
                 refreshListener.onExceptionRefreshFinished()
             }
         })
@@ -117,8 +115,7 @@ public class ExceptionRestConnector {
             }
 
             override fun failure(error: RetrofitError?) {
-                Toast.makeText(context, context.getString(R.string.failed_to_answer) + error?.message,
-                        Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.failed_to_answer), Toast.LENGTH_SHORT).show()
             }
 
         })
