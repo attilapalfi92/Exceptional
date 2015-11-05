@@ -41,18 +41,13 @@ public class Exception implements Comparable<Exception>, ClusterItem {
         this.toWho = wrapper.getToWho();
         this.pointsForSender = wrapper.getPointsForSender();
         this.pointsForReceiver = wrapper.getPointsForReceiver();
+        this.city = wrapper.getCity();
         this.question = wrapper.getQuestion();
     }
 
     @Override
     public int compareTo( Exception another ) {
         return another.instanceId.compareTo( instanceId );
-    }
-
-    public Exception clone( ) {
-        Exception e = new Exception();
-        e.setExceptionType( exceptionType );
-        return e;
     }
 
     public Exception( ) {
