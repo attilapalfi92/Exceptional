@@ -13,7 +13,7 @@ There are some statistics displayed for the user.
 
 Screenshots:
 
-![Alt text](/screenshots/2.jpg "Profile summary")
+![Alt text](screenshots/2.jpg "Profile summary")
 
 ![Alt text](/screenshots/4.jpg "Statistics")
 
