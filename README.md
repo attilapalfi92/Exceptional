@@ -19,6 +19,7 @@ Profile summary
 <br/>
 <img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/2.png" width="240">
 
+<hr/>
 Statistics
 <br/>
 <img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/4.png" width="240">
