@@ -13,10 +13,11 @@ There are some statistics displayed for the user.
 
 Screenshots:
 
-<img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/2.png" width="48">
+Profile summary
+<img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/2.png" width="160">
 
-![Alt text](https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/2.png "Profile summary")
+List of friends
+<img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/4.png" width="160">
 
-![Alt text](/../screenshots/4.jpg "Statistics")
-
-![Alt text](/../screenshots/8.jpg "List of friends")
+Statistics
+<img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/8.png" width="160">
