@@ -17,12 +17,40 @@ Screenshots:
 
 Profile summary
 <br/>
-<img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/2.png" width="160">
+<img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/2.png" width="240">
 
 Statistics
 <br/>
-<img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/4.png" width="160">
+<img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/4.png" width="240">
 
 List of friends
 <br/>
-<img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/8.png" width="160">
+<img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/8.png" width="240">
+
+Browsing exception types before throwing
+<br/>
+<img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/10.png" width="240">
+
+Throwing exception
+<br/>
+<img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/11.png" width="240">
+
+Catching exception
+<br/>
+<img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/13.png" width="240">
+
+Exception history
+<br/>
+<img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/5.png" width="240">
+
+Exception map
+<br/>
+<img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/6.png" width="240">
+
+Submitting exception
+<br/>
+<img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/15.png" width="240">
+
+Voting for submitted exception
+<br/>
+<img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/14.png" width="240">
