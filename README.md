@@ -13,7 +13,7 @@ There are some statistics displayed for the user.
 
 Screenshots:
 
-![Alt text](/../screenshots/2.jpg "Profile summary")
+![Alt text](https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/2.png "Profile summary")
 
 ![Alt text](/../screenshots/4.jpg "Statistics")
 
