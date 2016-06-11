@@ -21,37 +21,54 @@ Profile summary
 
 <hr/>
 Statistics
+
 <br/>
 <img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/4.png" width="240">
 
+<hr/>
 List of friends
+
 <br/>
 <img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/8.png" width="240">
 
+<hr/>
 Browsing exception types before throwing
+
 <br/>
 <img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/10.png" width="240">
 
+<hr/>
 Throwing exception
+
 <br/>
 <img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/11.png" width="240">
 
+<hr/>
 Catching exception
+
 <br/>
 <img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/13.png" width="240">
 
+<hr/>
 Exception history
+
 <br/>
 <img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/5.png" width="240">
 
+<hr/>
 Exception map
+
 <br/>
 <img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/6.png" width="240">
 
+<hr/>
 Submitting exception
+
 <br/>
 <img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/15.png" width="240">
 
+<hr/>
 Voting for submitted exception
+
 <br/>
 <img src="https://github.com/attilapalfi92/Exceptional/blob/master/screenshots/14.png" width="240">
